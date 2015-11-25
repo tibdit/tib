@@ -1,7 +1,20 @@
+// Page with buttons:
+
+
+// at foot of page
+//     var bd= tibHandler( "' . $PAD . '", "' . $CBK .'");
+//     bd.eventListeners(); 
+
+
+// Callback page:
+// 
 
 
 
 /* CALLBACK HANDLING FUNCTIONS */
+// These should probably also go in a closure.
+
+
 
 
 	function bdProcessToken() {
@@ -14,7 +27,7 @@
 				
 				bdPersistAck( token.SUB, token.ISS);
 
-				bdSweepOldTibs( bd_DURATION);
+				// bdSweepOldTibs( bd_DURATION);  Leaving out from here, so duration easily controlled from tib-button page
 
 				bdCloseCallbackWindow();
 
@@ -70,28 +83,6 @@
 
 
 
-	function bdSweepOldTibs ( ackDurationDays ) {
-
-		// deletes all expired tibs from localStorage
-		// nb: all tibs for the domain must have the same acknowledgement duration for this to be reliable
-
-		var expireLimit = Date.now() - (1000 * 60 * 60 * 24 * ackDurationDays); // (1000ms/s ⨉ 60s/m ⨉ 60 m/h ⨉ 24h/d)
-		
-		// any tibs with an issue time prior to expireLimit are out of date, and can be removed
-
-		for (var i = 0, n=localStorage.length; i < n; i++) {
-			var key= localStorage.key(i);
-			if ( key.substr(0,10) === "bd-subref-" ) {
-
-				if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
-					localStorage.removeItem(key);
-				}
-		    }
-		}
-	}
-
-
-
 
 	function bdCloseCallbackWindow( ) {
 
@@ -134,99 +125,21 @@
 
 
 
-/* ACKNOWLEDGE TIB FUNCTIONS */
 
 
-
-
-	function bdAckBySubref( SUB ) {
-
-		bdSweepOldTibs( bd_DURATION);
-		
-		var key="bd-subref-" + SUB;
-
-		if( localStorage[key] ) {
-			bdAckElementsInClass(key);
-		}
-	}
-
-
-
-
-	function bdAckByStorage( ) {
-		
-		// iterates through localStorage, adds "tibbed" class to any matched DOM Elements for persisted tibs
-
-		bdSweepOldTibs( bd_DURATION);
-
-		for (var i=0, n=localStorage.length; i<n; i++) {
-			var key= localStorage.key(i);
-
-			if ( key.substr(0,10) === "bd-subref-" ) {
-				bdAckElementsInClass(key);
-		    }
-	    }
-	}
-
-
-
-
-	function bdAckByClass( bdButtonClass) {
-
-		// alternative approach - use when there are fewer buttons in the DOM than potential ack'd tibs to check
-
-		// starting with the DOM and hunting the persistent storage for matched tib records may be quicker for others
-		// requires a class to have been applied to all elements to check.
-
-		bdButtonClass= bdButtonClass || "bd-tib-btn";
-
-		bdSweepOldTibs( bd_DURATION);
-
-		var bdElements= document.getElementsByClassName( bdButtonClass);
-
-		for (var i=0, n=bdElements.length; i<n; i++) {    // iterate through elements with .bdButtonClass
-
-			var e= bdElements[i];
-			if ( localStorage["bd-subref-" + e.getAttribute("data-bd-SUB")] ) {  // is there a matching tib record in localStorage?
-				e.classList.add("tibbed");  // add the tibbed class 
-			}
-		}
-	}
-
-
-
-	function bdAckLiveListener() {
-		window.addEventListener('storage', function(e) {
-			// fired when localStorage is updated by bdPersistAck
-			// e.newValue will be null if a remove event
-
-			if ( e.newValue && e.key.substr(0,10) === "bd-subref-") {
-				bdAckElementsInClass(e.key);
-			}
-		}); 
-	}
-
-
-
-	function bdAckElementsInClass( bdClassName) {
-		var bdElements= document.getElementsByClassName( bdClassName);
-		for (var i=0, n=bdElements.length; i<n; i++) {
-			bdElements[i].classList.add("tibbed");
-		}
-		return i;
-	}
-
-
-
-
-/* ON TIB FUNCTIONS */
+/* TIB INITIATION FUNCTIONS */
 
 
 	function tibHandler( PAD, CBK, ackDuration) {
+
+
 		var tibWindowName= "tibit";
+
 		var tibWindowOptions= "height=600,width=640,menubar=no,location=no,resizable=no,status=no";
 
-		return function tibButton( SUB, TIB) {
+
+
+		this.tib= function( SUB, TIB) {
 
 			return function tib(e){
 
@@ -235,31 +148,145 @@
 					return false;
 				}
 				
-				var tibInitiator = "?PAD=" + PAD + "&TIB=" + TIB + "&CBK=" + CBK + "&SUB=" + SUB + "&noclose=true";
+				var tibInitiator = "?PAD=" + PAD + "&TIB=" + TIB + "&CBK=" + CBK + "&SUB=" + SUB;
 
-				tibInitiator = "https://tib.me/" + tibInitiator + 
+				tibInitiator = "https://tib.me/" + tibInitiator; // + "&ACK=" + ackDuration; // + "&noclose=true";
 
 				var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
 				return tibWindow;
 			};
 		};
+
+
+		this.eventListeners= function( bdButtonClass) {
+
+			// Install button click handlers
+			// also adds the bd-subref-[SUB] class to each button
+
+			bdButtonClass= bdButtonClass || "bd-tib-btn";
+
+			var bdElements= document.getElementsByClassName( bdButtonClass);
+
+			for (var i=0, n=bdElements.length; i<n; i++) {
+				var e= bdElements[i];
+				e.classList.add("bd-subref-" + e.getAttribute("data-bd-SUB"));
+				e.addEventListener("click", tib( e.getAttribute("data-bd-SUB"), e.getAttribute("data-bd-TIB")));
+			}
+
+
+			// Install storage event handler
+
+			window.addEventListener('storage', function(e) {
+
+				// fired when localStorage is updated by bdPersistAck
+				// e.newValue will be null if a remove event
+
+				if ( e.newValue && e.key.substr(0,10) === "bd-subref-") {
+					ackElementsInClass(e.key);
+				}
+			}); 
+
+		};
+
+
+		this.sweepOldTibs= function()  {
+
+			// deletes all expired tibs from localStorage
+			// nb: all tibs for the domain must have the same acknowledgement duration for this to be reliable
+
+			var expireLimit = Date.now() - (1000 * 60 * 60 * 24 * ackDuration); // (1000ms/s ⨉ 60s/m ⨉ 60 m/h ⨉ 24h/d)
+			
+			// any tibs with an issue time prior to expireLimit are out of date, and can be removed
+
+			for (var i = 0, n=localStorage.length; i < n; i++) {
+				var key= localStorage.key(i);
+				if ( key.substr(0,10) === "bd-subref-" ) {
+
+					if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
+						localStorage.removeItem(key);
+					}
+			    }
+			}
+		};
+
+
+
+
+
+		/* ACKNOWLEDGE TIB FUNCTIONS */
+
+
+
+		this.ackElementsInClass =function( bdClassName) {
+			var bdElements= document.getElementsByClassName( bdClassName);
+			for (var i=0, n=bdElements.length; i<n; i++) {
+				bdElements[i].classList.add("tibbed");
+			}
+			return i;
+		};
+
+
+
+		this.ackByClass =function( bdButtonClass) {
+
+			// alternative approach - use when there are fewer buttons in the DOM than potential ack'd tibs to check
+
+			// starting with the DOM and hunting the persistent storage for matched tib records may be quicker for others
+			// requires a class to have been applied to all elements to check.
+
+			bdButtonClass= bdButtonClass || "bd-tib-btn";
+
+			sweepOldTibs( bd_DURATION);
+
+			var bdElements= document.getElementsByClassName( bdButtonClass);
+
+			for (var i=0, n=bdElements.length; i<n; i++) {    // iterate through elements with .bdButtonClass
+
+				var e= bdElements[i];
+				if ( localStorage["bd-subref-" + e.getAttribute("data-bd-SUB")] ) {  // is there a matching tib record in localStorage?
+					e.classList.add("tibbed");  // add the tibbed class 
+				}
+			}
+		};
+
+
+
+		this.ackByStorage= function() {
+			
+			// iterates through localStorage, adds "tibbed" class to any matched DOM Elements for persisted tibs
+
+			sweepOldTibs( bd_DURATION);
+
+			for (var i=0, n=localStorage.length; i<n; i++) {
+				var key= localStorage.key(i);
+
+				if ( key.substr(0,10) === "bd-subref-" ) {
+					ackElementsInClass(key);
+			    }
+		    }
+		};
+
+
+
+		this.ackBySubref =function( SUB ) {
+
+			// when the specific subref is known
+
+			sweepOldTibs( bd_DURATION);
+			
+			var key="bd-subref-" + SUB;
+
+			if( localStorage[key] ) {
+				ackElementsInClass(key);
+			}
+		};
+
+
+
 	}
+
+
+
+
 
 	
-
-	function bdEventListeners( bdButtonClass) {
-
-		bdButtonClass= bdButtonClass || "bd-tib-btn";
-
-		var bdElements= document.getElementsByClassName( bdButtonClass);
-
-		for (var i=0, n=bdElements.length; i<n; i++) {
-
-			var e= bdElements[i];
-
-			e.classList.add("bd-subref-" + e.getAttribute("data-bd-SUB"));
-			
-			e.addEventListener("click", tib( e.getAttribute("data-bd-SUB"), e.getAttribute("data-bd-TIB")));
-		}
-	}
-
