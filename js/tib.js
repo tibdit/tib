@@ -148,7 +148,10 @@
 					return false;
 				}
 				
-				var tibInitiator = "?PAD=" + PAD + "&TIB=" + TIB + "&CBK=" + CBK + "&SUB=" + SUB;
+				var tibInitiator = "?PAD=" + PAD
+					+ (TIB ? ("&TIB=" + TIB) : '')
+					+ (CBK ? ("&CBK=" + CBK) : '')
+					+ (SUB ? ("&SUB=" + SUB) : '');
 
 				tibInitiator = "https://tib.me/" + tibInitiator; // + "&ACK=" + ackDuration; // + "&noclose=true";
 
@@ -170,7 +173,10 @@
 			for (var i=0, n=bdElements.length; i<n; i++) {
 				var e= bdElements[i];
 				e.classList.add("bd-subref-" + e.getAttribute("data-bd-SUB"));
-				e.addEventListener("click", tib( e.getAttribute("data-bd-SUB"), e.getAttribute("data-bd-TIB")));
+				e.addEventListener("click", this.tib(
+					e.getAttribute("data-bd-SUB"),
+					e.getAttribute("data-bd-TIB")
+				));
 			}
 
 
