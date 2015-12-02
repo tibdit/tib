@@ -1,0 +1,46 @@
+
+.bd-tib-btn { 
+	border: none; 
+	/*border-radius: 50%;*/
+	background: transparent; 
+    width: 120px;
+	}
+
+.bd-tib-btn .bd-btn-face { 
+	fill: #4657a5; 
+	}
+
+.bd-tib-btn .bd-btn-face-tint {
+	fill: white; 
+	fill-opacity: 0.15; 
+	transition: 0.3s; 
+	}
+
+.bd-tib-btn .bd-btn-badge { 
+	fill: white;
+	}
+
+.bd-tib-btn .bd-btn-rim:hover {
+	cursor: pointer; 
+	}
+
+.bd-tib-btn:hover:not(.tibbed) .bd-btn-face-tint { 
+	fill-opacity: 0.3; 
+	}
+
+.bd-tib-btn .bd-btn-testnet {
+	fill: transparent; 
+	stroke: transparent;
+	}
+
+.bd-tib-btn.testnet .bd-btn-rim { 
+	stroke: #ffeb3b;
+	stroke-dasharray: 5%,8%;
+	}
+
+
+.bd-tib-btn        .bd-btn-badge-tibbed { visibility: hidden;  }
+.bd-tib-btn.tibbed .bd-btn-badge-tibbed { visibility: visible; }
+
+.bd-tib-btn.tibbed .bd-btn-badge-tib    { visibility: hidden;  }
+.bd-tib-btn.tibbed .bd-btn-face-tint    { visibility: hidden;  }

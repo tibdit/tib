@@ -1,0 +1,57 @@
+# tibbee integration (modx)
+
+* javascript only for now
+
+* chunks: 
+    * tib-button  
+    places a tib button into the page
+    
+* snippets
+    * tib-button-callback  
+    used alone on the callback page
+    
+    * tib-button-init  
+    used at the top of any page with tib-buttons
+    
+* resources required
+    * pages with tib buttons
+    * callback page
+
+## Callback page
+
+1. Put [[tib-button-callback]] at top
+1. give the page a Resource Alias  
+    (tibcbk recommended) 
+1. provide the URL in the [[tib-button-init]] parameters  
+see below
+   
+ 
+
+
+## Page with buttons
+
+### at top
+
+* [[tib-button-init?    ]]
+    * &PAD=\`\`  
+    * &CBK=\`\`
+    *  &ACK=\`\`  
+    * &btnPath=\`\`
+
+* PAD is bitcoin address
+
+* CBK is url to callback page (domain and path only)
+
+* ACK is the number of days (testmode: minutes) to persist the tib in browser localStorage
+
+* btnPath is the url to the parent folder of tib-button resources (SVGs)
+
+### for each button
+
+* [[$tib-button? &SUB=\`\` &btnName=\`\`]]
+
+* SUB is the subreference, eg an article ID or similar.   It distinguises between different tibs for different things on the same site.
+
+* btnName is the SVG file suffix used for the buttons.  Full name is bd-tib-btn-[btnName].svg
+
+
