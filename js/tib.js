@@ -161,7 +161,7 @@ function tibHandler( PAD, CBK, ackDuration) {
 				return false;
 			}
 			
-			var tibInitiator= "?PAD=" + PAD + "&TIB=" + TIB + "&CBK=" + CBK + "&SUB=" + SUB;
+			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 
 			tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
@@ -183,6 +183,7 @@ function tibHandler( PAD, CBK, ackDuration) {
 		var that=this;
 
 		buttonClass= buttonClass || "bd-tib-btn";
+
 
 		this.sweepOldTibs();
 
