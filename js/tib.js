@@ -25,7 +25,7 @@ function tibCallback() {
 			try {
 
 				var token = this.extractUrlToken( url); // token expected in GET params
-				
+
 				this.persistAck( token.SUB, token.ISS);
 
 				this.closeWindow();
@@ -46,12 +46,12 @@ function tibCallback() {
 
 		// for clarity, steps are individually broken down, reusing a single variable
 
-		var token= new URI(url); 
+		var token= new URI(url);
 
 		token= token.query(true); // retreive the querystring parameters into js object
 		token= token.tibtok; // pull out the value of the tibtok= querystring parameter
 		token= URI.decode(token); // convert any percent-encoded characters
-		token= atob(token); // base64 decode the token
+		token= atob(token); // base64 decode t'he token
 		token= JSON.parse(token); // convert the serialised json token string into js object
 
 		return token;
