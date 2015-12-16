@@ -1,0 +1,287 @@
+/*version 13*/
+
+.bd.widget
+{
+	border-top: solid;
+	border-bottom: solid;
+	border-width: thin;
+	margin: auto;
+	padding: 1em;
+	text-align: center;
+	background-color: rgba(0,0,0,0.1);
+	border-radius: 10%;
+  position: relative;
+  z-index: 1;
+}
+
+img.beta 
+{
+  padding-left: 1em;
+  vertical-align: middle;
+}
+
+.bd img.beta
+{
+  position: absolute;
+  right: 1em;
+  padding-right: 1em;
+  padding-top: 1em;
+}
+
+img.bd-sash 
+{
+  box-sizing: border-box;
+  width: 10rem;
+  -ms-transform: rotate(-45deg); /* IE 9 */
+  -webkit-transform: rotate(-45deg); /* Chrome, Safari, Opera */
+  transform: rotate(-45deg);
+  z-index: 1000;
+  position: fixed;
+  left: -2.5rem;
+  top: 1rem;
+  opacity: 0.5;
+  border-bottom: solid black 2px;
+  border-top: solid black 2px;
+}
+
+img.bd-sash:hover
+{
+    border-bottom: solid yellow 2px;
+    border-top: solid yellow 2px;
+}
+
+
+
+
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes tipdelay {
+    0%   {opacity:0;}
+    100% {opacity:0.8;}
+}
+
+/* Standard syntax */
+@keyframes tipdelay {
+    0%   {opacity:0;}
+    100% {opacity:0.8;}
+}
+
+
+
+div.bd.widget > p.wp_widget_plugin_textarea {
+  word-wrap: break-word;
+  font-size:80%;
+}
+
+div.bd.button 
+  {
+    background-color: #000;
+    display: inline-block;
+    position: relative;
+    padding: 0.3em;
+
+    text-align: center;
+    border-color: #CCC;
+    border-style: solid;
+    border-radius: 10px;
+    border-width: 1px 3px 2px 1px;
+    width: auto;
+    z-index: 2;
+  }
+
+div.bd.button:before
+  {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -0.25em; 
+  }
+
+div.bd.button.live:hover
+  {
+    cursor: pointer;
+    background-color: #222;
+    border-color: #EEE;
+  }
+
+div.bd.button img 
+  {
+    vertical-align: middle;
+    display: inline;
+    margin: 0.2em;
+  }
+
+div.bd.button.tibbed
+  {
+    border-style: none;
+    cursor: default;
+  }
+
+div.bd.button span.annotation
+  {
+    color: #DDD;
+    text-align: center;
+    display:inline-block;
+    vertical-align: middle;
+    line-height: 100%;
+    margin: 0.2em;
+  }
+
+div.bd.button .count
+  {
+    vertical-align: sub;   
+    color:#CCC;
+    font-size: 100%;
+    font-weight: bold;
+    display: inline;
+    line-height: normal;
+    margin: 0.2em;
+  }
+
+div.bd.button div.tip 
+  {
+    position:absolute; display:none;
+    color:#EEE;
+    z-index:999;  
+    padding:5px 5px;
+    top:100%; left:-50px;
+    font-size:75%;
+    width:14em; 
+    background:#333;
+    border:2px solid #000;  border-radius:10px;
+    box-shadow: 1px 1px 4px 2px #444;
+    opacity: 0.8;
+    margin-top:12px;
+    line-height: 120%;
+
+  }
+
+div.bd.button:hover div.tip
+  {
+    /* Chrome, Safari, Opera */
+    -webkit-animation-name: tipdelay;
+    -webkit-animation-duration: .4s;
+    -webkit-animation-timing-function: ease-in;
+    -webkit-animation-delay: 0.2s;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-direction: normal;
+    -webkit-animation-play-state: running;
+    -webkit-animation-fill-mode: forwards;
+    /* Standard syntax */
+    animation-name: tipdelay;
+    animation-duration: .4s;
+    animation-timing-function: ease-in;
+    animation-delay: 0.2s;
+    animation-iteration-count: 1;
+    animation-direction: normal;
+    animation-play-state: running;
+    animation-fill-mode: forwards;
+  }
+
+div.bd.button.show:hover div.tip 
+  {
+    opacity:0;
+    display:inline; 
+    -webkit-animation-delay: 0.3s;
+    animation-delay: 0.3s;
+  }
+
+div.bd.button div.tip p
+  {
+    font-size: inherit;
+    line-height:inherit; text-align: left;
+    padding:0;
+  }    
+
+div.bd.button div.tip p.dict 
+  {
+  	margin:0.2em 0;
+  	padding:0;
+    font-size: inherit;
+  }
+
+div.bd.button div.tip p.detail
+  {
+  	width: 10em;
+  	float: right;
+  	margin: 0;
+    font-size: inherit;
+  }
+
+div.bd.button div.tip p.detail.lead
+  {	
+  	font-style: italic;
+  	position: relative;
+  	width: 2em;
+  	float: left;
+  	margin:0;
+  	padding: 0 0.5em 0 0;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+div.bd.button img.callout {z-index:20;position:absolute;border:0;top: -14px;left:5em; opacity:0.5;}
+
+a.bd-link {
+      cursor: pointer;
+}
+
+a.bd-link:hover::after {
+      position: absolute;
+      top: -2em;
+      background-color: rgba(100,100,100,0.8);
+      display: block;
+      padding: 0.5em;
+      border-radius: 0.5em;
+      color: white;
+}
+
+a.bd-link.bd-live:hover::after {
+      content: "tib";
+}
+
+a.bd-link.tibbed:hover::after {
+      content: "tibbed";
+}
+
+a.bd-link.tibbed {
+      cursor: text;
+}
+
+input[type='text'].bd
+{
+	vertical-align: middle;
+	width: auto;
+	display: inline;
+}
+
+.bd input[type=submit]
+{
+  width: 10em;
+  margin: 1em 0;
+}
+
+.bd input[type=submit] ~ input[type=submit]
+{
+  margin: 1em 1em;
+}
+
+.bd input[type=submit][disabled], .bd input[type=submit]:disabled
+{
+  opacity: 0.2;
+}
+
+span.bd.status
+{
+  vertical-align: middle;
+  font-weight: bold;
+  font-size: 160%;
+}
+
+a.bd-admin-link:hover
+{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
