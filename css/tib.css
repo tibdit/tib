@@ -30,16 +30,15 @@
 	fill: white;
 	}
 
-.bd-tib-btn .bd-btn-rim:hover {
-	cursor: pointer; 
-	}
-
 .bd-tib-btn .bd-btn-testnet {
-	fill: transparent; 
-	stroke: transparent;
+	visibility: hidden;
 	}
 
-.bd-tib-btn .bd-btn-cover { fill: none; }
+.bd-tib-btn.testnet .bd-btn-testnet {
+	visibility: visible;
+	}
+
+.bd-tib-btn .bd-btn-cover { fill: transparent; }
 .bd-tib-btn .bd-btn-cover:hover { cursor: pointer; }
 
 .bd-tib-btn        	.bd-btn-tibbed 		{ visibility: hidden;  }
@@ -117,7 +116,7 @@
 /*COIN*/
 
 
-	.bd-tib-btn-coin .bd-ai-st0 { opacity:0.2;fill:white; }
+	.bd-tib-btn-coin .bd-ai-st0 { fill:white; }
 	.bd-tib-btn-coin .bd-ai-st1 { fill:none; stroke:yellow; stroke-width:9; stroke-miterlimit:10;}
 	/*.bd-tib-btn-coin .bd-ai-st2{fill:#8CC63F;}*/
 	.bd-tib-btn-coin .bd-ai-st3 { fill:white;}
@@ -125,6 +124,7 @@
 	.bd-tib-btn-coin .bd-ai-st5 { fill:none;}
 	.bd-tib-btn-coin .bd-ai-st6 { fill: black; }
 	.bd-tib-btn-coin .bd-ai-st7 { }
+	.bd-tib-btn-coin:not(.tibbed) .bd-btn-hover { fill-opacity: 0.2; }
 
 
 /*POSTER*/
@@ -148,7 +148,7 @@
 	.bd-tib-btn-hex .bd-ai-st1{ fill:yellow; stroke:yellow; }
 	.bd-tib-btn-hex .bd-ai-st2{ fill:white; }
 	.bd-tib-btn-hex .bd-ai-st3{ fill:white; }
-	.bd-tib-btn-hex .bd-ai-st4{ fill:none; }
+	/*.bd-tib-btn-hex .bd-ai-st4{ fill:none; } cover*/
 	.bd-tib-btn-hex .bd-ai-st5{ fill:black; }
 	.bd-tib-btn-hex .bd-ai-st6{ }
 
