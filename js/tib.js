@@ -43,17 +43,19 @@ Optional callback page
 	If no callback is specified, 
 	the tib initiating process will poll for a token arriving when the tibit window is redirected to an arbitrary url in the current domain
 
+<<<<<<< HEAD
 		<script>
 			var bd= new tibCallback()
 			bd.processToken( url-containing-token-in-querystring); typically window.location
 		</script>
+=======
+				var token = this.extractUrlToken( url); // token expected in GET params
+
+				this.persistAck( token.SUB, token.ISS);
+>>>>>>> 06d5330b2fd472375984499ada7d146c3ebec64a
 
 
 */
-
-
-
-
 
 
 
