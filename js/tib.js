@@ -91,15 +91,15 @@ bd= new tibHandler( obj.PAD, obj.DUR, obj.CBK);
     function tibCss() {
     	if (! document.getElementById('bd-css-tib-btn')) { 
 
-    		var headElement= d.getElementsByTagName('head')[0]; 
+    		var headElement= document.getElementsByTagName('head')[0]; 
 
     		var linkElement= document.createElement('link'); 
     		linkElement.id= 'bd-css-tib-btn';
+    		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.rel= 'stypesheet';
-    		linkElement.href= 'https://127.0.0.50/assets/css/tib.css';
-
-    		headElement.appendChild(linkElelment); 
+    		linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
+    		// linkElement.href= 'css/tib.css';
+    		headElement.appendChild(linkElement); 
     	}
     }
 }
@@ -123,7 +123,7 @@ function tibHandler( PAD, DUR, CBK) {
 	var prefix= 'staging.';  // NOT IN PRODUCTION
 	
 	var tibWindowName= "tibit";
-	var tibWindowOptions= "height=600,width=640,menubar=no,location=no,resizable=no,status=no";
+	var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
 
 	var cbkHandler, cbkPoller;
 
@@ -144,6 +144,7 @@ function tibHandler( PAD, DUR, CBK) {
 	// otherwise, assume it will be handled inline in the tibbee window button window
 
 	if (!CBK) {
+		console.log(window.location.hostname);
 		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
@@ -166,14 +167,16 @@ function tibHandler( PAD, DUR, CBK) {
 			that.sweepOldTibs();
 
 			if ( e.currentTarget.classList.contains('tibbed') ) {
-				window.open("https://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
+				window.open("http://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
+				// window.open("https://tib.me/account_overview",tibWindowName,tibWindowOptions);
 				return false;
 			}
 			
 
 			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 
-			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
+			tibInitiator= "http://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
+			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
 
@@ -352,7 +355,8 @@ function tibHandler( PAD, DUR, CBK) {
 			var tibqty= new XMLHttpRequest();
 
 			var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
-			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			tibQtyFetch= "http://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
 			tibqty.open( 'GET', tibQtyFetch, true);
 			tibqty.send();
@@ -419,7 +423,7 @@ function tibHandler( PAD, DUR, CBK) {
 		BTN= BTN || "default";
 
 		var tibbtn= new XMLHttpRequest();
-		tibbtn.open("GET", buttonResourcesUrl + "/tib-btn-" + BTN + ".svg", true);
+		tibbtn.open("GET", buttonResourcesUrl + "tib-btn-" + BTN + ".svg", true);
 		tibbtn.send();
 
 		tibbtn.onreadystatechange= function( ) {
