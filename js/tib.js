@@ -120,7 +120,7 @@ function tibHandler( PAD, DUR, CBK) {
 	DUR= DUR || 0;
 	var testnet= false, pollForToken= false, mDUR= 0;
 
-	var prefix= 'staging.';  // NOT IN PRODUCTION
+	var prefix= '';  // NOT IN PRODUCTION
 	
 	var tibWindowName= "tibit";
 	var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
@@ -128,6 +128,7 @@ function tibHandler( PAD, DUR, CBK) {
 	var cbkHandler, cbkPoller;
 
 	if ( "mn2".search(PAD.substr(0,1)) != "-1" ) {  
+		console.log(PAD);
 		// testnet bitcoin address, DUR is minutes
 		DUR= Math.max( 3, DUR); // minimum 3 minutes
 		mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m ) 
@@ -287,7 +288,6 @@ function tibHandler( PAD, DUR, CBK) {
 			if ( localStorage["bd-subref-" + SUB] ) { 
 				e.classList.add("tibbed");  // add the tibbed class 
 			}
-
 			if (testnet) {
 				e.classList.add("testnet");
 			}
