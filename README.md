@@ -46,6 +46,11 @@ For example:
 ```html 
 <button class='bd-tib-btn' data-bd-BTN='coin' data-bd-SUB='hello' data-bd-TIB="http://www.hello.com/" data-bd-CBK="http://www.hello.com/thank-you"></button>
 ```
+You can change the colour of the buttons by overwrting the css like this:
+``` css
+.bd-tib-btn .bd-btn-backdrop { fill: pink;}
+```
+
 [All button styles are listed here](http://sep15.staging.tibdit.com/wordpress/collect-tibs/#tibdetection)
 
 ### Detecting tibs 
