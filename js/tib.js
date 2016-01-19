@@ -168,7 +168,7 @@ function tibHandler( PAD, DUR, CBK) {
 			that.sweepOldTibs();
 
 			if ( e.currentTarget.classList.contains('tibbed') ) {
-				window.open("http://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
+				window.open("https://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
 				// window.open("https://tib.me/account_overview",tibWindowName,tibWindowOptions);
 				return false;
 			}
@@ -176,7 +176,7 @@ function tibHandler( PAD, DUR, CBK) {
 
 			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 
-			tibInitiator= "http://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
+			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
@@ -355,7 +355,7 @@ function tibHandler( PAD, DUR, CBK) {
 			var tibqty= new XMLHttpRequest();
 
 			var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
-			tibQtyFetch= "http://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
 			tibqty.open( 'GET', tibQtyFetch, true);
