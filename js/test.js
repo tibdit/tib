@@ -1,4 +1,66 @@
+/*
+
+
+Pages with buttons:
+
+	Ideally at top, but should be above tib buttons to avoid FOAB
+
+		<script 
+			src="https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js">
+			// provides $script dynamic loading of js
+		</script>
+
+		<script>
+			$script('http://127.0.0.90/assets/js/tib.js', function() {     // TODO minify and host
+				// once tib.js loaded
+				tibInit( { 
+					'PAD': 'myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz',    // tibbee btc address
+					TODO 'ASN': assignee
+					'CBK': // custom tibbee backend callback page (eg .php)
+					'DUR': // days (or minutes, if testnet) to ack tibs - defaults to minimum
+					'BTN': // shape of button - 'default' button is a copy of 'soap' for now
+				});
+			});
+		</script>
+
+	Then use below
+
+		<button 
+			class='bd-tib-btn' // required
+			data-bd-SUB='xyz' // defaults to 'blank'
+			data-bd-TIB='url-being-tibbed' // defaults to current window url
+			data-bd-BTN='soap' // override default button shape
+			>
+		</button>
+
+
+
+Optional callback page 
+
+	Required for backend processing, including verification if needed.  
+	Also required if site 
+
+	If no callback is specified, 
+	the tib initiating process will poll for a token arriving when the tibit window is redirected to an arbitrary url in the current domain
+
+<<<<<<< HEAD
+		<script>
+			var bd= new tibCallback()
+			bd.processToken( url-containing-token-in-querystring); typically window.location
+		</script>
+=======
+				var token = this.extractUrlToken( url); // token expected in GET params
+
+				this.persistAck( token.SUB, token.ISS);
+>>>>>>> 06d5330b2fd472375984499ada7d146c3ebec64a
+
+
+*/
+
+
+
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
+
 tibCss();
 
 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
@@ -12,7 +74,7 @@ if (typeof arg === 'string') {
 	obj= arg;
 }
 
-bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
+bd= new tibHandler( obj.PAD, obj.DUR, obj.CBK);
 
     // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
 
@@ -35,52 +97,55 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
     		linkElement.id= 'bd-css-tib-btn';
     		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
+    		linkElement.href= 'https://widget.tibdit.com/assets/css/tib.css';
     		// linkElement.href= 'css/tib.css';
     		headElement.appendChild(linkElement); 
     	}
     }
 }
 
+
+
+
+
+
+
 /* TIB INITIATION FUNCTIONS */
 
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN) {
+function tibHandler( PAD, DUR, CBK) {
 
 	DUR= DUR || 0;
-	ASN = ASN;
 	var testnet= false, pollForToken= false, mDUR= 0;
 
-	var prefix= '';  // NOT IN PRODUCTION
+	var prefix= 'staging.';  // NOT IN PRODUCTION
 	
 	var tibWindowName= "tibit";
 	var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
 
 	var cbkHandler, cbkPoller;
 
-	if (PAD) {
-		if ( "mn2".search(PAD.substr(0,1)) != "-1" ) {  
-			// console.log(PAD);
-			// testnet bitcoin address, DUR is minutes
-			DUR= Math.max( 3, DUR); // minimum 3 minutes
-			mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m ) 
-			testnet= true;
-		} 
+	if ( "mn2".search(PAD.substr(0,1)) != "-1" ) {  
+		console.log(PAD);
+		// testnet bitcoin address, DUR is minutes
+		DUR= Math.max( 3, DUR); // minimum 3 minutes
+		mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m ) 
+		testnet= true;
+	} 
 
-		else { 
-			// not a testnet bitcoin address, DUR is days
-			DUR= Math.max( 1, DUR); // minimum 24 hours
-			mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
-		}
-	};
+	else { 
+		// not a testnet bitcoin address, DUR is days
+		DUR= Math.max( 1, DUR); // minimum 24 hours
+		mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
+	}
 
 	// if CBK is provided, assume that all callback processing will happen in the tibit window
 	// otherwise, assume it will be handled inline in the tibbee window button window
 
 	if (!CBK) {
-		// console.log(window.location.hostname);
+		console.log(window.location.hostname);
 		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
@@ -91,7 +156,10 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 	this.tib= function( SUB, TIB) {
+
 		// construct tib initiator and open tibit popup
+
+
 
 		var that= this;
 
@@ -100,19 +168,18 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			that.sweepOldTibs();
 
 			if ( e.currentTarget.classList.contains('tibbed') ) {
-				window.open("https://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
+				window.open("http://" + prefix + "tib.me/account_overview",tibWindowName,tibWindowOptions);
 				// window.open("https://tib.me/account_overview",tibWindowName,tibWindowOptions);
 				return false;
 			}
 			
 
-			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (SUB ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 
-			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
-			console.log(tibInitiator);
+			tibInitiator= "http://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
-			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
+			// var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
 
 			if (pollForToken) {
 				cbkPoller= setInterval( function() { 
@@ -544,6 +611,9 @@ function tibCallback( inline) {
 		return token;
 	};
 
+
+
+
 	this.persistAck= function( SUB, ISS ){
 
 		// localStorage, becauase we want:
@@ -560,6 +630,9 @@ function tibCallback( inline) {
 		// Removed when no longer required by 
 
 	};
+
+
+
 
 	this.closeWindow= function( ) {
 

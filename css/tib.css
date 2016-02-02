@@ -1,6 +1,4 @@
 .bd-tib-btn { 
-	width: 120px;
-
 	display: inline-block;
 	box-sizing: content-box;
 	vertical-align:middle;
@@ -8,8 +6,24 @@
 	padding:0;
 	border: none; 
 	background: transparent; 
-	}
+}
 
+.bd-tib-big {
+    -ms-transform: scale(1.5); /* IE 9 */
+    -ms-transform-origin: 0 0; /* IE 9 */
+    -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
+    -webkit-transform-origin: 0 0; /* Chrome, Safari, Opera */
+    transform: scale(1.5);
+    transform-origin: 0 0;
+}
+.bd-tib-bigger {
+	-ms-transform: scale(2); /* IE 9 */
+    -ms-transform-origin: 0 0; /* IE 9 */
+    -webkit-transform: scale(2); /* Chrome, Safari, Opera */
+    -webkit-transform-origin: 0 0; /* Chrome, Safari, Opera */
+    transform: scale(2);
+    transform-origin: 0 0;
+}
 
 .bd-tib-btn object, .bd-tib-btn svg {
 	width: inherit;
@@ -21,7 +35,7 @@
 
 
 /*FACE*/
-	.bd-tib-btn .bd-btn-backdrop 	{ fill: #4657a5; }  /* customised background-color: */
+	.bd-tib-btn .bd-btn-backdrop 	{ fill: #8cc63f; fill: ; }  /* customised background-color: */
 	.bd-tib-btn .bd-btn-untibbed, 
 	.bd-tib-btn .bd-btn-tibbed 		{ fill: white; }
 	.bd-tib-btn .bd-btn-counter		{ fill: white; font-family: sans-serif; }
@@ -49,12 +63,14 @@
 
 
 /*DEFAULT*/
+	.bd-tib-btn-default {height: 40px}
 	.bd-tib-btn-default .bd-ai-st5 { fill: black; opacity: 0.2; }  /*permanent tint lower half*/
 	.bd-tib-btn-default .bd-btn-testnet-backdrop  { stroke-width: 2px; }
 	.bd-tib-btn-default .bd-btn-hover { opacity: 0.2; }
 
 
 /*CHEVRON*/
+	.bd-tib-btn-chevron {height: 22px}
 	.bd-tib-btn-chevron .bd-ai-st1,
 	.bd-tib-btn-chevron .bd-ai-st3 { fill: black; stroke: black; opacity: 0.4; }  /*counter tag*/
 	.bd-tib-btn-chevron .bd-btn-hover { opacity: 0.4; fill: black; }
@@ -62,36 +78,43 @@
 
 
 /*BUBBLE*/
-	.bd-tib-btn-bubble 	.bd-btn-counter { font-size:18; }
+	.bd-tib-btn-bubble {height: 60px}
+	.bd-tib-btn-bubble 	.bd-btn-counter { font-size:18px; }
 	.bd-tib-btn-bubble 	.bd-ai-st10	{ fill:black; opacity:0.2; } /*tint lower half */
 	.bd-tib-btn-bubble  .bd-btn-hover { opacity: 0.2; }
 
 
 /*VERT*/
+	.bd-tib-btn-vert {height: 50px}
 	.bd-tib-btn-vert .bd-btn-counter { fill:black; font-size:21; }
 	.bd-tib-btn-vert .bd-btn-hover { opacity: 0.2; }
 
 
 /*COIN*/
+	.bd-tib-btn-coin {height: 50px}
 	.bd-tib-btn-coin .bd-btn-testnet-backdrop { fill:none; stroke-width:9; }
 	.bd-tib-btn-coin .bd-btn-hover { opacity: 0.2; }
 
 
 /*POSTER*/
+	.bd-tib-btn-poster {height: 50px}
 	.bd-tib-btn-poster .bd-btn-hover { opacity:0.2; }
 	.bd-tib-btn-poster .bd-ai-st4 { opacity:0.5; fill: black; } /* colour two */
 	.bd-tib-btn-poster .bd-ai-st10 { font-size:18; }
 
 
 /*HEX*/
+	.bd-tib-btn-hex {height: 35px}
 	.bd-tib-btn-hex .bd-btn-hover { opacity:0.2; } /* missing from svg ? */
 
 
 /*HORIZ*/
+	.bd-tib-btn-horiz {height: 22px}
 	.bd-tib-btn-horiz .bd-ai-st1 { opacity:0.3; }
 	.bd-tib-btn-horiz .bd-ai-st4 { fill:white; }
 	.bd-tib-btn-horiz .bd-btn-counter { font-size:14; fill: black; }
 
 
 /*SHADOW*/
+	.bd-tib-btn-shadow {height: 37px}
 	.bd-tib-btn-shadow .bd-ai-st0 { visibility:hidden; opacity:0.8; }
