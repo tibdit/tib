@@ -35,14 +35,14 @@
 
 
 /*FACE*/
-	.bd-tib-btn .bd-btn-backdrop 	{ fill: #8cc63f; fill: ; }  /* customised background-color: */
+	.bd-tib-btn .bd-btn-backdrop 	{ fill: #8cc63f; }  /* customised background-color: */
 	.bd-tib-btn .bd-btn-untibbed, 
 	.bd-tib-btn .bd-btn-tibbed 		{ fill: white; }
 	.bd-tib-btn .bd-btn-counter		{ fill: white; font-family: sans-serif; }
 	.bd-tib-btn .bd-btn-countersurround { stroke: #BCBCBC; }   /*needs changing from fill to stroke in source*/
 
 /*TESTNET*/
-	.bd-tib-btn 		.bd-btn-testnet 			{ visibility: hidden; fill: black; 	}
+	.bd-tib-btn 		.bd-btn-testnet 			{ visibility: hidden; fill: white; 	}
 	.bd-tib-btn 		.bd-btn-testnet-backdrop 	{ fill: yellow; stroke: yellow; }
 	.bd-tib-btn.testnet .bd-btn-testnet 			{ visibility: visible; 	}
 

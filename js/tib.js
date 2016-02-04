@@ -105,9 +105,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				return false;
 			}
 			
-
-			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (SUB ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
-
+			if (ASN && TIB) {
+				var tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
+			} else {
+				var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+			}
+			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
 			console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
