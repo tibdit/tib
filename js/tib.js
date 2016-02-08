@@ -12,16 +12,16 @@ if (typeof arg === 'string') {
 	obj= arg;
 }
 
-bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.SRC);
+bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
     // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
 
     if (document.readyState === 'loading') {
     	document.addEventListener('DOMContentLoaded', function() {
-    		bd.initButtons( obj.BTN, obj.SRC , 'bd-tib-btn');
+    		bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
     	});
     } else {
-    	bd.initButtons( obj.BTN, obj.SRC , 'bd-tib-btn');
+    	bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
     }
 
     return bd;
@@ -214,6 +214,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			SUB= SUB || "blank";
 			e.classList.add("bd-subref-" + SUB);
 
+			BTS = e.getAttribute('data-bd-BTS');
+			BTS = BTS || buttonResourcesUrl;
+
 			BTN= e.getAttribute("data-bd-BTN");
 			BTN= BTN || defaultBTN;
 			e.classList.add( tibButtonsClass + "-" + BTN);
@@ -250,7 +253,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// load inline button SVG into DOM
 		buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) == i; }); // deduplicate buttonNames
 		for (var j=0, m=buttonNames.length; j<m; j++) {
-			this.loadButton( buttonNames[j], buttonResourcesUrl);
+			this.loadButton( buttonNames[j], BTS);
 		}
 
 		// retrieve counters for SUBs on page with couunter buttons
@@ -349,16 +352,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.loadButton= function( BTN, buttonResourcesUrl ){
+	this.loadButton= function( BTN, BTS ){
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 		BTN= BTN || "default";
-
-		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons/";
+		buttonResourcesUrl= BTS || "http://widget.tibdit.com/buttons/";
 
 		var tibbtn= new XMLHttpRequest();
-		tibbtn.open("GET", buttonResourcesUrl + "tib-btn-" + BTN + ".svg", true);
+		tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
 		tibbtn.send();
 
 		tibbtn.onreadystatechange= function( ) {
