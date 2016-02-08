@@ -35,6 +35,8 @@ Import the javascript magics from us and set your initiator parameters
         'TIB': 'http://www.website.com/', // Content you wish to be tibbed for (optional)
         'BTN': 'bubble', // Button styles which can be set site-wide (optional)
         'CBK' : 'http://www.website.com/thanks', // Site which the tib windo will redirect after a tib is confirmed (optional)
+        'SRC' : 'http://www.website.com/svgs/' // If using a custom SVG file, the folder your desired SVG is stored
+        in (following the naming scheme tib-btn-x.svg where 'x' is your unique button identifier.
     });});</script>
 ```
 And then place your tib button anywhere you wish on your web page: 
