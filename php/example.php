@@ -1,6 +1,9 @@
 <?php require 'tib.php';
 
-echo phpversion();
+    $x = 10 * 239;
+
+    echo $x;
+
 ?>
 
 <!DOCTYPE html>

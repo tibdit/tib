@@ -12,16 +12,16 @@ if (typeof arg === 'string') {
 	obj= arg;
 }
 
-bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
+bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.SRC);
 
     // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
 
     if (document.readyState === 'loading') {
     	document.addEventListener('DOMContentLoaded', function() {
-    		bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn'); 
+    		bd.initButtons( obj.BTN, obj.SRC , 'bd-tib-btn');
     	});
     } else {
-    	bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn');
+    	bd.initButtons( obj.BTN, obj.SRC , 'bd-tib-btn');
     }
 
     return bd;
@@ -353,10 +353,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
-
-		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons";
-
 		BTN= BTN || "default";
+
+		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons/";
 
 		var tibbtn= new XMLHttpRequest();
 		tibbtn.open("GET", buttonResourcesUrl + "tib-btn-" + BTN + ".svg", true);
