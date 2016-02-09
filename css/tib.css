@@ -42,7 +42,7 @@
 	.bd-tib-btn .bd-btn-countersurround { stroke: #BCBCBC; }   /*needs changing from fill to stroke in source*/
 
 /*TESTNET*/
-	.bd-tib-btn 		.bd-btn-testnet 			{ visibility: hidden; fill: white; 	}
+	.bd-tib-btn 		.bd-btn-testnet 			{ visibility: hidden; fill: black; 	}
 	.bd-tib-btn 		.bd-btn-testnet-backdrop 	{ fill: yellow; stroke: yellow; }
 	.bd-tib-btn.testnet .bd-btn-testnet 			{ visibility: visible; 	}
 
@@ -94,6 +94,7 @@
 	.bd-tib-btn-coin {height: 50px}
 	.bd-tib-btn-coin .bd-btn-testnet-backdrop { fill:none; stroke-width:9; }
 	.bd-tib-btn-coin .bd-btn-hover { opacity: 0.2; }
+	.bd-ai-st4 {fill: white;}
 
 
 /*POSTER*/
