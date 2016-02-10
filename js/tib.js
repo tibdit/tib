@@ -255,7 +255,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		// retrieve counters for SUBs on page with couunter buttons
 		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-		for (var k=0, u=buttonNames.length; k<u; k++) { 
+		for (var k=0, u=pageSUBs.length; k<u; k++) {
 			this.getCounter( pageSUBs[k]);
 		}
 	};
@@ -287,21 +287,24 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		}
 
 		if (hasCounter) {
-			
-			var tibqty= new XMLHttpRequest();
+			setTimeout(function(){
+				/* TODO Delay this based on XMLRequest events rather than a flat delay */
+				var tibqty= new XMLHttpRequest();
 
-			var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
-			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+				var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
+				tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+				// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
-			tibqty.open( 'GET', tibQtyFetch, true);
-			tibqty.send();
-					
-			tibqty.onreadystatechange= function( ) {
-				if (tibqty.readyState == 4 && tibqty.status == 200) {
-					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
-				}
-			};
+				tibqty.open( 'GET', tibQtyFetch, true);
+				tibqty.send();
+
+				tibqty.onreadystatechange= function( ) {
+					if (tibqty.readyState == 4 && tibqty.status == 200) {
+						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+					}
+				};
+
+			}, 10);
 
 		} else {
 			return false;
@@ -335,13 +338,14 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		expireLimit = Date.now() - mDUR;
 
 		// any tibs with an issue time prior to expireLimit are out of date, and can be removed
+		if(localStorage.length){
+			for (var i=0, n=localStorage.length; i<n; i++) {
+				var key= localStorage.key(i);
+				if ( key.substr(0,10) === "bd-subref-" ) {
 
-		for (var i=0, n=localStorage.length; i<n; i++) {
-			var key= localStorage.key(i);
-			if ( key.substr(0,10) === "bd-subref-" ) {
-
-				if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
-					localStorage.removeItem(key);
+					if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
+						localStorage.removeItem(key);
+					}
 				}
 			}
 		}
