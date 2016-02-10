@@ -35,7 +35,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
     		linkElement.id= 'bd-css-tib-btn';
     		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
+    		linkElement.href= 'https://widget.tibdit.com/assets/css/tib.css';
     		// linkElement.href= 'css/tib.css';
     		headElement.appendChild(linkElement); 
     	}
@@ -354,7 +354,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 
-		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons";
+		buttonResourcesUrl= buttonResourcesUrl || "https://widget.tibdit.com/buttons";
 
 		BTN= BTN || "default";
 
