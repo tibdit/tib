@@ -49,7 +49,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
 function tibHandler( PAD, DUR, CBK, ASN) {
 
-	DUR= DUR || 0;
+	DUR= DUR || 1;
 	ASN = ASN;
 	var testnet= false, pollForToken= false, mDUR= 0;
 
