@@ -238,6 +238,14 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			pageSUBs.push(SUB);
 		}
 
+		function manageCounters(){
+			// retrieve counters for SUBs on page with couunter buttons
+			pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
+			for (var k=0, u=pageSUBs.length; k<u; k++) {
+				that.getCounter( pageSUBs[k]);
+			}
+		}
+
 
 		// Install storage event handler
 		if (!pollForToken) {
@@ -252,20 +260,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			});
 		}
 
+
+
 		// load inline button SVG into DOM
 		buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) == i; }); // deduplicate buttonNames
 		for (var j=0, m=buttonNames.length; j<m; j++) {
-			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
+			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
 		}
 
-		// retrieve counters for SUBs on page with couunter buttons
-		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-		for (var k=0, u=pageSUBs.length; k<u; k++) {
-			this.getCounter( pageSUBs[k]);
-		}
 	};
-
-
 
 	this.getCounter= function( SUB) {
 
@@ -358,12 +361,14 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.loadButton= function( BTN, BTS ){
+	this.loadButton= function( BTN, BTS, callback ){
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 		BTN= BTN || "default";
 		BTS = BTS || "http://widget.tibdit.com/buttons/";
+
+		// TODO add a slash to end of URL when using custom BTS
 
 		var tibbtn= new XMLHttpRequest();
 		tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -371,11 +376,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		tibbtn.onreadystatechange= function( ) {
 			if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-				writeButtons( );
+				writeButtons();
 			}
 		};
 
-		function writeButtons( ){
+		function writeButtons(){
 
     	// overwrites <object> embedded svg with inline SVG to allow external CSS styling
     	
@@ -396,7 +401,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
 		}
+
+			callback();
 	}
+
+
 };
 
 
