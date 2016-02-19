@@ -283,8 +283,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			c= e.getElementsByClassName('bd-btn-counter');
-			if ( c) {
+			c = e.getElementsByClassName('bd-btn-counter');
+			if (c.length !== 0) {
 				hasCounter= true;
 
 				TIB= e.getAttribute("data-bd-TIB");
@@ -299,7 +299,14 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				/* TODO Delay this based on XMLRequest events rather than a flat delay */
 				var tibqty= new XMLHttpRequest();
 
-				var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
+				if (ASN && TIB) {
+					var tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
+				} else {
+					var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+				}
+				
+
+
 				tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 				// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
@@ -330,7 +337,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
 			c= e.getElementsByClassName('bd-btn-counter')[0];
-			if ( c) {
+			if (c) {
 				c.textContent= QTY;
 			}
 		}
