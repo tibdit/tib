@@ -90,7 +90,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.tib= function( SUB, TIB) {
+	this.tib= function( SUB, TIB, ASN) {
 		// construct tib initiator and open tibit popup
 
 		var that= this;
@@ -210,6 +210,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var e= buttons[i];
 			var SUB, BTN, TIB;
 
+			if (!ASN) {
+				ASN= e.getAttribute("data-bd-ASN");
+			} 
+			// ASN= ASN;
+
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
 			e.classList.add("bd-subref-" + SUB);
@@ -233,7 +238,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				e.classList.add("testnet");
 			}
 
-			e.addEventListener("click", this.tib( SUB, TIB));
+			e.addEventListener("click", this.tib( SUB, TIB, ASN));
 			buttonNames.push( BTN);
 			pageSUBs.push(SUB);
 		}
