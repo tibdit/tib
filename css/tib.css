@@ -33,6 +33,9 @@
 	}
 .bd-tib-btn .bd-btn-cover { pointer-events: all; }
 
+div.bd-tib-btn { display:inline; width: auto; }
+div.bd-tib-btn svg { vertical-align: middle; }
+.bd-tib-btn svg { vertical-align: middle;   cursor:pointer; }
 
 
 /*FACE*/

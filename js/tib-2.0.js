@@ -406,7 +406,16 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// target <button> element should have <object> as first or only child
 				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
 			}
-			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
+			s = e.children[0]   // we don't want duplicate id's in the DOM
+			s.removeAttribute("id");
+			
+			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+				s.style.width=(s.getBBox().width*(s.height.baseVal.value / s.getBBox().height )).toString()+"px";
+			};
+			// prevent default submit type/action if placed within a form
+			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
+			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+			}
 		}
 
 			callback();
