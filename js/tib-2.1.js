@@ -90,7 +90,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.tib= function( SUB, TIB) {
+	this.tib= function( SUB, TIB, ASN) {
 		// construct tib initiator and open tibit popup
 
 		var that= this;
@@ -208,7 +208,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			var SUB, BTN, TIB;
+			var SUB, BTN, TIB, ASN;
 
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
@@ -226,6 +226,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname;
 
+			ASN= e.getAttribute("data-bd-ASN");
+			ASN = ASN 
+
 			if ( localStorage["bd-subref-" + SUB] ) { 
 				e.classList.add("tibbed");  // add the tibbed class 
 			}
@@ -233,7 +236,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				e.classList.add("testnet");
 			}
 
-			e.addEventListener("click", this.tib( SUB, TIB));
+			e.addEventListener("click", this.tib( SUB, TIB, ASN));
 			buttonNames.push( BTN);
 			pageSUBs.push(SUB);
 		}
@@ -406,7 +409,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// target <button> element should have <object> as first or only child
 				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
 			}
-			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
+			s = e.children[0]   // we don't want duplicate id's in the DOM
+			s.removeAttribute("id");
 		}
 
 			callback();
