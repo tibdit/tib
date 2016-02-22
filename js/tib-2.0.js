@@ -51,7 +51,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 1;
 	ASN = ASN;
-	var testnet= false, pollForToken= false, mDUR= 0;
+	var testnet= false, pollForToken= false, mDUR= DUR * 3600000;
 
 	var prefix= '';  // NOT IN PRODUCTION
 	

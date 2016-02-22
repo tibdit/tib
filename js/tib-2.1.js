@@ -51,7 +51,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 1;
 	ASN = ASN;
-	var testnet= false, pollForToken= false, mDUR= 0;
+	var testnet= false, pollForToken= false, mDUR= DUR * 3600000;
 
 	var prefix= '';  // NOT IN PRODUCTION
 	
@@ -208,7 +208,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			var SUB, BTN, TIB, ASN;
+			var SUB, BTN, TIB, data_ASN;
 
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
@@ -226,8 +226,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname;
 
-			ASN= e.getAttribute("data-bd-ASN");
-			ASN = ASN 
+			data_ASN = e.getAttribute("data-bd-ASN");
+			ASN = data_ASN || ASN;
 
 			if ( localStorage["bd-subref-" + SUB] ) { 
 				e.classList.add("tibbed");  // add the tibbed class 
@@ -411,9 +411,16 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 			s = e.children[0]   // we don't want duplicate id's in the DOM
 			s.removeAttribute("id");
+			
+			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+				s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
+			};
+			// prevent default submit type/action if placed within a form
+			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
+			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+			}
 		}
-
-			callback();
+		callback();
 	}
 
 
