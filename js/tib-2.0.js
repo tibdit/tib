@@ -410,7 +410,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			s.removeAttribute("id");
 			
 			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-				s.style.width=(s.getBBox().width*(s.height.baseVal.value / s.getBBox().height )).toString()+"px";
+				s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
 			};
 			// prevent default submit type/action if placed within a form
 			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
