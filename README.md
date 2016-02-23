@@ -1,4 +1,4 @@
-<a href= "http://tib.me/mytibs9YhLYtrVhQkmTdbDS51H54WyrxTx" target="_blank" ><img src=https://tibit.com/wordpress/wp-content/themes/x-child/img/BasicPNGButton.png></a>
+<a href= "http://tib.me/mytibs9YhLYtrVhQkmTdbDS51H54WyrxTx?TIB=https://github.com/tibdit/tibbee-integration" target="_blank" ><img src=https://tibit.com/wordpress/wp-content/themes/x-child/img/BasicPNGButton.png></a>
 
 
 # Tibbee Integration
