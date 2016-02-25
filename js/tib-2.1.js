@@ -35,7 +35,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
     		linkElement.id= 'bd-css-tib-btn';
     		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.href= 'https://widget.tibdit.com/assets/css/tib.css';
+    		linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
     		// linkElement.href= 'css/tib.css';
     		headElement.appendChild(linkElement); 
     	}
@@ -51,7 +51,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 1;
 	ASN = ASN;
-	var testnet= false, pollForToken= false, mDUR= DUR * 3600000;
+	var testnet= false, pollForToken= false, mDUR= DUR * (3600000*24);
 
 	var prefix= '';  // NOT IN PRODUCTION
 	
@@ -81,7 +81,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	if (!CBK) {
 		// console.log(window.location.hostname);
-		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
+		CBK= window.location.protocol+"//"+window.location.host + "/nothing_to_see_here/tib_callback/404.err";
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
 		cbkPoller = 0;
@@ -376,7 +376,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 		BTN= BTN || "default";
-		BTS = BTS || "https://widget.tibdit.com/buttons/";
+		BTS = BTS || "//widget.tibdit.com/buttons/";
 
 		// TODO add a slash to end of URL when using custom BTS
 
