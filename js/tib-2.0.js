@@ -35,7 +35,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
     		linkElement.id= 'bd-css-tib-btn';
     		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
+    		linkElement.href= 'https://widget.tibdit.com/assets/css/tib.css';
     		// linkElement.href= 'css/tib.css';
     		headElement.appendChild(linkElement); 
     	}
@@ -378,7 +378,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 		BTN= BTN || "default";
-		BTS = BTS || "http://widget.tibdit.com/buttons/";
+		BTS = BTS || "https://widget.tibdit.com/buttons/";
 
 		// TODO add a slash to end of URL when using custom BTS
 
