@@ -18,10 +18,10 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
     if (document.readyState === 'loading') {
     	document.addEventListener('DOMContentLoaded', function() {
-    		bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
+    		bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn'); 
     	});
     } else {
-    	bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
+    	bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn');
     }
 
     return bd;
@@ -35,7 +35,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
     		linkElement.id= 'bd-css-tib-btn';
     		linkElement.rel= 'stylesheet';
     		linkElement.type= 'text/css';
-    		linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
+    		linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
     		// linkElement.href= 'css/tib.css';
     		headElement.appendChild(linkElement); 
     	}
@@ -49,9 +49,9 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
 function tibHandler( PAD, DUR, CBK, ASN) {
 
-	DUR= DUR || 1;
+	DUR= DUR || 0;
 	ASN = ASN;
-	var testnet= false, pollForToken= false, mDUR= DUR * (3600000*24);
+	var testnet= false, pollForToken= false, mDUR= 0;
 
 	var prefix= '';  // NOT IN PRODUCTION
 	
@@ -81,7 +81,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	if (!CBK) {
 		// console.log(window.location.hostname);
-		CBK= window.location.protocol+"//"+window.location.host + "/nothing_to_see_here/tib_callback/404.err";
+		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
 		cbkPoller = 0;
@@ -90,7 +90,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.tib= function( SUB, TIB, ASN) {
+	this.tib= function( SUB, TIB) {
 		// construct tib initiator and open tibit popup
 
 		var that= this;
@@ -105,12 +105,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				return false;
 			}
 			
-			if (ASN && TIB) {
-				var tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
-			} else {
-				var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
-			}
-			
+
+			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (SUB ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
 			console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
@@ -203,31 +200,35 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		this.sweepOldTibs();
 
 		var buttons= document.getElementsByClassName( tibButtonsClass);
-		var buttonNames= [], pageSUBs= [], buttonSources = [];
+		var buttonNames= [], pageSUBs= [];
 
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			var SUB, BTN, TIB, data_ASN;
+			var SUB, BTN, TIB;
 
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
-			e.classList.add("bd-subref-" + SUB);
 
+			if (SUB == "blank") {
+				var parent= e, parentID;
+				do {
+					parent= parent.parentElement;
+					parentID= parent.id;
+					if (parentID.substr(0,10) == "blog-post-") {
+						SUB=parentID;
+					}
+				} while ( SUB == "blank" && parent.tagName != "BODY" );
+			}
+
+			e.classList.add("bd-subref-" + SUB);
 
 			BTN= e.getAttribute("data-bd-BTN");
 			BTN= BTN || defaultBTN;
 			e.classList.add( tibButtonsClass + "-" + BTN);
 
-			BTS = e.getAttribute('data-bd-BTS');
-			BTS = BTS || buttonResourcesUrl;
-			buttonSources[BTN] = BTS;
-
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname;
-
-			data_ASN = e.getAttribute("data-bd-ASN");
-			ASN = data_ASN || ASN;
 
 			if ( localStorage["bd-subref-" + SUB] ) { 
 				e.classList.add("tibbed");  // add the tibbed class 
@@ -236,17 +237,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				e.classList.add("testnet");
 			}
 
-			e.addEventListener("click", this.tib( SUB, TIB, ASN));
+			e.addEventListener("click", this.tib( SUB, TIB));
 			buttonNames.push( BTN);
 			pageSUBs.push(SUB);
-		}
-
-		function manageCounters(){
-			// retrieve counters for SUBs on page with couunter buttons
-			pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-			for (var k=0, u=pageSUBs.length; k<u; k++) {
-				that.getCounter( pageSUBs[k]);
-			}
 		}
 
 
@@ -263,15 +256,20 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			});
 		}
 
-
-
 		// load inline button SVG into DOM
 		buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) == i; }); // deduplicate buttonNames
 		for (var j=0, m=buttonNames.length; j<m; j++) {
-			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
+			this.loadButton( buttonNames[j], buttonResourcesUrl);
 		}
 
+		// retrieve counters for SUBs on page with couunter buttons
+		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
+		for (var k=0, u=buttonNames.length; k<u; k++) { 
+			this.getCounter( pageSUBs[k]);
+		}
 	};
+
+
 
 	this.getCounter= function( SUB) {
 
@@ -286,8 +284,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			c = e.getElementsByClassName('bd-btn-counter');
-			if (c.length !== 0) {
+			c= e.getElementsByClassName('bd-btn-counter');
+			if ( c) {
 				hasCounter= true;
 
 				TIB= e.getAttribute("data-bd-TIB");
@@ -298,31 +296,21 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		}
 
 		if (hasCounter) {
-			setTimeout(function(){
-				/* TODO Delay this based on XMLRequest events rather than a flat delay */
-				var tibqty= new XMLHttpRequest();
+			
+			var tibqty= new XMLHttpRequest();
 
-				if (ASN && TIB) {
-					var tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
-				} else {
-					var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+			var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
+			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+
+			tibqty.open( 'GET', tibQtyFetch, true);
+			tibqty.send();
+					
+			tibqty.onreadystatechange= function( ) {
+				if (tibqty.readyState == 4 && tibqty.status == 200) {
+					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
 				}
-				
-
-
-				tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-				// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-
-				tibqty.open( 'GET', tibQtyFetch, true);
-				tibqty.send();
-
-				tibqty.onreadystatechange= function( ) {
-					if (tibqty.readyState == 4 && tibqty.status == 200) {
-						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
-					}
-				};
-
-			}, 10);
+			};
 
 		} else {
 			return false;
@@ -340,7 +328,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
 			c= e.getElementsByClassName('bd-btn-counter')[0];
-			if (c) {
+			if ( c) {
 				c.textContent= QTY;
 			}
 		}
@@ -376,26 +364,26 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.loadButton= function( BTN, BTS, callback ){
+	this.loadButton= function( BTN, buttonResourcesUrl ){
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
-		BTN= BTN || "default";
-		BTS = BTS || "//widget.tibdit.com/buttons/";
 
-		// TODO add a slash to end of URL when using custom BTS
+		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons";
+
+		BTN= BTN || "default";
 
 		var tibbtn= new XMLHttpRequest();
-		tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+		tibbtn.open("GET", buttonResourcesUrl + "tib-btn-" + BTN + ".svg", true);
 		tibbtn.send();
 
 		tibbtn.onreadystatechange= function( ) {
 			if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-				writeButtons();
+				writeButtons( );
 			}
 		};
 
-		function writeButtons(){
+		function writeButtons( ){
 
     	// overwrites <object> embedded svg with inline SVG to allow external CSS styling
     	
@@ -414,21 +402,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// target <button> element should have <object> as first or only child
 				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
 			}
-			s = e.children[0]   // we don't want duplicate id's in the DOM
-			s.removeAttribute("id");
-			
-			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-				s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
-			};
-			// prevent default submit type/action if placed within a form
-			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
-			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
-			}
+			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
 		}
-		callback();
 	}
-
-
 };
 
 

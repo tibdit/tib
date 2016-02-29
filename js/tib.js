@@ -339,13 +339,18 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		// any tibs with an issue time prior to expireLimit are out of date, and can be removed
 		if(localStorage.length){
+			var keysToRemove = [];
 			for (var i=0, n=localStorage.length; i<n; i++) {
 				var key= localStorage.key(i);
 				if ( key.substr(0,10) === "bd-subref-" ) {
-
 					if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
-						localStorage.removeItem(key);
+						keysToRemove.push(key);
 					}
+				}
+			}
+			if(keysToRemove.length){
+				for(var i= 0, n = keysToRemove.length; i < n; i++){
+					localStorage.removeItem(keysToRemove[i]);
 				}
 			}
 		}
