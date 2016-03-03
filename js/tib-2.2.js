@@ -298,21 +298,23 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         }
 
         if (hasCounter) {
-            console.log(SUB);
-
 
             try{
                 // Check the localStorage JSON string for a QTY value
-                QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
-                QTY = QTY['QTY'];
-                console.log('QTY is present: ' + QTY);
+                QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+                QTY = QTY['QTY']; /* Set QTY to the value we need from the JS obj */
+                if(!QTY){
+                    throw('QTY is empty'); /* If the JSON array has no QTY value, we throw an error, meaning we
+                     query tib.me/getqty/ for the QTY value we need instead */
+                }
+
 
                 that.writeCounter(SUB, QTY);
             }
-            
+
             catch(err){
-                // If unable to find a QTY value in localStorage, make an XML request to tib.me/getqty/
-                console.log('NO QTY FOUND');
+                // If unable to find a QTY value in localStorage, because it's not a JSON string, or because the
+                // JSON array contains no QTY value, then make an XML request to tib.me/getqty/
 
                 setTimeout(function(){
                     /* TODO Delay this based on XMLRequest events rather than a flat delay */
@@ -368,15 +370,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
     this.sweepOldTibs= function()  {
 
-        function isJSON(str){
-            try{
-                JSON.parse(str);
-            }
-            catch(err) {
-                return false;
-            }
-            return true;
-        }
 
         // deletes all expired tibs from localStorage
         // nb: all tibs for the domain must have the same acknowledgement duration for this to be reliable
@@ -391,15 +384,19 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
                 if ( key.substr(0,10) === "bd-subref-" ) {
 
-                    if(isJSON(localStorage.getItem(key))){
-                        var ISS = JSON.parse(localStorage.getItem(key));
-                        ISS = ISS['ISS'];
+                    try{
+                    /* Attempt to parse JSON string and save ISS for later usage */
+                        localStorageJSON = JSON.parse(localStorage.getItem(key));
+                        var ISS = localStorageJSON['ISS'];
                     }
-                    else{
-                        var ISS = localStorage.getItem(key);
-                        ISS = ISS['ISS'];
-                        newValue = {'ISS' : ISS};
-                        localStorage.setItem(key, JSON.stringify(newValue));
+                    catch(err){
+                    /* If localStorage value is not a JSON string, convert it to one and continue */
+                        localStorageJSON = localStorage.getItem(key); /* Get raw date string from localstorage */
+                        localStorageJSON = {'ISS' : localStorageJSON}; /* Convert string to JS object */
+                        localStorageJSON = JSON.stringify(localStorageJSON); /* Convert JS object to JSON string */
+                        var ISS = localStorageJSON['ISS']; /* Save ISS to variable for later usage */
+                        localStorage.setItem(key, localStorageJSON); /* Re-set localstorage value to JSON string */
+
                     }
 
                     if ( Date.parse(ISS) < expireLimit ) {
