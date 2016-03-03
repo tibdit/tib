@@ -298,31 +298,49 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         }
 
         if (hasCounter) {
-            setTimeout(function(){
-                /* TODO Delay this based on XMLRequest events rather than a flat delay */
-                var tibqty= new XMLHttpRequest();
-
-                if (ASN && TIB) {
-                    var tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
-                } else {
-                    var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
-                }
+            console.log(SUB);
 
 
+            try{
+                // Check the localStorage JSON string for a QTY value
+                QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+                QTY = QTY['QTY'];
+                console.log('QTY is present: ' + QTY);
 
-                tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-                // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+                that.writeCounter(SUB, QTY);
+            }
+            
+            catch(err){
+                // If unable to find a QTY value in localStorage, make an XML request to tib.me/getqty/
+                console.log('NO QTY FOUND');
 
-                tibqty.open( 'GET', tibQtyFetch, true);
-                tibqty.send();
+                setTimeout(function(){
+                    /* TODO Delay this based on XMLRequest events rather than a flat delay */
+                    var tibqty= new XMLHttpRequest();
 
-                tibqty.onreadystatechange= function( ) {
-                    if (tibqty.readyState == 4 && tibqty.status == 200) {
-                        that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+                    if (ASN && TIB) {
+                        var tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
+                    } else {
+                        var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
                     }
-                };
 
-            }, 10);
+
+
+                    tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+                    // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+
+                    tibqty.open( 'GET', tibQtyFetch, true);
+                    tibqty.send();
+
+                    tibqty.onreadystatechange= function( ) {
+                        if (tibqty.readyState == 4 && tibqty.status == 200) {
+                            that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+                        }
+                    };
+
+                }, 10);
+
+            }
 
         } else {
             return false;
@@ -375,14 +393,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
                     if(isJSON(localStorage.getItem(key))){
                         var ISS = JSON.parse(localStorage.getItem(key));
+                        ISS = ISS['ISS'];
                     }
                     else{
                         var ISS = localStorage.getItem(key);
+                        ISS = ISS['ISS'];
                         newValue = {'ISS' : ISS};
                         localStorage.setItem(key, JSON.stringify(newValue));
                     }
 
-                    var ISS = JSON.parse(localStorage.getItem(key));
                     if ( Date.parse(ISS) < expireLimit ) {
                         keysToRemove.push(key);
                     }
@@ -466,8 +485,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
     this.ackElementsInClass= function( classToAck, QTY) {
 
-        // add 'tibbed' class to all buttons with classToAck
+            localStorageArray = localStorage.getItem(classToAck);
+            localStorageArray = JSON.parse(localStorageArray);
+            QTY = QTY || localStorageArray['QTY'];
 
+        // add 'tibbed' class to all buttons with classToAck
         var buttons= document.getElementsByClassName( classToAck);
         for (var i=0, n=buttons.length; i<n; i++) {
             e= buttons[i];
@@ -569,7 +591,7 @@ function tibCallback( inline) {
                     // set local storage item to record tibbed subref
                     // will not trigger an event for updating button if processToken called from same page (ie: inline)
                     // but we still need to store this for subsequent pages with tib buttons
-                    that.persistAck( token.SUB, token.ISS);
+                    that.persistAck( token.SUB, token.ISS, token.QTY);
 
                     if (! inline) {
                         //
@@ -608,14 +630,13 @@ function tibCallback( inline) {
         return token;
     };
 
-    this.persistAck= function( SUB, ISS ){
+    this.persistAck= function( SUB, ISS, QTY ){
 
         // localStorage, becauase we want:
         // 1) to persist the tib acknowledgement across sessions, and
         // 2) sessionStorage is window-specific, so no good for message passing
 
         // [TODO] fallback to cookie storage
-        QTY = 12;
         tibDetails = {ISS: ISS, QTY: QTY};
         localStorage.setItem("bd-subref-" + SUB, JSON.stringify(tibDetails));
 
