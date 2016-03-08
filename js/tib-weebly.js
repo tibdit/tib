@@ -74,7 +74,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			DUR= Math.max( 1, DUR); // minimum 24 hours
 			mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
 		}
-	};
+	}
 
 	// if CBK is provided, assume that all callback processing will happen in the tibit window
 	// otherwise, assume it will be handled inline in the tibbee window button window
@@ -355,7 +355,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 			if(keysToRemove.length){
-				for(var i= 0, n = keysToRemove.length; i < n; i++){
+				for(i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}

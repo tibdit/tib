@@ -74,7 +74,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			DUR= Math.max( 1, DUR); // minimum 24 hours
 			mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
 		}
-	};
+	}
 
 	// if CBK is provided, assume that all callback processing will happen in the tibit window
 	// otherwise, assume it will be handled inline in the tibbee window button window
@@ -104,11 +104,13 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// window.open("https://tib.me/account_overview",tibWindowName,tibWindowOptions);
 				return false;
 			}
-			
+
+			var tibInitiator;
+
 			if (ASN && TIB) {
-				var tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
+				tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 			} else {
-				var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+				tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
 			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
@@ -302,10 +304,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				/* TODO Delay this based on XMLRequest events rather than a flat delay */
 				var tibqty= new XMLHttpRequest();
 
+				var tibQtyFetch;
+
 				if (ASN && TIB) {
-					var tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
+					tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
 				} else {
-					var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+					tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 				}
 				
 
@@ -367,7 +371,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 			if(keysToRemove.length){
-				for(var i= 0, n = keysToRemove.length; i < n; i++){
+				for(i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}
@@ -414,12 +418,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// target <button> element should have <object> as first or only child
 				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
 			}
-			s = e.children[0]   // we don't want duplicate id's in the DOM
+			s = e.children[0];   // we don't want duplicate id's in the DOM
 			s.removeAttribute("id");
 			
 			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
 				s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
-			};
+			}
 			// prevent default submit type/action if placed within a form
 			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
 			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
