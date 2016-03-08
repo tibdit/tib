@@ -61,7 +61,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 	var cbkHandler, cbkPoller;
 
 	if (PAD) {
-		if ( "mn2".search(PAD.substr(0,1)) != "-1" ) {  
+		if ( "mn2".search(PAD.substr(0,1)) !== -1) {  
 			// console.log(PAD);
 			// testnet bitcoin address, DUR is minutes
 			DUR= Math.max( 3, DUR); // minimum 3 minutes
@@ -74,7 +74,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			DUR= Math.max( 1, DUR); // minimum 24 hours
 			mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
 		}
-	};
+	}
 
 	// if CBK is provided, assume that all callback processing will happen in the tibit window
 	// otherwise, assume it will be handled inline in the tibbee window button window
@@ -105,10 +105,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				return false;
 			}
 			
+			var tibInitiator;
+
 			if (ASN && TIB) {
-				var tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
+				tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 			} else {
-				var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
+				tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
 			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
@@ -349,7 +351,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 			if(keysToRemove.length){
-				for(var i= 0, n = keysToRemove.length; i < n; i++){
+				for(i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}

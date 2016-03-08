@@ -62,7 +62,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
     var cbkHandler, cbkPoller;
 
     if (PAD) {
-        if ( "mn2".search(PAD.substr(0,1)) !== "-1" ) {
+        if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
             // console.log(PAD);
             // testnet bitcoin address, DUR is minutes
             DUR= Math.max( 3, DUR); // minimum 3 minutes
