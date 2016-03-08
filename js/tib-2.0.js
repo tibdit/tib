@@ -112,7 +112,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
-			console.log(tibInitiator);
+			// console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
