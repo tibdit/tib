@@ -25,26 +25,28 @@
 
 		var TIB= new URI(window.location);
 		var postForm = jQuery('.post-form-modal-content');
-		var markDownEditor = postForm.find('.icon.markdown');
-		var htmlEditor = postForm.find('.icon.html');
-		var richTextEditor = postForm.find('.editor-richtext');
+
+		postForm.markDownEditor = postForm.find('.icon.markdown');
+		postForm.htmlEditor = postForm.find('.icon.html');
+		postForm.richTextEditor = postForm.find('.editor-richtext');
 
 		if( TIB.hostname() === "www.tumblr.com") {
 			TIB= TIB.query(true).redirect_to;
 
 			if(postForm.is(':visible')){
-				if(richTextEditor.is(':visible')){
+				if(postForm.richTextEditor.is(':visible')){
 					paste = tumblrTexr;
-					console.log('richtext');
+					postForm.mode = 'richtext';
 				}
-				else if(markDownEditor.is(':visible')){
+				else if(postForm.markDownEditor.is(':visible')){
 					paste = tumblrMkDn;
-					console.log('markdown');
+					postForm.mode = 'markdown';
 				}
-				else if(htmlEditor.is(':visible')){
+				else if(postForm.htmlEditor.is(':visible')){
 					paste = tumblrHtml;
-					console.log('html');
+					postForm.mode = 'html';
 				}
+				console.log(postForm.mode);
 
 				paste= paste.replace('{BTN}', BTN);
 				paste= paste.replace('{PAD}', PAD);
