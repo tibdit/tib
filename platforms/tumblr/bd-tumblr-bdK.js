@@ -18,23 +18,46 @@
 	var tumblrHtml="<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
 	var tumblrMkDn="## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
 	var tumblrTexr="{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
+	 //var paste=tumblrMkDn;
 
-	var paste=tumblrMkDn;
 
 	$script.ready('urijs', function() {
 
 		var TIB= new URI(window.location);
+		var postForm = jQuery('.post-form-modal-content');
+		var markDownEditor = postForm.find('.icon.markdown');
+		var htmlEditor = postForm.find('.icon.html');
+		var richTextEditor = postForm.find('.editor-richtext');
 
-		if( TIB.hostname() === "www.tumblr.com" && (TIB.segment(0) === "edit" || TIB.segment(0) === "customize")) {
+		if( TIB.hostname() === "www.tumblr.com") {
 			TIB= TIB.query(true).redirect_to;
 
-			paste= paste.replace('{BTN}', BTN);
-			paste= paste.replace('{PAD}', PAD);
-			paste= paste.replace('{TIB}', TIB);
+			if(postForm.is(':visible')){
+				if(richTextEditor.is(':visible')){
+					paste = tumblrTexr;
+					console.log('richtext');
+				}
+				else if(markDownEditor.is(':visible')){
+					paste = tumblrMkDn;
+					console.log('markdown');
+				}
+				else if(htmlEditor.is(':visible')){
+					paste = tumblrHtml;
+					console.log('html');
+				}
 
-			window.prompt("copy this",paste);
+				paste= paste.replace('{BTN}', BTN);
+				paste= paste.replace('{PAD}', PAD);
+				paste= paste.replace('{TIB}', TIB);
+
+				window.prompt("copy this",paste);
+			}
+			else{
+				window.alert(window.location + " not recognised as tumblr edit window");
+			}
+
 		} else {
-			window.alert(window.location + " not recognised as tumblr edit window");
+			window.alert(window.location + " not recognised as tumblr");
 		}
 	});
 
