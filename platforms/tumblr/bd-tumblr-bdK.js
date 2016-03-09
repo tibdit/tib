@@ -15,27 +15,94 @@
 
 	var BTN="&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
 
-	var tumblrHtml="<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
-	var tumblrMkDn="## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
-	var tumblrTexr="{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
+	$script.ready(['urijs'], function() {
 
-	var paste=tumblrMkDn;
+		TIB= new URI(window.location);
 
-	$script.ready('urijs', function() {
-
-		var TIB= new URI(window.location);
-
-		if( TIB.hostname() === "www.tumblr.com" && (TIB.segment(0) === "edit" || TIB.segment(0) === "customize")) {
+		if( TIB.hostname() === "www.tumblr.com" ) {
 			TIB= TIB.query(true).redirect_to;
+			console.log(TIB);
 
+			postEditor = jQuery('.post-form');
+			if(postEditor.length) {
+				generateInputWindow();
+			}
+
+		}
+		else {
+				window.alert(window.location + " not recognised as tumblr window");
+		}
+
+
+		function generateButtonCode(mode, BTN, PAD, TIB){
+			var paste;
+			switch(mode) {
+				case 'html':
+					paste = "<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
+					break;
+				case 'markdown':
+					paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
+					break;
+				case 'richtext':
+					paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
+					break;
+			}
 			paste= paste.replace('{BTN}', BTN);
 			paste= paste.replace('{PAD}', PAD);
 			paste= paste.replace('{TIB}', TIB);
 
-			window.prompt("copy this",paste);
-		} else {
-			window.alert(window.location + " not recognised as tumblr edit window");
+			return paste;
 		}
+
+		function generateInputWindow(postEditorMode){
+			jQuery('#tib-input-window').remove();
+
+			var div = jQuery('<div id="tib-input-window"></div>');
+			div.css('position', 'fixed');
+			div.css('top', '0');
+			div.css('z-index', '50000');
+			div.css('width', '100%');
+			div.css('padding', '20px');
+			div.css('background', 'rgba(255,255,255, 0.8)');
+			div.css('display', 'none');
+
+			tibForm = jQuery('<form id="tib-form"></form>');
+
+
+			tibForm.append('<label for="PAD">Bitcoin Address:</label><input id="PAD">');
+			tibForm.append('<input type="submit">');
+			tibForm.submit(function(e){
+				e.preventDefault();
+				PAD = jQuery('#PAD').val();
+				console.log(PAD);
+
+				var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
+
+				window.prompt("copy this",paste);
+			});
+
+			div.append(tibForm);
+			jQuery('body').append(div);
+			div.fadeIn();
+		}
+
+		function getEditorMode(){
+			if(postEditor.length){
+
+				if(postEditor.find('.icon.html').is(':visible')){
+					postEditor.mode = 'html';
+				}
+				else if(postEditor.find('.icon.markdown').is(':visible')){
+					postEditor.mode = 'markdown';
+				}
+				else{
+					postEditor.mode = 'richtext';
+				}
+
+				return postEditor.mode;
+			}
+		}
+
 	});
 
 })();
