@@ -5,14 +5,60 @@
     width: 100%;
     padding: 20px;
     background: #14123E;
+    height: 40px;
+    color: white;
 }
 
 #tib-logo{
-    height: 40px;
-    vertical-align: center;
+    width: 9%;
+    vertical-align: middle;
+    display: inline-block;
 }
 
+
+
 #tib-form{
-    height: 40px;
-    display: inline;
+    display: inline-block;
+    width: 90%;
+}
+
+#tib-form:before{
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+}
+
+#tib-form input{
+
+}
+
+#tib-form-column{
+    width: 80%;
+}
+
+#tib-form label{
+    color: white;
+    padding: 0px 10px;
+}
+
+#tib-form input#PAD, input#TIB{
+    background: transparent;
+    border: 1px solid #4657A5;
+    color: white;
+    padding: 10px;
+}
+
+#tib-form #tib-form-copy{
+    border: 1px solid #4657A5;
+    color: white;
+    background: transparent;
+    padding: 10px;
+    float: right;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+#tib-form #tib-form-copy:hover{
+    background: rgba(255,255,255,0.1);
 }
