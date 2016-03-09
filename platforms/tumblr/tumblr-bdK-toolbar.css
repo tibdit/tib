@@ -1,0 +1,18 @@
+#tib-input-bar{
+    position: fixed;
+    top: 0;
+    z-index: 50000;
+    width: 100%;
+    padding: 20px;
+    background: #14123E;
+}
+
+#tib-logo{
+    height: 40px;
+    vertical-align: center;
+}
+
+#tib-form{
+    height: 40px;
+    display: inline;
+}

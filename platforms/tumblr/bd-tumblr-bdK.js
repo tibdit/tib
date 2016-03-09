@@ -48,17 +48,9 @@
 
 		function appendCSS(){
 			jQuery('style.tibStyles').remove();
-			jQuery('head').append('' +
-				'<style class="tibStyles">' +
-				'#tib-input-bar{' +
-				'position: fixed;' +
-				'top: 0;' +
-				'z-index: 50000;' +
-				'width: 100%;' +
-				'padding: 20px;' +
-				'background: rgba(255,255,255, 0.8);' +
-				'display: none;' +
-				'}</style>');
+			jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.css', function(data){
+				jQuery('head').append('<style class="tibStyles">' + data + '</style>');
+			});
 		}
 
 		function generateButtonCode(mode, BTN, PAD, TIB){
@@ -82,19 +74,18 @@
 		}
 
 		function generateInputWindow(){
+			jQuery('#tib-input-bar').fadeOut('fast', function(){
+				jQuery('#tib-input-bar').remove();
 
-			appendCSS();
-			jQuery('#tib-input-bar').remove();
+				jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
+					jQuery('body').append(data);
+					jQuery('#tib-input-bar').fadeIn();
+					jQuery('#tib-form').submit(tibFormSubmitHandler);
 
-
-			jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
-				jQuery('body').append(data);
-
-				jQuery('#tib-input-bar').fadeIn();
-				jQuery('#tib-form').submit(tibFormSubmitHandler);
+					appendCSS();
+				});
 			});
-			//tibBar.append(tibForm);
-			//jQuery('body').append(tibBar);
+
 		}
 
 		function tibFormSubmitHandler(e){
