@@ -26,13 +26,40 @@
 			postEditor = jQuery('.post-form');
 			if(postEditor.length) {
 				generateInputWindow();
+				setTimeout(watchElementVisibility, 1000, postEditor);
 			}
-
+			else {
+				window.alert(window.location + " not recognised as tumblr edit window");
+			}
 		}
 		else {
 				window.alert(window.location + " not recognised as tumblr window");
 		}
 
+		function watchElementVisibility(element){
+
+			if(element.is(':hidden')){
+				jQuery('#tib-input-window').remove();
+			}
+			else{
+				setTimeout(watchElementVisibility, 1000, element);
+			}
+		}
+
+		function appendCSS(){
+			jQuery('style.tibStyles').remove();
+			jQuery('head').append('' +
+				'<style class="tibStyles">' +
+				'#tib-input-window{' +
+				'position: fixed;' +
+				'top: 0;' +
+				'z-index: 50000;' +
+				'width: 100%;' +
+				'padding: 20px;' +
+				'background: rgba(255,255,255, 0.8);' +
+				'display: none;' +
+				'}</style>');
+		}
 
 		function generateButtonCode(mode, BTN, PAD, TIB){
 			var paste;
@@ -54,18 +81,12 @@
 			return paste;
 		}
 
-		function generateInputWindow(postEditorMode){
+		function generateInputWindow(){
+			appendCSS();
+
 			jQuery('#tib-input-window').remove();
 
 			var div = jQuery('<div id="tib-input-window"></div>');
-			div.css('position', 'fixed');
-			div.css('top', '0');
-			div.css('z-index', '50000');
-			div.css('width', '100%');
-			div.css('padding', '20px');
-			div.css('background', 'rgba(255,255,255, 0.8)');
-			div.css('display', 'none');
-
 			tibForm = jQuery('<form id="tib-form"></form>');
 
 
