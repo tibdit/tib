@@ -39,7 +39,7 @@
 		function watchElementVisibility(element){
 
 			if(element.is(':hidden')){
-				jQuery('#tib-input-window').remove();
+				jQuery('#tib-input-bar').remove();
 			}
 			else{
 				setTimeout(watchElementVisibility, 1000, element);
@@ -50,7 +50,7 @@
 			jQuery('style.tibStyles').remove();
 			jQuery('head').append('' +
 				'<style class="tibStyles">' +
-				'#tib-input-window{' +
+				'#tib-input-bar{' +
 				'position: fixed;' +
 				'top: 0;' +
 				'z-index: 50000;' +
@@ -82,29 +82,29 @@
 		}
 
 		function generateInputWindow(){
+
 			appendCSS();
-
-			jQuery('#tib-input-window').remove();
-
-			var div = jQuery('<div id="tib-input-window"></div>');
-			tibForm = jQuery('<form id="tib-form"></form>');
+			jQuery('#tib-input-bar').remove();
 
 
-			tibForm.append('<label for="PAD">Bitcoin Address:</label><input id="PAD">');
-			tibForm.append('<input type="submit">');
-			tibForm.submit(function(e){
-				e.preventDefault();
-				PAD = jQuery('#PAD').val();
-				console.log(PAD);
+			jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
+				jQuery('body').append(data);
 
-				var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
-
-				window.prompt("copy this",paste);
+				jQuery('#tib-input-bar').fadeIn();
+				jQuery('#tib-form').submit(tibFormSubmitHandler);
 			});
+			//tibBar.append(tibForm);
+			//jQuery('body').append(tibBar);
+		}
 
-			div.append(tibForm);
-			jQuery('body').append(div);
-			div.fadeIn();
+		function tibFormSubmitHandler(e){
+			e.preventDefault();
+			PAD = jQuery('#PAD').val();
+			console.log(PAD);
+
+			var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
+
+			window.prompt("copy this",paste);
 		}
 
 		function getEditorMode(){
