@@ -12,10 +12,11 @@
  (function() {
 
 	$script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
+	 $script('https://cdn.jsdelivr.net/clipboard.js/1.5.8/clipboard.min.js', 'clipboardjs');
 
 	var BTN="&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
 
-	$script.ready(['urijs'], function() {
+	$script.ready(['urijs'],['clipboardjs'], function() {
 
 		TIB= new URI(window.location);
 
@@ -74,9 +75,21 @@
 		}
 
 		function generateInputWindow(){
-			jQuery('#tib-input-bar').fadeOut('fast', function(){
-				jQuery('#tib-input-bar').remove();
+			if(jQuery('#tib-input-bar').length){
+				jQuery('#tib-input-bar').fadeOut('fast', function(){
+					jQuery('#tib-input-bar').remove();
 
+					jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
+						jQuery('body').append(data);
+						jQuery('#tib-input-bar').fadeIn();
+						jQuery('#tib-form').submit(tibFormSubmitHandler);
+
+						appendCSS();
+					});
+				});
+			}
+			else{
+				console.log('testytest');
 				jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
 					jQuery('body').append(data);
 					jQuery('#tib-input-bar').fadeIn();
@@ -84,7 +97,7 @@
 
 					appendCSS();
 				});
-			});
+			}
 
 		}
 
@@ -95,7 +108,13 @@
 
 			var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
 
-			window.prompt("copy this",paste);
+			copyToClipboard(paste);
+
+			jQuery(this).find('#tib-form-copy').val('✔ Copied to clipboard').addClass('submitted');
+
+			setTimeout(function(){
+				jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
+			}, 2000);
 		}
 
 		function getEditorMode(){
@@ -115,6 +134,28 @@
 			}
 		}
 
+		/* Taken from Ignarron / copyToClipboard.html
+		https://gist.github.com/lgarron/d1dee380f4ed9d825ca7 */
+		var copyToClipboard = (function() {
+			var _dataString = null;
+			document.addEventListener("copy", function(e){
+				if (_dataString !== null) {
+					try {
+						e.clipboardData.setData("text/plain", _dataString);
+						e.preventDefault();
+					} finally {
+						_dataString = null;
+					}
+				}
+			});
+			return function(data) {
+				_dataString = data;
+				document.execCommand("copy");
+			};
+		})();
+
 	});
+
+
 
 })();

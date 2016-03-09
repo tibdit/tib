@@ -3,23 +3,27 @@
     top: 0;
     z-index: 50000;
     width: 100%;
-    padding: 20px;
     background: #14123E;
-    height: 40px;
     color: white;
 }
 
 #tib-logo{
-    width: 9%;
+    width: 8%;
+    margin-left: 1%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 1%;
     vertical-align: middle;
     display: inline-block;
+
 }
 
 
 
 #tib-form{
     display: inline-block;
-    width: 90%;
+    width: 89%;
+    margin: 10px 0;
 }
 
 #tib-form:before{
@@ -30,16 +34,13 @@
 }
 
 #tib-form input{
-
-}
-
-#tib-form-column{
-    width: 80%;
+    margin: 10px 0px;
 }
 
 #tib-form label{
     color: white;
     padding: 0px 10px;
+    margin: 10px 0px;
 }
 
 #tib-form input#PAD, input#TIB{
@@ -55,8 +56,12 @@
     background: transparent;
     padding: 10px;
     float: right;
-    margin-right: 20px;
+    margin-right: 2.5%;
     cursor: pointer;
+}
+
+#tib-form #tib-form-copy.submitted{
+    background: rgba(0,200,0, 0.15);
 }
 
 #tib-form #tib-form-copy:hover{
