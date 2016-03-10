@@ -10,48 +10,70 @@
     font-family: 'Roboto', sans-serif;
 }
 
-#tib-logo{
-    width: 8%;
-    margin-left: 1%;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-right: 1%;
+#tib-input-bar *{
+    box-sizing: border-box;
+    margin: 0;
+    white-space: nowrap;
+
+}
+
+#logo-container{
+    width: 20%;
+    max-width: 20%;
+}
+#PAD-container, #TIB-container{
+    width: 29%;
+    max-width: 30%;
+}
+#submit-container{
+    width: 20%;
+    max-width: 20%;
+}
+
+.container{
     vertical-align: middle;
     display: inline-block;
+    text-align: center;
+    height: 100%;
 
 }
-
-#tib-form{
-    display: inline-block;
-    width: 89%;
-    margin: 10px 0;
-}
-
-#tib-form:before{
+.container:before{
     content: "";
     display: inline-block;
     vertical-align: middle;
     height: 100%;
 }
 
+#tib-logo{
+    max-height: 100%;
+    max-width: 60%;
+    padding: 5% 10%;
+    vertical-align: middle;
+    display: inline-block;
+    float:left;
+}
+
+
+
+
 #tib-form input{
-    margin: 10px 0px;
 }
 
 #tib-form label{
     color: white;
-    padding: 0px 10px;
-    margin: 10px 0px;
-    font-size: 12px;
-    width: 15%;
-    max-width: 15%;
+    font-size: 1.2vmin;
+    width: 45%;
+    max-width: 45%;
+    word-break: break-word;
+    height: auto;
+    overflow: auto;
+    margin-right: 5%;
     font-family: 'Roboto', sans-serif;
 }
 
 #tib-form input#PAD, input#TIB{
-    width: 25%;
-    margin-right: 2%;
-    margin-left: 2%;
+    width: 50%;
+
     background: transparent;
     border: 1px solid #4657A5;
     color: white;
@@ -72,7 +94,8 @@
     color: white;
     background: transparent;
     padding: 10px;
-    width: 10%;
+    width: 50%;
+    display: inline-block;
 
     cursor: pointer;
     font-family: 'Roboto', sans-serif;
@@ -93,7 +116,7 @@
 }
 
 #tib-form #tib-form-copy:disabled{
-    color: #aaaaaa;
+    color: #cccccc;
     cursor: not-allowed;
     background: rgba(150,150,150,0.5);
 }

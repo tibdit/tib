@@ -1,9 +1,17 @@
 <div id="tib-input-bar" style="display: none;">
-    <img id="tib-logo" src="//widget.tibit.local/tibbee-integration/platforms/tumblr/tibit-logo-icon.png">
-
+    <div id="logo-container" class="container">
+        <img id="tib-logo" src="//widget.tibit.local/tibbee-integration/platforms/tumblr/tibit-logo-icon.png">
+    </div>
         <form id="tib-form">
-            <label for="PAD">Bitcoin address for tibs to be sent to:</label><input type="text" id="PAD">
-            <label for="TIB">Website Address for Meta Data (optional):</label><input type="text" id="TIB">
-            <input id="tib-form-copy" type="submit" value="Copy to clipboard" disabled>
+            <div id="PAD-container" class="container">
+                <label for="PAD">Bitcoin address for tibs to be sent to:</label><input type="text" id="PAD">
+            </div>
+            <div id="TIB-container" class="container">
+                <label for="TIB">Website Address for Meta Data (optional):</label><input type="text" id="TIB">
+            </div>
+            <div id="submit-container" class="container">
+                <input id="tib-form-copy" type="submit" value="Copy to clipboard" disabled>
+            </div>
         </form>
+
 </div>

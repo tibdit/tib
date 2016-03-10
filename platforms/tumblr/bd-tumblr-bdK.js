@@ -12,19 +12,28 @@
  (function() {
 
 	 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
-	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/jsbn.js', 'jsbn');
-	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/jsbn2.js', 'jsbn2');
-	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/crypto-sha256.js', 'crpytosha256js');
-	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/btcaddr_validator.js', 'btcvaljs');
+	 $script(baseSRC + 'jsbn.js', 'jsbn');
+	 $script(baseSRC + 'jsbn2.js', 'jsbn2');
+	 $script(baseSRC + 'crypto-sha256.js', 'crpytosha256js');
+	 $script(baseSRC + 'btcaddr_validator.js', 'btcvaljs');
 
 	 var BTN = "&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
 
 	 $script.ready(['urijs', 'jsbn', 'jsbn2', 'crpytosha256js', 'btcvaljs'], function () {
 
+		 /* MAIN INITIALISATION BLOCK
+		 *
+		 * we check we're on tumblr, check we have an editor window open, and then
+		 * if both of these are true, we fire our generateInputWindow function that
+		 * builds our tibbee toolbar. We also set watchElementVisibility using setTimeout
+		 * to close our toolbar when the editor window closes. */
+
+		 console.log(baseSRC);
+
 		 TIB = new URI(window.location);
 
 		 if (TIB.hostname() === "www.tumblr.com") {
-			 TIB = TIB.query(true).redirect_to;
+			 TIB = TIB.hostname() + '/blog/' + jQuery('.caption').html();
 			 console.log(TIB);
 
 			 postEditor = jQuery('.post-form');
@@ -40,6 +49,8 @@
 			 window.alert(window.location + " not recognised as tumblr window");
 		 }
 
+		 /* MAIN INITIALISATION BLOCK */
+
 		 function watchElementVisibility(element) {
 
 			 if (element.is(':hidden')) {
@@ -52,7 +63,7 @@
 
 		 function appendCSS() {
 			 jQuery('style.tibStyles').remove();
-			 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.css', function (data) {
+			 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.css', function (data) {
 				 jQuery('head').append('<style class="tibStyles">' + data + '</style>');
 			 });
 		 }
@@ -79,8 +90,7 @@
 
 		 function btcValidator(e) {
 			 target = jQuery(e.target);
-			 submitButton = jQuery('#tib-form #tib-form-copy');
-			 console.log()
+			 submitButton = jQuery('#tib-form-copy');
 			 if(check_address(target.val())){
 				 submitButton.prop('disabled', false);
 				 target.addClass('valid');
@@ -103,7 +113,7 @@
 				 jQuery('#tib-input-bar').fadeOut('fast', function () {
 					 jQuery('#tib-input-bar').remove();
 
-					 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function (data) {
+					 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.html', function (data) {
 						 jQuery('body').append(data);
 						 jQuery('#tib-input-bar').fadeIn();
 						 jQuery('#tib-form').submit(tibFormSubmitHandler);
@@ -118,7 +128,7 @@
 			 }
 			 else {
 				 console.log('testytest');
-				 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function (data) {
+				 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.html', function (data) {
 					 jQuery('body').append(data);
 					 jQuery('#tib-input-bar').fadeIn();
 					 jQuery('#tib-form').submit(tibFormSubmitHandler);
@@ -136,9 +146,9 @@
 		 function tibFormSubmitHandler(e) {
 			 e.preventDefault();
 			 PAD = jQuery('#PAD').val();
-			 console.log(PAD);
+			 customTIB = jQuery('#TIB').val();
 
-			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
+			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, customTIB || TIB);
 
 			 copyToClipboard(paste);
 
