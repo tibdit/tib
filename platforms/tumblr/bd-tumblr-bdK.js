@@ -11,150 +11,182 @@
 
  (function() {
 
-	$script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
-	 $script('https://cdn.jsdelivr.net/clipboard.js/1.5.8/clipboard.min.js', 'clipboardjs');
+	 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
+	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/jsbn.js', 'jsbn');
+	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/jsbn2.js', 'jsbn2');
+	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/crypto-sha256.js', 'crpytosha256js');
+	 $script('//widget.tibit.local/tibbee-integration/platforms/tumblr/btcaddr_validator.js', 'btcvaljs');
 
-	var BTN="&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
+	 var BTN = "&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
 
-	$script.ready(['urijs'],['clipboardjs'], function() {
+	 $script.ready(['urijs', 'jsbn', 'jsbn2', 'crpytosha256js', 'btcvaljs'], function () {
 
-		TIB= new URI(window.location);
+		 TIB = new URI(window.location);
 
-		if( TIB.hostname() === "www.tumblr.com" ) {
-			TIB= TIB.query(true).redirect_to;
-			console.log(TIB);
+		 if (TIB.hostname() === "www.tumblr.com") {
+			 TIB = TIB.query(true).redirect_to;
+			 console.log(TIB);
 
-			postEditor = jQuery('.post-form');
-			if(postEditor.length) {
-				generateInputWindow();
-				setTimeout(watchElementVisibility, 1000, postEditor);
-			}
-			else {
-				window.alert(window.location + " not recognised as tumblr edit window");
-			}
-		}
-		else {
-				window.alert(window.location + " not recognised as tumblr window");
-		}
+			 postEditor = jQuery('.post-form');
+			 if (postEditor.length) {
+				 generateInputWindow();
+				 setTimeout(watchElementVisibility, 1000, postEditor);
+			 }
+			 else {
+				 window.alert(window.location + " not recognised as tumblr edit window");
+			 }
+		 }
+		 else {
+			 window.alert(window.location + " not recognised as tumblr window");
+		 }
 
-		function watchElementVisibility(element){
+		 function watchElementVisibility(element) {
 
-			if(element.is(':hidden')){
-				jQuery('#tib-input-bar').remove();
-			}
-			else{
-				setTimeout(watchElementVisibility, 1000, element);
-			}
-		}
+			 if (element.is(':hidden')) {
+				 jQuery('#tib-input-bar').remove();
+			 }
+			 else {
+				 setTimeout(watchElementVisibility, 1000, element);
+			 }
+		 }
 
-		function appendCSS(){
-			jQuery('style.tibStyles').remove();
-			jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.css', function(data){
-				jQuery('head').append('<style class="tibStyles">' + data + '</style>');
-			});
-		}
+		 function appendCSS() {
+			 jQuery('style.tibStyles').remove();
+			 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.css', function (data) {
+				 jQuery('head').append('<style class="tibStyles">' + data + '</style>');
+			 });
+		 }
 
-		function generateButtonCode(mode, BTN, PAD, TIB){
-			var paste;
-			switch(mode) {
-				case 'html':
-					paste = "<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
-					break;
-				case 'markdown':
-					paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
-					break;
-				case 'richtext':
-					paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
-					break;
-			}
-			paste= paste.replace('{BTN}', BTN);
-			paste= paste.replace('{PAD}', PAD);
-			paste= paste.replace('{TIB}', TIB);
+		 function generateButtonCode(mode, BTN, PAD, TIB) {
+			 var paste;
+			 switch (mode) {
+				 case 'html':
+					 paste = "<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
+					 break;
+				 case 'markdown':
+					 paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
+					 break;
+				 case 'richtext':
+					 paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
+					 break;
+			 }
+			 paste = paste.replace('{BTN}', BTN);
+			 paste = paste.replace('{PAD}', PAD);
+			 paste = paste.replace('{TIB}', TIB);
 
-			return paste;
-		}
+			 return paste;
+		 }
 
-		function generateInputWindow(){
-			if(jQuery('#tib-input-bar').length){
-				jQuery('#tib-input-bar').fadeOut('fast', function(){
-					jQuery('#tib-input-bar').remove();
+		 function btcValidator(e) {
+			 target = jQuery(e.target);
+			 submitButton = jQuery('#tib-form #tib-form-copy');
+			 console.log()
+			 if(check_address(target.val())){
+				 submitButton.prop('disabled', false);
+				 target.addClass('valid');
+				 target.removeClass('invalid');
+			 }
+			 else if(target.val() == ''){
+				 submitButton.prop('disabled', true);
+				 target.removeClass('invalid');
+				 target.removeClass('valid');
+			 }
+			 else{
+				 submitButton.prop('disabled', true);
+				 target.addClass('invalid');
+				 target.removeClass('valid');
+			 }
+		 }
 
-					jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
-						jQuery('body').append(data);
-						jQuery('#tib-input-bar').fadeIn();
-						jQuery('#tib-form').submit(tibFormSubmitHandler);
+		 function generateInputWindow() {
+			 if (jQuery('#tib-input-bar').length) {
+				 jQuery('#tib-input-bar').fadeOut('fast', function () {
+					 jQuery('#tib-input-bar').remove();
 
-						appendCSS();
-					});
-				});
-			}
-			else{
-				console.log('testytest');
-				jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function(data){
-					jQuery('body').append(data);
-					jQuery('#tib-input-bar').fadeIn();
-					jQuery('#tib-form').submit(tibFormSubmitHandler);
+					 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function (data) {
+						 jQuery('body').append(data);
+						 jQuery('#tib-input-bar').fadeIn();
+						 jQuery('#tib-form').submit(tibFormSubmitHandler);
 
-					appendCSS();
-				});
-			}
+						 appendCSS();
 
-		}
 
-		function tibFormSubmitHandler(e){
-			e.preventDefault();
-			PAD = jQuery('#PAD').val();
-			console.log(PAD);
+						 jQuery('#tib-form input#PAD').keyup({'target': '#tib-form input#PAD'}, btcValidator);
 
-			var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
+					 });
+				 });
+			 }
+			 else {
+				 console.log('testytest');
+				 jQuery.get('//widget.tibit.local/tibbee-integration/platforms/tumblr/tumblr-bdK-toolbar.html', function (data) {
+					 jQuery('body').append(data);
+					 jQuery('#tib-input-bar').fadeIn();
+					 jQuery('#tib-form').submit(tibFormSubmitHandler);
 
-			copyToClipboard(paste);
+					 appendCSS();
 
-			jQuery(this).find('#tib-form-copy').val('✔ Copied to clipboard').addClass('submitted');
+					 $script.ready('btcvaljs', function () {
+						 jQuery('#tib-form input#PAD').keyup({'target': '#tib-form input#PAD'}, btcValidator);
+					 });
+				 });
+			 }
 
-			setTimeout(function(){
-				jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
-			}, 2000);
-		}
+		 }
 
-		function getEditorMode(){
-			if(postEditor.length){
+		 function tibFormSubmitHandler(e) {
+			 e.preventDefault();
+			 PAD = jQuery('#PAD').val();
+			 console.log(PAD);
 
-				if(postEditor.find('.icon.html').is(':visible')){
-					postEditor.mode = 'html';
-				}
-				else if(postEditor.find('.icon.markdown').is(':visible')){
-					postEditor.mode = 'markdown';
-				}
-				else{
-					postEditor.mode = 'richtext';
-				}
+			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB);
 
-				return postEditor.mode;
-			}
-		}
+			 copyToClipboard(paste);
 
-		/* Taken from Ignarron / copyToClipboard.html
-		https://gist.github.com/lgarron/d1dee380f4ed9d825ca7 */
-		var copyToClipboard = (function() {
-			var _dataString = null;
-			document.addEventListener("copy", function(e){
-				if (_dataString !== null) {
-					try {
-						e.clipboardData.setData("text/plain", _dataString);
-						e.preventDefault();
-					} finally {
-						_dataString = null;
-					}
-				}
-			});
-			return function(data) {
-				_dataString = data;
-				document.execCommand("copy");
-			};
-		})();
+			 jQuery(this).find('#tib-form-copy').val('✔ Copied to clipboard').addClass('submitted');
 
-	});
+			 setTimeout(function () {
+				 jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
+			 }, 2000);
+		 }
+
+		 function getEditorMode() {
+			 if (postEditor.length) {
+
+				 if (postEditor.find('.icon.html').is(':visible')) {
+					 postEditor.mode = 'html';
+				 }
+				 else if (postEditor.find('.icon.markdown').is(':visible')) {
+					 postEditor.mode = 'markdown';
+				 }
+				 else {
+					 postEditor.mode = 'richtext';
+				 }
+
+				 return postEditor.mode;
+			 }
+		 }
+
+		 /* Taken from Ignarron / copyToClipboard.html
+		  https://gist.github.com/lgarron/d1dee380f4ed9d825ca7 */
+		 var copyToClipboard = (function () {
+			 var _dataString = null;
+			 document.addEventListener("copy", function (e) {
+				 if (_dataString !== null) {
+					 try {
+						 e.clipboardData.setData("text/plain", _dataString);
+						 e.preventDefault();
+					 } finally {
+						 _dataString = null;
+					 }
+				 }
+			 });
+			 return function (data) {
+				 _dataString = data;
+				 document.execCommand("copy");
+			 };
+	 })();
+
+ 	});
 
 
 

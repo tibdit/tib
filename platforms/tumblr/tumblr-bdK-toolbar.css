@@ -1,10 +1,13 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,500,700,900,300,100);
+
 #tib-input-bar{
     position: fixed;
     top: 0;
-    z-index: 50000;
+    z-index: 5000;
     width: 100%;
     background: #14123E;
     color: white;
+    font-family: 'Roboto', sans-serif;
 }
 
 #tib-logo{
@@ -17,8 +20,6 @@
     display: inline-block;
 
 }
-
-
 
 #tib-form{
     display: inline-block;
@@ -41,29 +42,58 @@
     color: white;
     padding: 0px 10px;
     margin: 10px 0px;
+    font-size: 12px;
+    width: 15%;
+    max-width: 15%;
+    font-family: 'Roboto', sans-serif;
 }
 
 #tib-form input#PAD, input#TIB{
+    width: 25%;
+    margin-right: 2%;
+    margin-left: 2%;
     background: transparent;
     border: 1px solid #4657A5;
     color: white;
     padding: 10px;
+    font-family: 'Roboto', sans-serif;
 }
+
+#tib-form input#PAD.valid{
+    background: rgba(0, 200, 0, 0.3);
+}
+#tib-form input#PAD.invalid{
+    background: rgba(200, 0, 0, 0.3);
+}
+
 
 #tib-form #tib-form-copy{
     border: 1px solid #4657A5;
     color: white;
     background: transparent;
     padding: 10px;
-    float: right;
-    margin-right: 2.5%;
+    width: 10%;
+
     cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
 }
 
 #tib-form #tib-form-copy.submitted{
-    background: rgba(0,200,0, 0.15);
+    background: rgba(0,200,0, 0.45);
+}
+
+#tib-form #tib-form-copy.submitted:hover{
+    background: rgba(0,200,0, 0.55);
 }
 
 #tib-form #tib-form-copy:hover{
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.2);
+
+}
+
+#tib-form #tib-form-copy:disabled{
+    color: #aaaaaa;
+    cursor: not-allowed;
+    background: rgba(150,150,150,0.5);
 }
