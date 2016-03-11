@@ -155,6 +155,11 @@
 			 copyToClipboard(paste);
 
 			 jQuery(this).find('#tib-form-copy').val('✔ Copied to clipboard').addClass('submitted');
+			 jQuery('.ace-text-layer').click();
+			 jQuery('#TIB').select();
+
+			 document.execCommand("paste");
+			 console.log(window.clipboardData.getData('Text'));
 
 			 setTimeout(function () {
 				 jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
@@ -185,6 +190,10 @@
 
 				 return postEditor.mode;
 			 }
+		 }
+
+		 function pasteFromClipboard(){
+
 		 }
 
 		 /* Taken from Ignarron / copyToClipboard.html
