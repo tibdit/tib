@@ -33,7 +33,8 @@
 		 TIB = new URI(window.location);
 
 		 if (TIB.hostname() === "www.tumblr.com") {
-			 TIB = TIB.hostname() + '/blog/' + jQuery('.caption').html();
+			 blogName = jQuery('.caption').html();
+			 TIB = TIB.hostname() + '/blog/' + blogName;
 			 console.log(TIB);
 
 			 postEditor = jQuery('.post-form');
@@ -66,26 +67,6 @@
 			 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.css', function (data) {
 				 jQuery('head').append('<style class="tibStyles">' + data + '</style>');
 			 });
-		 }
-
-		 function generateButtonCode(mode, BTN, PAD, TIB) {
-			 var paste;
-			 switch (mode) {
-				 case 'html':
-					 paste = "<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}''>{BTN}</a></b></h2>";
-					 break;
-				 case 'markdown':
-					 paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB})**";
-					 break;
-				 case 'richtext':
-					 paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}";
-					 break;
-			 }
-			 paste = paste.replace('{BTN}', BTN);
-			 paste = paste.replace('{PAD}', PAD);
-			 paste = paste.replace('{TIB}', TIB);
-
-			 return paste;
 		 }
 
 		 function btcValidator(e) {
@@ -127,7 +108,6 @@
 				 });
 			 }
 			 else {
-				 console.log('testytest');
 				 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.html', function (data) {
 					 jQuery('body').append(data);
 					 jQuery('#tib-input-bar').fadeIn();
@@ -143,12 +123,34 @@
 
 		 }
 
+		 function generateButtonCode(mode, BTN, PAD, TIB, SUB) {
+			 var paste;
+			 switch (mode) {
+				 case 'html':
+					 paste = "<h2><b><a href='https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}''>{BTN}</a></b></h2>";
+					 break;
+				 case 'markdown':
+					 paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB})**";
+					 break;
+				 case 'richtext':
+					 paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}";
+					 break;
+			 }
+			 paste = paste.replace('{BTN}', BTN);
+			 paste = paste.replace('{PAD}', PAD);
+			 paste = paste.replace('{TIB}', TIB);
+			 paste = paste.replace('{SUB}', SUB);
+
+			 return paste;
+		 }
+
 		 function tibFormSubmitHandler(e) {
 			 e.preventDefault();
 			 PAD = jQuery('#PAD').val();
 			 customTIB = jQuery('#TIB').val();
+			 SUB = generateSUB();
 
-			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, customTIB || TIB);
+			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, customTIB || TIB, SUB);
 
 			 copyToClipboard(paste);
 
@@ -157,6 +159,15 @@
 			 setTimeout(function () {
 				 jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
 			 }, 2000);
+		 }
+
+		 function generateSUB(){
+			 var SUB = 'tumblr-' + blogName + '-';
+			 var possibleCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			 for(i = 0; i < 5; i++){
+				 SUB += possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
+			 }
+			 return SUB;
 		 }
 
 		 function getEditorMode() {
