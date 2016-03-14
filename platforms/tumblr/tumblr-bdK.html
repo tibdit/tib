@@ -1,4 +1,48 @@
-<a href="javascript:(function(){
+
+<form id="bmk-gen">
+	<input type="text" id="PAD" onkeyup="validatePAD()">
+	<input id="bmk-submit" type="submit" disabled>
+</form>
+
+<script src="jsbn.js"></script>
+<script src="jsbn2.js"></script>
+<script src="crypto-sha256.js"></script>
+<script src="btcaddr_validator.js"></script>
+
+<script>
+
+	baseSRC = window.location.href;
+	baseSRC = baseSRC.replace('tumblr-bdK.html', '');
+	console.log(baseSRC);
+
+	function validatePAD(){
+		target = document.getElementById('PAD');
+		submitButton = document.getElementById('bmk-submit');
+
+			document.getElementById('bmk-submit').disabled = !check_address(target.value);
+
+	}
+
+	document.getElementById('bmk-gen').addEventListener('submit', function(event){
+		event.preventDefault();
+		console.log('submit attempt');
+
+		var bmkHref = 'javascript:(function(){';
+		bmkHref += "PAD='" + document.getElementById('PAD').value + "';";
+		bmkHref += "baseSRC = '"+ baseSRC + "';";
+		bmkHref += "bmk=document.createElement('SCRIPT');";
+		bmkHref += "bmk.type='text/javascript';";
+		bmkHref += "bmk.src= baseSRC + 'bd-tumblr-bdK.js';";
+		bmkHref += "document.getElementsByTagName('head')[0].appendChild(bmk);";
+		bmkHref += "})();";
+
+		bmkLink = document.getElementById('bmk-link');
+		bmkLink.setAttribute('href', bmkHref);
+		bmkLink.style.display = 'block';
+	});
+</script>
+
+<a style="display: none" id="bmk-link" href="javascript:(function(){
 	PAD='mytibs9YhLYtrVhQkmTdbDS51H54WyrxTx';
 	baseSRC = '//widget.tibit.local/tibbee-integration/platforms/tumblr/';
 	bmk=document.createElement('SCRIPT');

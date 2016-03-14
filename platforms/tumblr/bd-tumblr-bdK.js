@@ -18,6 +18,7 @@
 	 $script(baseSRC + 'btcaddr_validator.js', 'btcvaljs');
 
 	 var BTN = "&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
+	 var rtfBTN = "❲⛀ tib ↬❳";
 
 	 $script.ready(['urijs', 'jsbn', 'jsbn2', 'crpytosha256js', 'btcvaljs'], function () {
 
@@ -39,8 +40,16 @@
 
 			 postEditor = jQuery('.post-form');
 			 if (postEditor.length) {
-				 generateInputWindow();
-				 setTimeout(watchElementVisibility, 1000, postEditor);
+				 var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB, generateSUB());
+				 console.log(getEditorMode());
+				 if(getEditorMode() === 'html' || getEditorMode() === 'markdown'){
+					 insertButtonAce(paste);
+				 }
+				 else if(getEditorMode() === 'richtext'){
+					 insertButtonRTF(paste);
+				 }
+
+
 			 }
 			 else {
 				 window.alert(window.location + " not recognised as tumblr edit window");
@@ -50,77 +59,25 @@
 			 window.alert(window.location + " not recognised as tumblr window");
 		 }
 
-		 /* MAIN INITIALISATION BLOCK */
-
-		 function watchElementVisibility(element) {
-
-			 if (element.is(':hidden')) {
-				 jQuery('#tib-input-bar').remove();
-			 }
-			 else {
-				 setTimeout(watchElementVisibility, 1000, element);
-			 }
+		 function insertButtonAce(paste){
+			 var editor = ace.edit(jQuery('.ace_editor')[0]);
+			 editor.setValue(editor.getValue() + '\n\n' + paste);
 		 }
 
-		 function appendCSS() {
-			 jQuery('style.tibStyles').remove();
-			 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.css', function (data) {
-				 jQuery('head').append('<style class="tibStyles">' + data + '</style>');
-			 });
-		 }
-
-		 function btcValidator(e) {
-			 target = jQuery(e.target);
-			 submitButton = jQuery('#tib-form-copy');
-			 if(check_address(target.val())){
-				 submitButton.prop('disabled', false);
-				 target.addClass('valid');
-				 target.removeClass('invalid');
-			 }
-			 else if(target.val() == ''){
-				 submitButton.prop('disabled', true);
-				 target.removeClass('invalid');
-				 target.removeClass('valid');
-			 }
-			 else{
-				 submitButton.prop('disabled', true);
-				 target.addClass('invalid');
-				 target.removeClass('valid');
-			 }
-		 }
-
-		 function generateInputWindow() {
-			 if (jQuery('#tib-input-bar').length) {
-				 jQuery('#tib-input-bar').fadeOut('fast', function () {
-					 jQuery('#tib-input-bar').remove();
-
-					 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.html', function (data) {
-						 jQuery('body').append(data);
-						 jQuery('#tib-input-bar').fadeIn();
-						 jQuery('#tib-form').submit(tibFormSubmitHandler);
-
-						 appendCSS();
-
-
-						 jQuery('#tib-form input#PAD').keyup({'target': '#tib-form input#PAD'}, btcValidator);
-
-					 });
-				 });
-			 }
-			 else {
-				 jQuery.get(baseSRC + 'tumblr-bdK-toolbar.html', function (data) {
-					 jQuery('body').append(data);
-					 jQuery('#tib-input-bar').fadeIn();
-					 jQuery('#tib-form').submit(tibFormSubmitHandler);
-
-					 appendCSS();
-
-					 $script.ready('btcvaljs', function () {
-						 jQuery('#tib-form input#PAD').keyup({'target': '#tib-form input#PAD'}, btcValidator);
-					 });
-				 });
-			 }
-
+		 function insertButtonRTF(paste){
+			 console.log('insert rtf');
+			 var rtfEditor = jQuery('.editor-richtext')[0];
+			 var a = document.createElement('a');
+			 var bold = document.createElement('b');
+			 var h2 = document.createElement('h2');
+			 a.setAttribute('href', paste);
+			 a.innerText = rtfBTN;
+			 newLine = document.createElement('br');
+			 bold.appendChild(a);
+			 h2.appendChild(bold);
+			 link = h2;
+			 rtfEditor.appendChild(newLine);
+			 rtfEditor.appendChild(link);
 		 }
 
 		 function generateButtonCode(mode, BTN, PAD, TIB, SUB) {
@@ -133,7 +90,7 @@
 					 paste = "## **[{BTN}](https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB})**";
 					 break;
 				 case 'richtext':
-					 paste = "{BTN}&emsp;https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}";
+					 paste = "https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}";
 					 break;
 			 }
 			 paste = paste.replace('{BTN}', BTN);
@@ -142,28 +99,6 @@
 			 paste = paste.replace('{SUB}', SUB);
 
 			 return paste;
-		 }
-
-		 function tibFormSubmitHandler(e) {
-			 e.preventDefault();
-			 PAD = jQuery('#PAD').val();
-			 customTIB = jQuery('#TIB').val();
-			 SUB = generateSUB();
-
-			 var paste = generateButtonCode(getEditorMode(), BTN, PAD, customTIB || TIB, SUB);
-
-			 copyToClipboard(paste);
-
-			 jQuery(this).find('#tib-form-copy').val('✔ Copied to clipboard').addClass('submitted');
-			 jQuery('.ace-text-layer').click();
-			 jQuery('#TIB').select();
-
-			 document.execCommand("paste");
-			 console.log(window.clipboardData.getData('Text'));
-
-			 setTimeout(function () {
-				 jQuery('#tib-form-copy').val('Copy to clipboard').removeClass('submitted');
-			 }, 2000);
 		 }
 
 		 function generateSUB(){
@@ -191,30 +126,6 @@
 				 return postEditor.mode;
 			 }
 		 }
-
-		 function pasteFromClipboard(){
-
-		 }
-
-		 /* Taken from Ignarron / copyToClipboard.html
-		  https://gist.github.com/lgarron/d1dee380f4ed9d825ca7 */
-		 var copyToClipboard = (function () {
-			 var _dataString = null;
-			 document.addEventListener("copy", function (e) {
-				 if (_dataString !== null) {
-					 try {
-						 e.clipboardData.setData("text/plain", _dataString);
-						 e.preventDefault();
-					 } finally {
-						 _dataString = null;
-					 }
-				 }
-			 });
-			 return function (data) {
-				 _dataString = data;
-				 document.execCommand("copy");
-			 };
-	 })();
 
  	});
 
