@@ -9,17 +9,14 @@ BDtibExtension = function(that){
 
         buttonList = document.getElementsByClassName('bd-tib-btn');
         console.log('button list lgnth' + buttonList.length);
-        for(i=0; i < buttonList.length; i++){
-
+        for(var i=0; i < buttonList.length; i++){
             post = this.findParentPost(buttonList[i]);
 
             if(post){
-                console.log('post found: ' + post.nodeName);
                 txtButtons = post.getElementsByClassName('bd-tib-btn-tumblr-txt');
 
                 for(j=0; j < txtButtons.length; j++){
                     queryParams = this.getTxtBtnQueryParams(txtButtons[i]);
-                    console.log(queryParams);
                     SUB = queryParams['SUB'];
 
                     txtButtons[i].style.display = 'none';
@@ -42,18 +39,25 @@ BDtibExtension = function(that){
         return href;
     }
 
+    this.findTextButton = function(currentEl){
+        var textButtons = currentEl.getElementsByClassName('bd-tib-btn-tumblr-txt');
+
+        if(textButtons.length == 1){
+            console.log('found it');
+            return textButtons;
+        }
+    }
+
     this.findParentPost = function(element){
         //console.log(el.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
         var el = element;
-        for(i = 0; i < 6; i++){
-            console.log(i);
-            console.log(el.nodeName);
+        for(var i = 0; i < 10; i++){
 
+            if(el.parentElement){
+                el = el.parentElement;
 
-            if(el.parentNode){
-                el = el.parentNode;
-
-                if(el.nodeName == "ARTICLE"){
+                if(this.findTextButton(el)){
+                    console.log('ARTICLE found');
                     return el;
                 }
 

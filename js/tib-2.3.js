@@ -12,9 +12,16 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj= arg;
     }
 
-    // $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
 
-    // $script.ready(['extension', 'urijs'], function(){
+    var scriptsToImport = ['urijs'];
+
+    if(obj.PLT){
+        $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
+        scriptsToImport.push('extension');
+    }
+
+    console.log(scriptsToImport);
+    $script.ready(scriptsToImport, function(){
 
         bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
 
@@ -30,7 +37,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
         return bd;
 
-    // });
+    });
 
     function tibCss() {
         if (! document.getElementById('bd-css-tib-btn')) {
@@ -41,8 +48,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
             linkElement.id= 'bd-css-tib-btn';
             linkElement.rel= 'stylesheet';
             linkElement.type= 'text/css';
-            // linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
-            linkElement.href= 'http://widget.tibdit.com/assets/css/tib.css';
+            linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
             // linkElement.href= 'css/tib.css';
             headElement.appendChild(linkElement);
         }
@@ -58,9 +64,12 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
 
-    // ext = new BDtibExtension(this);
+    if(PLT){
+        ext = new BDtibExtension(this);
+        ext.preButtonInit();
+    }
 
-    // ext.preButtonInit();
+
 
     DUR= DUR || 1;
     ASN = ASN;
@@ -342,11 +351,12 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.open( 'GET', tibQtyFetch, true);
                     tibqty.send();
                     tibqty.SUB = SUB;
-
-                    if(ext.customCounter){
-                        tibqty.onreadystatechange = function(){
-                            return ext.customCounter(tibqty, that);
-                        };
+                    if(typeof ext != "undefined"){
+                        if(ext.customCounter){
+                            tibqty.onreadystatechange = function(){
+                                return ext.customCounter(tibqty, that);
+                            };
+                        }
                     }
                     else {
                         tibqty.onreadystatechange = function () {
@@ -400,10 +410,10 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 var ISS;
 
                 if ( key.substr(0,10) === "bd-subref-" ) {
-                    var localStorageJSON;
+
                     try{
                         /* Attempt to parse JSON string and save ISS for later usage */
-                        localStorageJSON = JSON.parse(localStorage.getItem(key));
+                        var localStorageJSON = JSON.parse(localStorage.getItem(key));
                         ISS = localStorageJSON.ISS;
                     }
                     catch(err){
@@ -422,7 +432,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 }
             }
             if(keysToRemove.length){
-                for( i= 0, n = keysToRemove.length; i < n; i++){
+                for(var i= 0, n = keysToRemove.length; i < n; i++){
                     localStorage.removeItem(keysToRemove[i]);
                 }
             }
@@ -439,17 +449,16 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         BTS = BTS || "//widget.tibdit.com/buttons/";
 
         // TODO add a slash to end of URL when using custom BTS
-        if (BTN != "none") {
-            var tibbtn= new XMLHttpRequest();
-            tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
-            tibbtn.send();
 
-            tibbtn.onreadystatechange= function( ) {
-                if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-                    writeButtons();
-                }
-            };
-        }
+        var tibbtn= new XMLHttpRequest();
+        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+        tibbtn.send();
+
+        tibbtn.onreadystatechange= function( ) {
+            if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+                writeButtons();
+            }
+        };
 
         function writeButtons(){
 
