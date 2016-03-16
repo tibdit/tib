@@ -12,9 +12,17 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj= arg;
     }
 
-    // $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
 
-    // $script.ready(['extension', 'urijs'], function(){
+    var scriptsToImport = ['urijs'];
+
+    if(obj.PLT){
+        $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
+        scriptsToImport.push('extension');
+    }
+
+    console.log(scriptsToImport);
+    $script.ready(scriptsToImport, function(){
+
 
         bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
 
@@ -30,7 +38,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
         return bd;
 
-    // });
+    });
 
     function tibCss() {
         if (! document.getElementById('bd-css-tib-btn')) {
@@ -58,9 +66,10 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
 
-    // ext = new BDtibExtension(this);
-
-    // ext.preButtonInit();
+    if(PLT){
+        ext = new BDtibExtension(this);
+        ext.preButtonInit();
+    }
 
     DUR= DUR || 1;
     ASN = ASN;
@@ -343,10 +352,12 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.send();
                     tibqty.SUB = SUB;
 
-                    if(ext.customCounter){
-                        tibqty.onreadystatechange = function(){
-                            return ext.customCounter(tibqty, that);
-                        };
+                    if(typeof ext != "undefined"){
+                        if(ext.customCounter){
+                            tibqty.onreadystatechange = function(){
+                                return ext.customCounter(tibqty, that);
+                            };
+                        }
                     }
                     else {
                         tibqty.onreadystatechange = function () {
