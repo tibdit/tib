@@ -69,8 +69,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         ext.preButtonInit();
     }
 
-
-
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -351,6 +349,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.open( 'GET', tibQtyFetch, true);
                     tibqty.send();
                     tibqty.SUB = SUB;
+
                     if(typeof ext != "undefined"){
                         if(ext.customCounter){
                             tibqty.onreadystatechange = function(){
@@ -410,10 +409,10 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 var ISS;
 
                 if ( key.substr(0,10) === "bd-subref-" ) {
-
+                    var localStorageJSON;
                     try{
                         /* Attempt to parse JSON string and save ISS for later usage */
-                        var localStorageJSON = JSON.parse(localStorage.getItem(key));
+                        localStorageJSON = JSON.parse(localStorage.getItem(key));
                         ISS = localStorageJSON.ISS;
                     }
                     catch(err){
