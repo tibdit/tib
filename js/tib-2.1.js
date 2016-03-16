@@ -62,7 +62,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	if (PAD) {
 		if ( "mn2".search(PAD.substr(0,1)) != -1 ) {  
-			// console.log(PAD);
 			// testnet bitcoin address, DUR is minutes
 			DUR= Math.max( 3, DUR); // minimum 3 minutes
 			mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m ) 
@@ -114,7 +113,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
-			console.log(tibInitiator);
+			// console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);

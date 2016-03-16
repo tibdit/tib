@@ -31,12 +31,12 @@
 	height: inherit;
 	pointer-events: none;
 	}
+
 .bd-tib-btn .bd-btn-cover { pointer-events: all; }
 
 div.bd-tib-btn { display:inline; width: auto; }
 div.bd-tib-btn svg { vertical-align: middle; }
 .bd-tib-btn svg { vertical-align: middle;   cursor:pointer; }
-
 
 /*FACE*/
 	.bd-tib-btn .bd-btn-backdrop 	{ fill: #8cc63f; }  /* customised background-color: */
