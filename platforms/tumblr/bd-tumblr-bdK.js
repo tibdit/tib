@@ -68,7 +68,7 @@
 			 console.log('insert rtf');
 			 var rtfEditor = jQuery('.editor-richtext')[0];
 			 var a = document.createElement('a');
-			 a.classList.add('bd-btn-tumblr-txt');
+			 a.classList.add('bd-tib-btn-tumblr-txt');
 			 var bold = document.createElement('b');
 			 var h2 = document.createElement('h2');
 			 a.setAttribute('href', paste);
@@ -85,10 +85,10 @@
 			 var paste;
 			 switch (mode) {
 				 case 'html':
-					 paste = "<h2><b><a class='bd-btn-tumblr-txt' href='https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}''>{BTN}</a></b></h2>";
+					 paste = "<h2><b><a class='bd-tib-btn-tumblr-txt' href='https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}''>{BTN}</a></b></h2>";
 					 break;
 				 case 'markdown':
-					 paste = "<h2><b><a class='bd-btn-tumblr-txt' href='https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}'>{BTN}</a></b></h2>";
+					 paste = "<h2><b><a class='bd-tib-btn-tumblr-txt' href='https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}'>{BTN}</a></b></h2>";
 					 break;
 				 case 'richtext':
 					 paste = "https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}";
