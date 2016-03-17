@@ -19,7 +19,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
         scriptsToImport.push('extension');
     }
-
+    
     $script.ready(scriptsToImport, function(){
 
         bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
@@ -280,7 +280,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         // load inline button SVG into DOM
         buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) === i; }); // deduplicate buttonNames
         for (var j=0, m=buttonNames.length; j<m; j++) {
-            this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
+            if (buttonNames[j] !== "none") {
+                this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
+            }
         }
 
     };
