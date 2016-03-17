@@ -19,15 +19,21 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
         scriptsToImport.push('extension');
     }
-    
+
     $script.ready(scriptsToImport, function(){
 
         bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
 
+        if(obj.PLT){
+            var that = this;
+            ext = new BDtibExtension(bd);
+            ext.preButtonInit();
+        }
+
         // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function(){
                 bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
             });
         } else {
@@ -62,11 +68,6 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
 function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
-
-    if(PLT){
-        ext = new BDtibExtension(this);
-        ext.preButtonInit();
-    }
 
     DUR= DUR || 1;
     ASN = ASN;
@@ -352,10 +353,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.SUB = SUB;
 
                     if(typeof ext != "undefined"){
-
-                        if(ext.customCounter){
+                        if(ext.customCounterHandler){
                             tibqty.onreadystatechange = function(){
-                                return ext.customCounter(tibqty, that);
+                                return ext.customCounterHandler(tibqty, that);
                             };
                         }
                     }
