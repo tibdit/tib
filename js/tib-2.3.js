@@ -20,7 +20,6 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         scriptsToImport.push('extension');
     }
 
-    console.log(scriptsToImport);
     $script.ready(scriptsToImport, function(){
 
         bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
@@ -351,6 +350,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.SUB = SUB;
 
                     if(typeof ext != "undefined"){
+
                         if(ext.customCounter){
                             tibqty.onreadystatechange = function(){
                                 return ext.customCounter(tibqty, that);
