@@ -194,8 +194,14 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             clearInterval(cbkPoller);
             var token= cbkHandler.processToken( tibWindowUrl);
             tibWindow.close();
-            that.ackBySubref( token.SUB, token.QTY );
-
+            if(typeof ext === "undefined"){
+                that.ackBySubref( token.SUB, token.QTY );
+            }
+            else{
+                if(ext.preAckBySubref){
+                    ext.preAckBySubref(that.ackBySubref, token.SUB, token.QTY);
+                }
+            }
             // TODO if no token
         }
     };
@@ -323,7 +329,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                      query tib.me/getqty/ for the QTY value we need instead */
                 }
 
-
                 that.writeCounter(SUB, QTY);
             }
 
@@ -352,19 +357,27 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     tibqty.send();
                     tibqty.SUB = SUB;
 
-                    if(typeof ext != "undefined"){
+                    if(typeof ext === "undefined"){
+                        tibqty.onreadystatechange = function () {
+                            if (tibqty.readyState === 4 && tibqty.status === 200) {
+                                that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
+                            }
+                        };
+                    }
+                    else {
                         if(ext.customCounterHandler){
                             tibqty.onreadystatechange = function(){
                                 return ext.customCounterHandler(tibqty, that);
                             };
                         }
-                    }
-                    else {
-                        tibqty.onreadystatechange = function () {
+                        else{
+                            tibqty.onreadystatechange = function () {
                                 if (tibqty.readyState === 4 && tibqty.status === 200) {
                                     that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
                                 }
-                        };
+
+                            };
+                        }
                     }
 
                 }, 10);
@@ -375,6 +388,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             return false;
         }
     };
+
+
 
 
 
@@ -616,7 +631,18 @@ function tibCallback( inline) {
                     // set local storage item to record tibbed subref
                     // will not trigger an event for updating button if processToken called from same page (ie: inline)
                     // but we still need to store this for subsequent pages with tib buttons
-                    that.persistAck( token.SUB, token.ISS, token.QTY);
+
+                    if(typeof ext === "undefined"){
+                        that.persistAck( token.SUB, token.ISS, token.QTY);
+                    }
+                    else{
+                        if(ext.prePersistAck){
+                            ext.prePersistAck(that.persistAck, token.SUB, token.ISS, token.QTY);
+                        }
+                        else{
+                            that.persistAck( token.SUB, token.ISS, token.QTY);
+                        }
+                    }
 
                     if (! inline) {
                         //

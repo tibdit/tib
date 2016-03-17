@@ -5,10 +5,10 @@
 
 BDtibExtension = function(that){
 
-    this.additionalSubQty = {};
     this.subQty = {};
     this.tibQtyReqs = {};
     this.additionalTibQtyReqs = {};
+    this.parentTibHandler = that;
 
     this.preButtonInit = function(){
 
@@ -93,7 +93,7 @@ BDtibExtension = function(that){
 
             for(var k = 0; k < selectors.length; k++){
                 if(!el.parentNode){ return false; }
-                if(el.parentNode.querySelector(selectors[k]) == el && !el.querySelector(selectors[k])){
+                if(el.parentNode.querySelector(selectors[k]) == el && el.querySelector(selectors[k]) === null){
                     return el;
                 }
             }
@@ -112,7 +112,6 @@ BDtibExtension = function(that){
         var additionalTibQty = this.additionalTibQtyReqs[primaryTibQty.SUB];
         if(additionalTibQty) {
             if (primaryTibQty.readyState === 4 && primaryTibQty.status === 200 && additionalTibQty.readyState === 4 && additionalTibQty.status === 200) {
-                console.log('test');
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
                 QTY += JSON.parse(this.additionalTibQtyReqs[primaryTibQty.SUB].response).QTY || 0;
                 that.writeCounter(primaryTibQty.SUB, QTY);
@@ -124,6 +123,22 @@ BDtibExtension = function(that){
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
                 that.writeCounter(primaryTibQty.SUB, QTY);
             }
+        }
+    }
+
+    this.preAckBySubref = function(callback, SUB, QTY){
+        var additionalTibQty = this.additionalTibQtyReqs[SUB];
+        if(additionalTibQty){
+            QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
+            callback.call(this.parentTibHandler, SUB, QTY);
+        }
+    }
+
+    this.prePersistAck = function(callback, SUB, ISS, QTY){
+        var additionalTibQty = this.additionalTibQtyReqs[SUB];
+        if(additionalTibQty){
+            QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
+            callback.call(this.parentTibHandler, SUB, ISS, QTY);
         }
     }
 
