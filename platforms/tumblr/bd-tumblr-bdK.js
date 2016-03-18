@@ -12,38 +12,28 @@
  (function() {
 
 	 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
-	 $script(baseSRC + 'jsbn.js', 'jsbn');
-	 $script(baseSRC + 'jsbn2.js', 'jsbn2');
-	 $script(baseSRC + 'crypto-sha256.js', 'crpytosha256js');
-	 $script(baseSRC + 'btcaddr_validator.js', 'btcvaljs');
 
 	 var BTN = "&#x2772;&#x26C0;&ensp;tib&ensp;&#x21AC;&#x2773;";
-	 var rtfBTN = "❲⛀ tib ↬❳";
+	 var rtfBTN = "❲⛀ tib ↬❳"; /* Setting our base button strings - unicode for html/markdown, and a normal string
+	  for RTF */
 
-	 $script.ready(['urijs', 'jsbn', 'jsbn2', 'crpytosha256js', 'btcvaljs'], function () {
+	 $script.ready(['urijs'], function () {
 
-		 /* MAIN INITIALISATION BLOCK
-		 *
-		 * we check we're on tumblr, check we have an editor window open, and then
-		 * if both of these are true, we fire our generateInputWindow function that
-		 * builds our tibbee toolbar. We also set watchElementVisibility using setTimeout
-		 * to close our toolbar when the editor window closes. */
+		 TIB = new URI(window.location); /* Using URI.js library to get current location */
 
-		 console.log(baseSRC);
+		 if (TIB.hostname() === "www.tumblr.com") { /* Must be running on tumblr, if not, throw up an alert for the
+		  user */
+			 blogName = jQuery('.caption').html(); /* Grab the caption from the edit window for the blog name */
+			 TIB = 'www.' + blogName + '.tumblr.com'; /* Prepend blog name to tumblr url to get blog URL */
 
-		 TIB = new URI(window.location);
-
-		 if (TIB.hostname() === "www.tumblr.com") {
-			 blogName = jQuery('.caption').html();
-			 TIB = TIB.hostname() + '/blog/' + blogName;
-			 console.log(TIB);
-
-			 postEditor = jQuery('.post-form');
+			 postEditor = jQuery('.post-form'); /* Attempting to grab the editor window as a jQuery object */
 			 if (postEditor.length) {
-				 var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB, generateSUB());
-				 console.log(getEditorMode());
+				 var paste = generateButtonCode(getEditorMode(), BTN, PAD, TIB, generateSUB()); /* Creating our
+				  output by running generateButtonCode */
+
 				 if(getEditorMode() === 'html' || getEditorMode() === 'markdown'){
-					 insertButtonAce(paste);
+					 insertButtonAce(paste); /* As HTML and Markdown use the same editor, we can use the same
+					  function to insert the output of generateButtonCode */
 				 }
 				 else if(getEditorMode() === 'richtext'){
 					 insertButtonRTF(paste);
@@ -51,7 +41,8 @@
 
 
 			 }
-			 else {
+			 else { /* If we were unable to retrieve the editor, we throw an alert that we could not find an editor
+			  window */
 				 window.alert(window.location + " not recognised as tumblr edit window");
 			 }
 		 }
@@ -60,22 +51,29 @@
 		 }
 
 		 function insertButtonAce(paste){
-			 var editor = ace.edit(jQuery('.ace_editor')[0]);
-			 editor.setValue(editor.getValue() + '\n\n' + paste);
+			 var editor = ace.edit(jQuery('.ace_editor')[0]); /* Grabbing the editor */
+			 editor.setValue(editor.getValue() + '\n\n' + paste); /* Get the value from the Ace Editor and append
+			  our paste string to it (with some newlines inbetween) */
 		 }
 
 		 function insertButtonRTF(paste){
-			 console.log('insert rtf');
+			 /* To insert a link, we create an anchor tag using document.CreateElement, set the href property to the
+			  paste string we generated earlier, and wrap it in the appropriate tags as well as setting it's class
+			   to our standard bd-tib-btn-tumblr-txt class. Finally, we append it as a child of .editor-richtext */
 			 var rtfEditor = jQuery('.editor-richtext')[0];
+
 			 var a = document.createElement('a');
+			 a.setAttribute('href', paste);
 			 a.classList.add('bd-tib-btn-tumblr-txt');
+			 a.innerText = rtfBTN;
+
 			 var bold = document.createElement('b');
 			 var h2 = document.createElement('h2');
-			 a.setAttribute('href', paste);
-			 a.innerText = rtfBTN;
 			 newLine = document.createElement('br');
+
 			 bold.appendChild(a);
 			 h2.appendChild(bold);
+
 			 link = h2;
 			 rtfEditor.appendChild(newLine);
 			 rtfEditor.appendChild(link);
@@ -94,24 +92,38 @@
 					 paste = "https://tib.me/?PAD={PAD}&TIB={TIB}&SUB={SUB}";
 					 break;
 			 }
+			 /* First we generate a string/template based on the type of editor we're currently using, replacing
+			  the relevant parts of the URL with {PARAM} placeholders */
+
 			 paste = paste.replace('{BTN}', BTN);
 			 paste = paste.replace('{PAD}', PAD);
 			 paste = paste.replace('{TIB}', TIB);
 			 paste = paste.replace('{SUB}', SUB);
+			 /* Now, we can replace the {PARAM} placeholders with the actual value we want to insert */
 
 			 return paste;
 		 }
 
 		 function generateSUB(){
+			 /* Generate a SUBreference of the pattern 'tumblr-{blog name}-{random string}' */
 			 var SUB = 'tumblr-' + blogName + '-';
-			 var possibleCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			 var possibleCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; /* Defining the list
+			  of possible characters to randomly select from */
 			 for(i = 0; i < 5; i++){
 				 SUB += possibleCharacters[Math.floor(Math.random() * possibleCharacters.length)];
+
+				 /*
+				   a) Generate a random number between 0 and 1
+				   b) Multiply this number by the length of possibleCharacters to get a number between 0 and this length
+				   c) Run the resultant number through Math.floor to round down to the nearest integer
+				   d) Append the corresponding character within possibleCharacters to the SUB string */
 			 }
 			 return SUB;
 		 }
 
 		 function getEditorMode() {
+			 /* If a postEditor is stored, check whether we are in html, markdown, or richtext editing mode and
+			  set this as a property of postEditor. Then, return this postEditor.mode property */
 			 if (postEditor.length) {
 
 				 if (postEditor.find('.icon.html').is(':visible')) {

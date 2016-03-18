@@ -5,30 +5,37 @@
 
 BDtibExtension = function(that){
 
-    this.subQty = {};
-    this.primaryTibQtyReqs = {};
+    this.primaryTibQtyReqs = {}; /* TODO: consolidate primary and additional tibQtyReqs under single object */
     this.additionalTibQtyReqs = {};
     this.parentTibHandler = that; /* The instance of the tibHandler object (bd), passed as a parameter when
      initialising the BDtibExtension object */
 
-    this.preButtonInit = function(){
-    /* This function is called when the tibHandler object is initialised, so this  */
+    this.extensionInit = function(){
+    /* Our functions to be executed once the extension has initialised */
 
-        var graphicalButtonList = document.getElementsByClassName('bd-tib-btn');
-        for(var i=0; i < graphicalButtonList.length; i++){
+        var graphicalButtonList = document.getElementsByClassName('bd-tib-btn'); /* Grabbing our primary buttons
+         based on class */
+        for(var i=0; i < graphicalButtonList.length; i++){ /* Cycling through the button list */
         // Cycling through our array of graphical buttons
-            var postContainer = this.findPostContainer(graphicalButtonList[i]);
-                if(postContainer){
-                    var textButton = this.findTextButton(postContainer);
-                    var SUB = graphicalButtonList[i].getAttribute('data-bd-SUB');
-                    if(textButton) {
-                        queryParams = this.getTxtBtnQueryParams(textButton);
+            var postContainer = this.findPostContainer(graphicalButtonList[i]); /* Attempting to retrieve the
+             containing post of the current grpahical button */
+                if(postContainer){ /* Continue executing if we successfully found the container */
+                    var textButton = this.findTextButton(postContainer); /* Attempting to pull a text button within
+                     the current post */
+                    var SUB = graphicalButtonList[i].getAttribute('data-bd-SUB'); /* Grabbing the SUB of
+                     the button, which will be set from the snippet we insert into peoples themes */
+                    if(textButton) { /* If we found a text button, we want to initiate a QTY request so that we can
+                     add this value to the primary buttons counter */
+                        queryParams = this.getTxtBtnQueryParams(textButton); /* Pulling the GET parameters from the
+                         URL of the text tib button */
                         textButton.style.display = 'none';
 
                         this.initiateQtyRequest(queryParams, SUB);
                     }
                     else{
                         this.additionalTibQtyReqs[SUB] = false;
+                        /* If we didn't find a text tib button, we set the value of the corresponding SUB within
+                         additionalTibQtyReqs to false to signify the absense of a text button */
                     }
                 }
 
@@ -67,12 +74,16 @@ BDtibExtension = function(that){
          additionalTibQtyReqs of the extension object  */
         if(additionalTibQty) { /* If we have an additionalTibQty for this subref, we want to wait for both the
          additional quantity request AND the primary quantity request to return before writing the counter */
-            if (primaryTibQty.readyState === 4 && primaryTibQty.status === 200 && additionalTibQty.readyState === 4 && additionalTibQty.status === 200) {
+            if (this.checkXMLReqCompletion(primaryTibQty) && this.checkXMLReqCompletion(additionalTibQty)) {
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
                 var additionalQTY = JSON.parse(additionalTibQty.response).QTY;
+
+                this.primaryTibQtyReqs[SUB] = { completed: true, QTY: QTY }; /* Removing and re-setting primary and
+                 additional tibQty reqs to simple objects containing the actual QTY value themselves */
+                this.additionalTibQtyReqs[SUB] = { completed: true, QTY: additionalQTY };
                 QTY += additionalQTY || 0; /* Parse the
                  response from additionalTibQty and add this QTY to our primary QTY if present, otherwise add nothing */
-                that.writeCounter(primaryTibQty.SUB, QTY);
+                that.writeCounter(SUB, QTY);
                 /* At this point, our custom handling is complete and we can call tibHandler.writeCounter with our
                  new values to proceed through tib.js as usual */
             }
@@ -80,13 +91,31 @@ BDtibExtension = function(that){
         else{ /* As additionalTibQtys are initiated before getCounter, and thusly before customCounterHandler, if we
          have no HTTP request set for a given SUB, we can simply check the status of the primaryTibQty and proceed
           accordingly */
-            if (primaryTibQty.readyState === 4 && primaryTibQty.status === 200) {
+            if (this.checkXMLReqCompletion(primaryTibQty)) {
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
-                that.writeCounter(primaryTibQty.SUB, QTY);
+                primaryTibQty = { completed: true, QTY: QTY };
+                that.writeCounter(SUB, QTY);
                 /* We have no additional counter to combine with our primary counter, so we call
                  tibHandler.writeCounter and proceed with the flow of tib.js as usual */
             }
         }
+    }
+
+    this.checkXMLReqCompletion = function(XMLReq){
+        if(XMLReq instanceof XMLHttpRequest){
+            if(XMLReq.readyState === 4 && XMLReq.status === 200){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else if(typeof XMLReq === 'object' && XMLReq !== null){
+            if (XMLReq.completed === true){
+                return true;
+            }
+        }
+        return false;
     }
 
     this.additionalCounterHandler = function(additionalTibQtyReq){
@@ -100,13 +129,15 @@ BDtibExtension = function(that){
          return and wait for it */
             return;
         }
-        else if (additionalTibQtyReq.readyState === 4 && additionalTibQtyReq.status === 200 && primaryTibQty.readyState === 4 && primaryTibQty.status === 200) {
+        else if (this.checkXMLReqCompletion(additionalTibQtyReq) && this.checkXMLReqCompletion(primaryTibQty)) {
         /* In the unlikely case that the additionalCounter request comes back before the primary, we want to add the
          QTY values of these together and call tibHandler.writeCounter */
             var QTY = JSON.parse(primaryTibQty.response).QTY;
             var additionalQTY = JSON.parse(additionalTibQtyReq.response).QTY;
+            this.primaryTibQtyReqs[SUB] = { completed: true, QTY: QTY };
+            this.additionalTibQtyReqs[SUB] = { completed: true, QTY: additionalQTY};
             QTY += additionalQTY || 0;
-            that.writeCounter(primaryTibQty.SUB, QTY);
+            that.writeCounter(SUB, QTY);
         }
     }
     this.additionalCounterHandler = this.additionalCounterHandler.bind(this);
@@ -164,14 +195,18 @@ BDtibExtension = function(that){
     }
 
     this.findTextButton = function(postContainer){
+        /* Simply searches the element provided for the text button class, and returns the first result */
         var textButton = postContainer.getElementsByClassName('bd-tib-btn-tumblr-txt');
         return textButton[0];
     }
 
     this.preAckBySubref = function(callback, SUB, QTY){
+        /* Runs in place of preAckBySubref - adds the additional QTY attached to the provided subref if present, and
+         runs ackBySubref using Function.prototype.call to ensure the function runs in the context of the tibHandler
+          rather than the BDTibExtension object */
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
-            QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
+            QTY += additionalTibQty.QTY || 0;
             callback.call(this.parentTibHandler, SUB, QTY);
         }
         else{
@@ -180,9 +215,11 @@ BDtibExtension = function(that){
     }
 
     this.prePersistAck = function(callback, SUB, ISS, QTY){
+        /* Runs in place of tibHandler.persistAck, adding the additionalTibQty if present to the QTY provided, and
+         then running persistAck with this new value, passing the tibHandler object via Function.protoype.call */
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
-            QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
+            QTY += additionalTibQty.QTY || 0;
             callback.call(this.parentTibHandler, SUB, ISS, QTY);
         }
         else{
