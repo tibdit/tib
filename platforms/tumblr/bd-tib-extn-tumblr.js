@@ -82,22 +82,39 @@ BDtibExtension = function(that){
     }
 
     this.findPostContainer = function(el, counter){
-        /* Search upwards through parent nodes. The element we are looking for matches one of the selectors
-          * we have specified, AND does not have a descendant that also matches the query */
-        counter = counter || 0;
+        /* Search upwards through the element's parents to find the containing post element */
+        counter = counter || 0; /* Initialising the counter at 0 if not set */
 
-        selectors = ['article', '.post', '#post', '.posts', '.postcontent'];
+        selectors = ['article', '.post', '#post', '.posts', '.postcontent']; /* The array of selectors that we want
+         to compare with */
         while(counter < 10){
-            if(!el.parentNode){ return false; }
+        /* Iterating 10 elements upwards in the DOM hierarchy */
+            if(!el.parentNode){ return false; } /* If the element has no parent, give up */
             el = el.parentNode;
 
-            for(var k = 0; k < selectors.length; k++){
+            for(var k = 0; k < selectors.length; k++){ /* Iterating through our selector list */
                 if(!el.parentNode){ return false; }
-                if(el.parentNode.querySelector(selectors[k]) == el && el.querySelector(selectors[k]) === null){
-                    return el;
+
+                if(selectors[k].substring(0, 1) === '.'){ /* Class selector block */
+                    if(el.classList.contains(selectors[k].substring(1)) && el.getElementsByClassName(selectors[k].substring(1)).length === 0){
+                        return el;
+                    }
+                }
+                else if(selectors[k].substring(0, 1) === '#'){ /* ID selector block */
+                    if(el.getAttribute('id') === selectors[k].substring(1) && el.getElementsByClassName(selectors[k].substring(1)).length === 0){
+                        return el;
+                    }
+                }
+                else{ /* Tagname selector block */
+                    if(el.tagName.toLowerCase() === selectors[k] && el.getElementsByTagName(selectors[k]).length === 0){
+                        return el
+                    }
+
                 }
             }
             this.findPostContainer(el, counter + 1);
+            /* Calling our function again, with an incremented counter and the new element (at this point one level
+             up in the DOM hierarchy */
         }
     }
 
@@ -132,12 +149,18 @@ BDtibExtension = function(that){
             QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
             callback.call(this.parentTibHandler, SUB, QTY);
         }
+        else{
+            callback.call(this.parentTibHandler, SUB, QTY);
+        }
     }
 
     this.prePersistAck = function(callback, SUB, ISS, QTY){
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
             QTY += JSON.parse(this.additionalTibQtyReqs[SUB].response).QTY;
+            callback.call(this.parentTibHandler, SUB, ISS, QTY);
+        }
+        else{
             callback.call(this.parentTibHandler, SUB, ISS, QTY);
         }
     }
