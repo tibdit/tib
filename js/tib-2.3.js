@@ -366,6 +366,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                     }
                     else {
                         if(ext.customCounterHandler){
+                            ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
                             tibqty.onreadystatechange = function(){
                                 return ext.customCounterHandler(tibqty, that);
                             };
