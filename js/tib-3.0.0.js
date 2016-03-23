@@ -3,9 +3,9 @@
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT) {
+function tibHandler( PAD, DUR, CBK, ASN, PLT, obj) {
 
-
+    this.instance = obj; /* Setting up an object containing instance variables passed to object */
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -18,8 +18,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
     var cbkHandler, cbkPoller;
 
-    if (PAD) {
-        if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
+    if (this.instance.PAD) {
+        if ( "mn2".search(this.instance.PAD.substr(0,1)) !== -1 ) {
             // console.log(PAD);
             // testnet bitcoin address, DUR is minutes
             DUR= Math.max( 1, DUR); // minimum 1 minutes

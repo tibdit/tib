@@ -18,7 +18,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     if(obj.PLT){ /* If a PLT is specified, import the corresponding extension JS file and add it to the list of
      scripts to import */
-        $script('https://widget.tibit.local/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
+        $script('https://widget.tibdit.com/tibbee-integration/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
         scriptsToImport.push('extension');
     }
 

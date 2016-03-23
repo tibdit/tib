@@ -8,7 +8,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
     }
     var bdEnvPath = bdEnvPath || 'tibdit.com';
 
-    tibCss(bdEnvPath); /* tibCss isn't part of the closure, so bdEnvPath needs to be manually passed to it - should
+    tibCss(); /* tibCss isn't part of the closure, so bdEnvPath needs to be manually passed to it - should
      tibCss be part of the closure? */
 
     var bd;
@@ -37,7 +37,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     $script.ready(scriptsToImport, function () {
 
-        bd = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
+        bd = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
 
         if (obj.PLT) { /* If a PLT is specified, we initialise a BDtibExtension object, passing our tibHandler to the
          constructor */
@@ -60,7 +60,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     });
 
-    function tibCss(bdEnvPath) {
+    function tibCss() {
         if (!document.getElementById('bd-css-tib-btn')) {
 
             var headElement = document.getElementsByTagName('head')[0];
@@ -69,7 +69,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
             linkElement.id = 'bd-css-tib-btn';
             linkElement.rel = 'stylesheet';
             linkElement.type = 'text/css';
-            linkElement.href = '//widget.'+ bdEnvPath + '/assets/css/tib.css';
+            linkElement.href = '//widget.tibdit.com/assets/css/tib.css';
             // linkElement.href= 'css/tib.css';
             headElement.appendChild(linkElement);
         }
