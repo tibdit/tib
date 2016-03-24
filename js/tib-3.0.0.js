@@ -3,9 +3,9 @@
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT, obj) {
+function tibHandler( PAD, DUR, CBK, ASN, PLT, instance) {
 
-    this.instance = obj; /* Setting up an object containing instance variables passed to object */
+    this.instance = instance; /* Setting up an object containing instance variables passed to object */
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
