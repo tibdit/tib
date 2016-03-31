@@ -102,7 +102,7 @@ BDtibExtension = function(that){
     }
 
     this.checkXMLReqCompletion = function(XMLReq){
-        if(XMLReq instanceof XMLHttpRequest){
+        if(XMLReq.__proto__ == new XMLHttpRequest().__proto__){
             if(XMLReq.readyState === 4 && XMLReq.status === 200){
                 return true;
             }

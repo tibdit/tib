@@ -359,7 +359,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
                 tibqty.open( 'GET', tibQtyFetch, true);
-
+                tibqty.SUB = SUB;
                 if(typeof ext === "undefined" || !ext.customCounterHandler){
                 /* If ext is undefined, or the ext constructed has no customCounterHandler attached, we want to use
                  the default handler for onreadystatechange */
@@ -377,7 +377,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                         return ext.customCounterHandler(tibqty, that);
                     };
                 }
-                tibqty.SUB = SUB;
                 tibqty.send();
 
             }
