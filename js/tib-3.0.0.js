@@ -472,15 +472,15 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 e.setAttribute('data-bd-BTC', BTC);
                 /* Setting the BTC property in priority of data-attribute > tibInit param > default value, then
                  setting the data-bd-BTC to give us something to target with our CSS */
-
-                var cssStr = '';
-                cssStr = 'button[data-bd-BTC="' + BTC + '"] .bd-btn-backdrop{';
-                cssStr += 'fill: ' + BTC + ';';
-                cssStr += '}';
+                if(BTC){
+                    var cssStr = '';
+                    cssStr = 'button[data-bd-BTC="' + BTC + '"] .bd-btn-backdrop{';
+                    cssStr += 'fill: ' + BTC + ';';
+                    cssStr += '}';
                 /* Creating CSS string to be appended to styleElement - further CSS selectors and corresponding
                  styles can later be created (e.g. BTH) */
-
-                styleElement.appendChild(document.createTextNode(cssStr));
+                }
+                if(cssStr){styleElement.appendChild(document.createTextNode(cssStr));}
 
             }
 
