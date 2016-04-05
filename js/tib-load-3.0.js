@@ -28,6 +28,9 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
      tibHandler */
     $script('https://widget.'+ obj.ENP + '/assets/js/tib-'+ obj.VER + '.js', 'tibjs');
 
+    $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
+    scriptsToImport.push('urijs');
+
     if (obj.PLT) { /* If a PLT is specified, import the corresponding extension JS file and add it to the list of
      scripts to import */
         $script('https://widget.'+ obj.ENP + '/assets/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
