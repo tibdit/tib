@@ -1,4 +1,4 @@
-<a href= "http://tib.me/mytibs9YhLYtrVhQkmTdbDS51H54WyrxTx?TIB=https://github.com/tibdit/tibbee-integration" target="_blank" ><img src=https://tibit.com/wordpress/wp-content/themes/x-child/img/BasicPNGButton.png></a>
+<a href= "https://tib.me/mytibs9YhLYtrVhQkmTdbDS51H54WyrxTx?TIB=https://github.com/tibdit/tibbee-integration" target="_blank" ><img src=https://tibit.com/wordpress/wp-content/themes/x-child/img/BasicPNGButton.png></a>
 
 
 # Tibbee Integration
@@ -32,12 +32,12 @@ Import the javascript magics from us and set your initiator parameters
 
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js"></script>
-    <script>$script('http://widget.tibdit.com/assets/js/tib.js', function() { tibInit( { 
+    <script>$script('https://widget.tibdit.com/assets/js/tib.js', function() { tibInit( { 
         'PAD': 'myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz', // Your bitcoin address
         'DUR': '3', // Duration in days of the tibbing cookie which will be set when a tib is confirmed (optional)
-        'TIB': 'http://www.website.com/', // Content you wish to be tibbed for (optional)
+        'TIB': 'https://www.website.com/', // Content you wish to be tibbed for (optional)
         'BTN': 'bubble', // Button styles which can be set site-wide (optional)
-        'CBK' : 'http://www.website.com/thanks', // Site which the tib windo will redirect after a tib is confirmed (optional)
+        'CBK' : 'https://www.website.com/thanks', // Site which the tib windo will redirect after a tib is confirmed (optional)
     });});</script>
 ```
 And then place your tib button anywhere you wish on your web page: 
@@ -54,8 +54,6 @@ You can change the colour of the buttons by overwrting the css like this:
 .bd-tib-btn .bd-btn-backdrop { fill: pink;}
 ```
 
-[All button styles are listed here](http://sep15.staging.tibdit.com/wordpress/collect-tibs/#tibdetection)
-
 ### Detecting tibs 
 
 A tib token will be passed to the CBK url which you can processed by URL decoding followed by base64 decoding.
@@ -68,6 +66,6 @@ Each tib token has a unique ```tibsig``` param, which you can verify by followin
 
 3. Copy signature, url decode it, base64 decode it, and save it to a file. ```$ openssl base64 -A -d <<< 'MCECDwCudAeytoGZLq4p12nucQIOYtw=' > sig```
 
-4. Get the public key from [our website](http://widget.tibdit.com/pub.key).
+4. Get the public key from [our website](https://widget.tibdit.com/pub.key).
 
 5. Verify the signature, using the public key and the digest: ```$ openssl pkeyutl -verify -in digest -sigfile sig -pubin -inkey pub.key```	
