@@ -3,11 +3,9 @@
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
+function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
-    this.params = params; /* Setting up an object containing instance variables passed to object */
     DUR= DUR || 1;
-    this.params.DUR = this.params.DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
     var testnet= false, pollForToken= false, mDUR= DUR * (3600000*24);
@@ -19,25 +17,24 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
     var cbkHandler, cbkPoller;
 
-    if (this.params.PAD) {
-        if ( "mn2".search(this.params.PAD.substr(0,1)) !== -1 ) {
+    if (PAD) {
+        if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
             // console.log(PAD);
             // testnet bitcoin address, DUR is minutes
-            this.params.DUR= Math.max( 1, this.params.DUR); // minimum 1 minutes
-            mDUR= this.params.DUR * 60000; // ( 1000ms/s ⨉ 60s/m )
+            DUR= Math.max( 1, DUR); // minimum 1 minutes
+            mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m )
             testnet= true;
         }
 
         else {
             // not a testnet bitcoin address, DUR is days
-            this.params.DUR= Math.max( 1, this.params.DUR); // minimum 24 hours
+            DUR= Math.max( 1, DUR); // minimum 24 hours
             mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d )
         }
     }
 
     // if CBK is provided, assume that all callback processing will happen in the tibit window
     // otherwise, assume it will be handled inline in the tibbee window button window
-    CBK = this.params.CBK;
     if (!CBK) {
         // console.log(window.location.hostname);
         CBK= window.location.protocol+"//"+window.location.host + "/nothing_to_see_here/tib_callback/404.err";
@@ -183,6 +180,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
             BTN= e.getAttribute("data-bd-BTN");
             BTN= BTN || defaultBTN;
             e.classList.add( tibButtonsClass + "-" + BTN);
+            e.dataset.bdBtn = e.dataset.dataBdBtn || BTN;
 
             BTS = e.getAttribute('data-bd-BTS');
             BTS = BTS || buttonResourcesUrl;
