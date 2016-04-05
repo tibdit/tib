@@ -3,8 +3,8 @@
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT) {
-
+function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
+    this.params = params;
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -412,6 +412,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         BTN= BTN || "default";
         BTS = BTS || "https://widget.tibdit.com/buttons/";
 
+        that = this;
+
         // TODO add a slash to end of URL when using custom BTS
 
         var tibbtn= new XMLHttpRequest();
@@ -443,6 +445,10 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 headElement.insertBefore(btnLinkCss, tibCssElement.nextSibling);
             }
 
+            var styleElement = document.createElement('style');
+            styleElement.type = 'text/css';
+            /* Creating our style element to append CSS to in the for loop */
+
             for (var i=0, n=buttons.length; i<n; i++) {
                 var e= buttons[i];
                 if (e.children.length === 0) {
@@ -461,7 +467,27 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 if (e.tagName === 'BUTTON' && !e.getAttribute('type') ) {
                     e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
                 }
+
+                var BTC = e.getAttribute('data-bd-BTC') || that.params.BTC;
+                e.setAttribute('data-bd-BTC', BTC);
+                /* Setting the BTC property in priority of data-attribute > tibInit param > default value, then
+                 setting the data-bd-BTC to give us something to target with our CSS */
+
+                var cssStr = '';
+                cssStr = 'button[data-bd-BTC="' + BTC + '"] .bd-btn-backdrop{';
+                cssStr += 'fill: ' + BTC + ';';
+                cssStr += '}';
+                /* Creating CSS string to be appended to styleElement - further CSS selectors and corresponding
+                 styles can later be created (e.g. BTH) */
+
+                styleElement.appendChild(document.createTextNode(cssStr));
+
             }
+
+            var head = document.head || document.getElementsByTagName('head')[0];
+            head.appendChild(styleElement);
+            /* Appending the styleElement with all our button-specific CSS to the <head> tag */
+
             // TODO This is reloading all counters (ManageCounters) for each button type‽‽
             // managecounters should be called only once after all buttons loaded?
             callback();
