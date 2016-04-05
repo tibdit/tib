@@ -447,6 +447,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
             var styleElement = document.createElement('style');
             styleElement.type = 'text/css';
+            styleElement.setAttribute('class', 'bd-btn-' + BTN + '-styles');
             /* Creating our style element to append CSS to in the for loop */
 
             for (var i=0, n=buttons.length; i<n; i++) {
@@ -469,20 +470,37 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 }
 
                 var BTC = e.getAttribute('data-bd-BTC') || that.params.BTC;
-                e.setAttribute('data-bd-BTC', BTC);
-                /* Setting the BTC property in priority of data-attribute > tibInit param > default value, then
-                 setting the data-bd-BTC to give us something to target with our CSS */
-                if(BTC){
-                    var cssStr = '';
+                /* BTC set to data-bd-BTC if present, otherwise defaulted to value passed in tibInit */
+
+                var cssStr = '';
+                /* cssStr declared outside of if statement to account for other properties being set and appended
+                 using this variable */
+
+                if(e.getAttribute('data-bd-BTC')){
                     cssStr = 'button[data-bd-BTC="' + BTC + '"] .bd-btn-backdrop{';
                     cssStr += 'fill: ' + BTC + ';';
                     cssStr += '}';
                 /* Creating CSS string to be appended to styleElement - further CSS selectors and corresponding
                  styles can later be created (e.g. BTH) */
                 }
-                if(cssStr){styleElement.appendChild(document.createTextNode(cssStr));}
+
+                e.setAttribute('data-bd-BTC', BTC);
+                /* Setting data-bd-BTC so that our CSS has something to target */
+
+                styleElement.appendChild(document.createTextNode(cssStr));
 
             }
+
+            var cssStr = '';
+            if(that.params.BTC){
+                cssStr = 'button[data-bd-BTC="' + that.params.BTC + '"] .bd-btn-backdrop{';
+                cssStr += 'fill: ' + that.params.BTC + ';';
+                cssStr += '}';
+
+                styleElement.appendChild(document.createTextNode(cssStr));
+            }
+            /* Creating and appending a CSS string in the case that we have a tibHandler.params.BTC value set. This
+             is done outside of the for loop to avoid repeatedly adding this CSS for each button */
 
             var head = document.head || document.getElementsByTagName('head')[0];
             head.appendChild(styleElement);
