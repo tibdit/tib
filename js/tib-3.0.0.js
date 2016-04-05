@@ -477,14 +477,13 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                  using this variable */
 
                 if(e.getAttribute('data-bd-BTC')){
-                    cssStr = 'button[data-bd-BTC="' + BTC + '"] .bd-btn-backdrop{';
-                    cssStr += 'fill: ' + BTC + ';';
-                    cssStr += '}';
-                /* Creating CSS string to be appended to styleElement - further CSS selectors and corresponding
-                 styles can later be created (e.g. BTH) */
+                    cssStr = 'button[data-bd-BTC="{BTC}"] .bd-btn-backdrop{ fill: {BTC}; }';
+                    cssStr = cssStr.replace(/{BTC}/g, BTC);
+                    /* Creating CSS string to be appended to styleElement - further CSS selectors and corresponding
+                     styles can later be created (e.g. BTH) */
                 }
 
-                e.setAttribute('data-bd-BTC', BTC);
+                e.setAttribute('data-bd-BTC', BTC || 'default');
                 /* Setting data-bd-BTC so that our CSS has something to target */
 
                 styleElement.appendChild(document.createTextNode(cssStr));
@@ -493,9 +492,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
             var cssStr = '';
             if(that.params.BTC){
-                cssStr = 'button[data-bd-BTC="' + that.params.BTC + '"] .bd-btn-backdrop{';
-                cssStr += 'fill: ' + that.params.BTC + ';';
-                cssStr += '}';
+                cssStr = 'button[data-bd-BTC="{BTC}"] .bd-btn-backdrop{ fill: {BTC}; }';
+                cssStr = cssStr.replace(/{BTC}/g, that.params.BTC);
 
                 styleElement.appendChild(document.createTextNode(cssStr));
             }
