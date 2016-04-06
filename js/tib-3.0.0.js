@@ -417,7 +417,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         // TODO add a slash to end of URL when using custom BTS
 
         var tibbtn= new XMLHttpRequest();
-        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".html", true);
         tibbtn.responseType="document";
         tibbtn.send();
 
