@@ -395,7 +395,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 }
             }
             if(keysToRemove.length){
-                for(var j= 0, m = keysToRemove.length; j < m; i++){ /* Should m=keysToRemove.length be var
+                for(var j= 0, m = keysToRemove.length; j < m; j++){ /* Should m=keysToRemove.length be var
                  m=keystoRemove.length? */
                     localStorage.removeItem(keysToRemove[j]);
                 }
@@ -412,7 +412,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         BTN= BTN || "default";
         BTS = BTS || "https://widget.tibdit.com/buttons/";
 
-        that = this;
+        var that = this;
 
         // TODO add a slash to end of URL when using custom BTS
 
