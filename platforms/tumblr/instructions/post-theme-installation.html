@@ -1,58 +1,61 @@
-Installing the theme tib button.
-
-
-<ol>
-    <li>Go to theme HTML
-    <ol>
-        <li>Go to your tumblr dashboard<li>
+    <h2>1. Go to theme HTML</h2>
+    <ul>
+        <li>Go to your tumblr dashboard</li>
         <li>Click the account icon (pictured below)</li>
         <li>Click “Edit appearance” under the appropriate tumblr</li>
+        <img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-3.png" alt="image">
         <li>Click “Edit theme” under “Website Theme”</li>
         <li>Click “Edit HTML” in the top left</li>
-        [more image goodness]
-    </li>
-Add the javascript & css
-Click inside the HTML frame to place your cursor
-Press Ctrl+F (Cmd+F on Mac) to bring up the search bar
-Type: “/head”
-[show]
-Add script snippet just above/before </head> tag (see below as an example - the bitcoin address highlighted is the public address of one of the team who uses it on their tumblr blog so don’t use this or they’ll get your tibs)
+
+    </ul>
 
 
-<script src='https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js'></script>
-<script>
+    <h2>2. Add the javascript & css</h2>
+    <ul>
+        <li>Click inside the HTML frame to place your cursor</li>
+        <li>Press Ctrl+F (Cmd+F on Mac) to bring up the search bar</li>
+        <li>Type: “/head”</li>
+        show
+        <li>Add script snippet just above/before &lt;/head&gt; tag (see below as an example - the bitcoin address highlighted is the public address of one of the team who uses it on their tumblr blog so don’t use this or they’ll get your
+        tibs)</li>
+    </ul>
+
+    <pre><code>
+&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js'&gt;&lt;/script&gt;
+&lt;script&gt;
     $script('http://widget.tibdit.com/assets/js/tib-2.4.js', function() {
         tibInit( {
             'PAD' : '1FLKyEZqM2JPxi2m42QQevfuszFDzJKdVn', mytibs...
-        'BTN' : 'bubble',
-                'PLT' : 'tumblr'
+            'BTN' : 'bubble',
+            'PLT' : 'tumblr'
+        });
     });
-    });
-</script>
+&lt;/script&gt;
+    </code></pre>
 
 
-Add the button
-Click within the HTML pane, and hit Ctrl+F/Cmd+F again to bring up the search bar
-This time, type “{Body}”
-This should bring up one or more results - these “{Body}” instances represent the content of your tumblr posts, and you’ll likely want to paste the button snippet just below each of these. Why each, and not just once??
-Paste the following button snippet below the {Body} block(s) (or anywhere else in your theme you might want to include a button)
+    <h2>3. Add the button</h2>
+    <ul>
+        <li>Click within the HTML pane, and hit Ctrl+F/Cmd+F again to bring up the search bar</li>
+        <li>This time, type “{Body}”</li>
+        <li>This should bring up one or more results - these “{Body}” instances represent the content of your tumblr posts, and you’ll likely want to paste the button snippet just below each of these. Why each, and not just once??</li>
+        <li>Paste the following button snippet below the {Body} block(s) (or anywhere else in your theme you might want to include a button)</li>
 
-{block:NotReblog}<button type='button' class='bd-tib-btn' data-bd-SUB='{PostID}' data-bd-TIB='{permalink}'></button>{/block:NotReblog}
+    <pre><code>{block:NotReblog}&lt;button type='button' class='bd-tib-btn' data-bd-SUB='{PostID}' data-bd-TIB='{permalink}'&gt;&lt;/button&gt;{/block:NotReblog} </code></pre>
+    </ul>
 
+    <h2>4. Save</h2>
+    <ul>
+        <li>Open your tumblr in a new tab/window ( your-blog.tumblr.com )</li>
+        <li>Return to your original edit window/tab</li>
+        <li>Click Update Preview button at top of HTML edit panel  (what is seen at this stage IMG</li>
+        <li>Click Save button at top of HTML edit panel</li>
+        <li>Return to your tumblr - you should now see a tib button on each individual non-reblog post</li>
+    </ul>
 
+    <h2>5. Done</h2>
+        <ul><li>Live tib buttons should be visible at the bottom of original posts.</li></ul>
 
+    <p>If you select a size and then you don’t how it appears on your blog or a colour that doesn’t match, you can always redo these steps at any point.</p>
 
-
-Save
-Open your tumblr in a new tab/window ( your-blog.tumblr.com )
-Return to your original edit window/tab
-Click Update Preview button at top of HTML edit panel  (what is seen at this stage [IMG]
-Click Save button at top of HTML edit panel
-Return to your tumblr - you should now see a tib button on each individual non-reblog post
-Done - live tib buttons should be visible at the bottom of original posts.
-
-
-
-If you select a size and then you don’t how it appears on your blog or a colour that doesn’t match, you can always redo these steps at any point.
-
-(For more information on the options available here, visit https://github.com/tibdit/tibbee-integration/#using-an-embedded-button )
+    <p>(For more information on the options available here, visit https://github.com/tibdit/tibbee-integration/#using-an-embedded-button )</p>
