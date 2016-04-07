@@ -1,12 +1,21 @@
-    <h2>1. Go to theme HTML</h2>
+<p>With your bookmarklet <a href="http://tibbable.tumblr.com/post/142398330822/installing-the-tibit-bookmarklet">created and set-up</a>, perhaps with a couple of text buttons included in your
+    tumblr posts, you might now want to further integrate tibit into your tumblr theme. This will give you access to
+our dynamic SVG buttons, like this one:</p>
+
+<button class="bd-tib-btn" data-bd-btn="chevron"></button>
+
+<p>Aside from being prettier to look at, these dynamic buttons will track your tibs and display a counter, taking
+    into account any text buttons added to the same post, hiding them and including any tibs made to the counter. They'll also react to tibs, changing from "tib" to "tibbed".</p>
+
+<h2>1. Go to theme HTML</h2>
     <ul>
         <li>Go to your tumblr dashboard</li>
         <li>Click the account icon (pictured below)</li>
         <li>Click “Edit appearance” under the appropriate tumblr</li>
-        <img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-3.png" alt="image">
+<img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-3.png" alt="image">
         <li>Click “Edit theme” under “Website Theme”</li>
         <li>Click “Edit HTML” in the top left</li>
-        <img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-4.png" alt="image">
+<img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-4.png" alt="image">
 
     </ul>
 
@@ -16,29 +25,27 @@
         <li>Click inside the HTML frame to place your cursor <b>(1)</b></li>
         <li>Press Ctrl+F (Cmd+F on Mac) to bring up the search bar</li>
         <li>Type: “/head” <b>(2)</b></li>
-        <img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-5.png" alt="image">
+<img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-5.png" alt="image">
         <li>Add script snippet just above/before &lt;/head&gt; tag (see <b>(3)</b> above - the bitcoin address highlighted is the public address of one of the team who uses it on their tumblr blog so don’t use this or they’ll get your tibs)</li>
     </ul>
 
-    <pre><code>
-&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js'&gt;&lt;/script&gt;
+<pre><code>&lt;script src='https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js'&gt;&lt;/script&gt;
 &lt;script&gt;
     $script('http://widget.tibdit.com/assets/js/tib-2.4.js', function() {
         tibInit( {
-            'PAD' : '1FLKyEZqM2JPxi2m42QQevfuszFDzJKdVn', mytibs...
+            'PAD' : '1FLKyEZqM2JPxi2m42QQevfuszFDzJKdVn'
             'BTN' : 'bubble',
             'PLT' : 'tumblr'
         });
     });
-&lt;/script&gt;
-    </code></pre>
+&lt;/script&gt;</code></pre>
 
 
     <h2>3. Add the button</h2>
     <ul>
         <li>Click within the HTML pane, and hit Ctrl+F/Cmd+F again to bring up the search bar</li>
         <li>This time, type “{Body}” <b>(1)</b></li>
-        <img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-6.png" alt="image">
+<img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-6.png" alt="image">
         <li>This should bring up one or more results - these “{Body}” instances represent the content of your tumblr posts. The latter will likely be the instance you want (Non-reblogged, as opposed to reblogged, posts.) <b>(2)</b></li>
         <li>Paste the following button snippet below the {Body} block(s) (or anywhere else in your theme you might want to include a button)</li>
 
@@ -49,7 +56,8 @@
     <ul>
         <li>Open your tumblr in a new tab/window ( your-blog.tumblr.com )</li>
         <li>Return to your original edit window/tab</li>
-        <li>Click Update Preview button at top of HTML edit panel  (what is seen at this stage IMG</li>
+        <li>Click Update Preview button at top of HTML edit panel</li>
+<img src="http://widget.tibdit.com/assets/platforms/tumblr/instructions/img/tumblr-instructions-example-7.png" alt="image">
         <li>Click Save button at top of HTML edit panel</li>
         <li>Return to your tumblr - you should now see a tib button on each individual non-reblog post</li>
     </ul>
@@ -59,4 +67,4 @@
 
     <p>If you select a size and then you don’t how it appears on your blog or a colour that doesn’t match, you can always redo these steps at any point.</p>
 
-    <p>(For more information on the options available here, visit https://github.com/tibdit/tibbee-integration/#using-an-embedded-button )</p>
+    <p>(For more information on the options available here, visit <a href="https://github.com/tibdit/tibbee-integration/#using-an-embedded-button">our GitHub readme</a> )</p>
