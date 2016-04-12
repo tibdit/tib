@@ -69,13 +69,12 @@
 
 			 var bold = document.createElement('b');
 			 var h2 = document.createElement('h2');
-			 newLine = document.createElement('br');
 
 			 bold.appendChild(a);
 			 h2.appendChild(bold);
 
 			 link = h2;
-			 rtfEditor.appendChild(newLine);
+
 			 rtfEditor.appendChild(link);
 		 }
 
