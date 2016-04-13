@@ -296,6 +296,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             if (buttonNames[j] !== "none") {
                 this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
             }
+            else {
+                manageCounters();
+            }
         }
 
     };
