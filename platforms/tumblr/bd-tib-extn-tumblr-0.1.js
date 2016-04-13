@@ -1,7 +1,4 @@
-/**
- * Created by nadil on 14/03/16.
- */
-
+/* tumblr extension version 0.1 */
 
 BDtibExtension = function(that){
 

@@ -1,5 +1,6 @@
+/* tumblr extension version 0.2 */
+
 BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
-/* Extension version 0.2 */
 
 
     this.primaryTibQtyReqs = {}; /* TODO: consolidate primary and additional tibQtyReqs under single object */

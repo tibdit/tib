@@ -133,19 +133,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 tibWindow.close();
             }
 
-            //if(typeof ext === "undefined"){ /* If no extension exists, run ackBySubref as normal */
-            //    that.ackBySubref( token.SUB, token.QTY ); // will fail if localStorage missing
-            //}
-            //else{
-            //    if(ext.preAckBySubref){ /* If an extension exists, and a preAckBySubref function is specified, run
-            //     this, passing in the default ackBySubref as a parameter */
-            //        ext.preAckBySubref(that.ackBySubref, token.SUB, token.QTY);
-            //    }
-            //    else{ /* If no preAckBySubref function exists, run ackBySubref as normal */
-            //        that.ackBySubref( token.SUB, token.QTY );
-            //    }
-            //}
-
             that.ackBySubref(token.SUB, token.QTY);
 
             // TODO if no token
@@ -310,32 +297,11 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                     tibqty.send();
                     tibqty.SUB = SUB;
 
-                    //if(typeof ext === "undefined"){ /* If no extension is defined, set the tibqty onreadystatechange
-                    // handler as normal */
-                    //    tibqty.onreadystatechange = function () {
-                    //        if (tibqty.readyState === 4 && tibqty.status === 200) {
-                    //            that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
-                    //        }
-                    //    };
-                    //}
-                    //else {
-                    //    if(ext.customCounterHandler){ /* If an extension is present, and a customCounterHandler is
-                    //     specified, set the tibqty onreadystatechange handler to a function that returns this
-                    //     customCounterHandler - this allows us to pass in both the XMLHttpRequest object and the
-                    //     tibHandler object */
-                    //        ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
-                    //        tibqty.onreadystatechange = function(){
-                    //            return ext.customCounterHandler(tibqty, that);
-                    //        };
-                    //    }
-                    //    else{ /* If an extension is present but no custom handler is specified, set the default
-                    //     handler as normal */
-                    //
-                    //    }
-                    //}
-
                     tibqty.onreadystatechange = function(){
                         return that.counterHandler(tibqty, that);
+                        /* Returning that.counterHandler within an anonymous function in order to allow us to
+                         * pass that as a parameter to that.counterHandler (used in processing in
+                          * tibHandler extensions) */
                     }
 
                 }, 10);
@@ -644,18 +610,7 @@ function tibCallback( inline) {
                     // will not trigger an event for updating button if processToken called from same page (ie: inline)
                     // but we still need to store this for subsequent pages with tib buttons
 
-                    if(typeof ext === "undefined"){ /* If no extension is present, run persistAck as normal */
-                        that.persistAck( token.SUB, token.ISS, token.QTY);
-                    }
-                    else{
-                        if(ext.prePersistAck){ /* If an extension is present and a prePersistAck function exists,
-                         run this function, passing persistAck as a callback */
-                            ext.prePersistAck(that.persistAck, token.SUB, token.ISS, token.QTY);
-                        }
-                        else{ /* If an extension exists but has no persistAck function, run persistAck as normal */
-                            that.persistAck( token.SUB, token.ISS, token.QTY);
-                        }
-                    }
+                    that.persistAck( token.SUB, token.ISS, token.QTY);
 
                     if (! inline) {
                         //
