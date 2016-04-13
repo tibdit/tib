@@ -60,13 +60,13 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
 
     }
 
-    this.customCounterHandler = function(primaryTibQty, that){
+    this.counterHandler = function(primaryTibQty, that){
         /* onreadystatechange handler for our primary QTY request. This is set from tib.js - a function is called
          onreadystatechange that executes and returns the product of running customCounterHandler, feeding the
          tibqty and tibHandler objects in as parameters */
 
         var SUB = primaryTibQty.SUB; /* Storing primaryTibQty in the SUB variable for more concise usage */
-        var additionalTibQty = this.additionalTibQtyReqs[SUB]; /* Pulling in any HTTPRequest objects in the
+        var additionalTibQty = that.additionalTibQtyReqs[SUB]; /* Pulling in any HTTPRequest objects in the
          additionalTibQtyReqs of the extension object  */
         if(additionalTibQty) { /* If we have an additionalTibQty for this subref, we want to wait for both the
          additional quantity request AND the primary quantity request to return before writing the counter */
@@ -196,31 +196,29 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
         return textButton[0];
     }
 
-    this.preAckBySubref = function(callback, SUB, QTY){
+    var originalAckBySubref = this.ackBySubref;
+    this.ackBySubref = function(SUB, QTY){
         /* Runs in place of preAckBySubref - adds the additional QTY attached to the provided subref if present, and
          runs ackBySubref using Function.prototype.call to ensure the function runs in the context of the tibHandler
          rather than the BDTibExtension object */
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
             QTY += additionalTibQty.QTY || 0;
-            callback.call(this.parentTibHandler, SUB, QTY);
         }
-        else{
-            callback.call(this.parentTibHandler, SUB, QTY);
-        }
+
+        originalAckBySubref.call(this, SUB, QTY);
     }
 
-    this.prePersistAck = function(callback, SUB, ISS, QTY){
+    var originalPersistAck = this.persistAck;
+    this.prePersistAck = function(SUB, ISS, QTY){
         /* Runs in place of tibHandler.persistAck, adding the additionalTibQty if present to the QTY provided, and
          then running persistAck with this new value, passing the tibHandler object via Function.protoype.call */
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
             QTY += additionalTibQty.QTY || 0;
-            callback.call(this.parentTibHandler, SUB, ISS, QTY);
+
         }
-        else{
-            callback.call(this.parentTibHandler, SUB, ISS, QTY);
-        }
+        originalPersistAck.call(this, SUB, ISS, QTY);
     }
 
 

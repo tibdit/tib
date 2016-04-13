@@ -244,6 +244,12 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
     };
 
+    this.counterHandler = function(tibqty, that){
+        if (tibqty.readyState === 4 && tibqty.status === 200) {
+            that.writeCounter(tibqty.SUB, JSON.parse(tibqty.response).QTY);
+        }
+    }
+
     this.getCounter= function( SUB) {
 
         // TODO counter caching in localStorage
@@ -328,11 +334,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                     //    }
                     //}
 
-                    tibqty.onreadystatechange = function () {
-                        if (tibqty.readyState === 4 && tibqty.status === 200) {
-                            that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
-                        }
-                    };
+                    tibqty.onreadystatechange = function(){
+                        return that.counterHandler(tibqty, that);
+                    }
 
                 }, 10);
 
