@@ -133,18 +133,21 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 tibWindow.close();
             }
 
-            if(typeof ext === "undefined"){ /* If no extension exists, run ackBySubref as normal */
-                that.ackBySubref( token.SUB, token.QTY ); // will fail if localStorage missing
-            }
-            else{
-                if(ext.preAckBySubref){ /* If an extension exists, and a preAckBySubref function is specified, run
-                 this, passing in the default ackBySubref as a parameter */
-                    ext.preAckBySubref(that.ackBySubref, token.SUB, token.QTY);
-                }
-                else{ /* If no preAckBySubref function exists, run ackBySubref as normal */
-                    that.ackBySubref( token.SUB, token.QTY );
-                }
-            }
+            //if(typeof ext === "undefined"){ /* If no extension exists, run ackBySubref as normal */
+            //    that.ackBySubref( token.SUB, token.QTY ); // will fail if localStorage missing
+            //}
+            //else{
+            //    if(ext.preAckBySubref){ /* If an extension exists, and a preAckBySubref function is specified, run
+            //     this, passing in the default ackBySubref as a parameter */
+            //        ext.preAckBySubref(that.ackBySubref, token.SUB, token.QTY);
+            //    }
+            //    else{ /* If no preAckBySubref function exists, run ackBySubref as normal */
+            //        that.ackBySubref( token.SUB, token.QTY );
+            //    }
+            //}
+
+            that.ackBySubref(token.SUB, token.QTY);
+
             // TODO if no token
         }
     };
@@ -301,34 +304,35 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                     tibqty.send();
                     tibqty.SUB = SUB;
 
-                    if(typeof ext === "undefined"){ /* If no extension is defined, set the tibqty onreadystatechange
-                     handler as normal */
-                        tibqty.onreadystatechange = function () {
-                            if (tibqty.readyState === 4 && tibqty.status === 200) {
-                                that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
-                            }
-                        };
-                    }
-                    else {
-                        if(ext.customCounterHandler){ /* If an extension is present, and a customCounterHandler is
-                         specified, set the tibqty onreadystatechange handler to a function that returns this
-                         customCounterHandler - this allows us to pass in both the XMLHttpRequest object and the
-                         tibHandler object */
-                            ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
-                            tibqty.onreadystatechange = function(){
-                                return ext.customCounterHandler(tibqty, that);
-                            };
-                        }
-                        else{ /* If an extension is present but no custom handler is specified, set the default
-                         handler as normal */
-                            tibqty.onreadystatechange = function () {
-                                if (tibqty.readyState === 4 && tibqty.status === 200) {
-                                    that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
-                                }
+                    //if(typeof ext === "undefined"){ /* If no extension is defined, set the tibqty onreadystatechange
+                    // handler as normal */
+                    //    tibqty.onreadystatechange = function () {
+                    //        if (tibqty.readyState === 4 && tibqty.status === 200) {
+                    //            that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
+                    //        }
+                    //    };
+                    //}
+                    //else {
+                    //    if(ext.customCounterHandler){ /* If an extension is present, and a customCounterHandler is
+                    //     specified, set the tibqty onreadystatechange handler to a function that returns this
+                    //     customCounterHandler - this allows us to pass in both the XMLHttpRequest object and the
+                    //     tibHandler object */
+                    //        ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
+                    //        tibqty.onreadystatechange = function(){
+                    //            return ext.customCounterHandler(tibqty, that);
+                    //        };
+                    //    }
+                    //    else{ /* If an extension is present but no custom handler is specified, set the default
+                    //     handler as normal */
+                    //
+                    //    }
+                    //}
 
-                            };
+                    tibqty.onreadystatechange = function () {
+                        if (tibqty.readyState === 4 && tibqty.status === 200) {
+                            that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
                         }
-                    }
+                    };
 
                 }, 10);
 

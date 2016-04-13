@@ -1,46 +1,50 @@
-BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
-/* Extension version 0.2 */
+/**
+ * Created by nadil on 14/03/16.
+ */
 
+
+BDtibExtension = function(that){
 
     this.primaryTibQtyReqs = {}; /* TODO: consolidate primary and additional tibQtyReqs under single object */
     this.additionalTibQtyReqs = {};
-    that = this;
+    this.parentTibHandler = that; /* The instance of the tibHandler object (bd), passed as a parameter when
+     initialising the BDtibExtension object */
 
     this.extensionInit = function(){
-        /* Our functions to be executed once the extension has initialised */
+    /* Our functions to be executed once the extension has initialised */
 
         var graphicalButtonList = document.getElementsByClassName('bd-tib-btn'); /* Grabbing our primary buttons
          based on class */
         for(var i=0; i < graphicalButtonList.length; i++){ /* Cycling through the button list */
-            // Cycling through our array of graphical buttons
+        // Cycling through our array of graphical buttons
             var postContainer = this.findPostContainer(graphicalButtonList[i]); /* Attempting to retrieve the
              containing post of the current grpahical button */
-            if(postContainer){ /* Continue executing if we successfully found the container */
-                var textButton = this.findTextButton(postContainer); /* Attempting to pull a text button within
-                 the current post */
-                var SUB = graphicalButtonList[i].getAttribute('data-bd-SUB'); /* Grabbing the SUB of
-                 the button, which will be set from the snippet we insert into peoples themes */
-                if(textButton) { /* If we found a text button, we want to initiate a QTY request so that we can
-                 add this value to the primary buttons counter */
-                    queryParams = this.getTxtBtnQueryParams(textButton); /* Pulling the GET parameters from the
-                     URL of the text tib button */
-                    textButton.style.display = 'none';
+                if(postContainer){ /* Continue executing if we successfully found the container */
+                    var textButton = this.findTextButton(postContainer); /* Attempting to pull a text button within
+                     the current post */
+                    var SUB = graphicalButtonList[i].getAttribute('data-bd-SUB'); /* Grabbing the SUB of
+                     the button, which will be set from the snippet we insert into peoples themes */
+                    if(textButton) { /* If we found a text button, we want to initiate a QTY request so that we can
+                     add this value to the primary buttons counter */
+                        queryParams = this.getTxtBtnQueryParams(textButton); /* Pulling the GET parameters from the
+                         URL of the text tib button */
+                        textButton.style.display = 'none';
 
-                    this.initiateQtyRequest(queryParams, SUB);
+                        this.initiateQtyRequest(queryParams, SUB);
+                    }
+                    else{
+                        this.additionalTibQtyReqs[SUB] = false;
+                        /* If we didn't find a text tib button, we set the value of the corresponding SUB within
+                         additionalTibQtyReqs to false to signify the absense of a text button */
+                    }
                 }
-                else{
-                    this.additionalTibQtyReqs[SUB] = false;
-                    /* If we didn't find a text tib button, we set the value of the corresponding SUB within
-                     additionalTibQtyReqs to false to signify the absense of a text button */
-                }
-            }
 
         }
     };
 
     this.initiateQtyRequest = function(queryParams, primarySUB){
-        /* initiating a tibqty request, using the params of the additional button, and the SUB of the primary button
-         with which we want to associate this counter with */
+    /* initiating a tibqty request, using the params of the additional button, and the SUB of the primary button
+     with which we want to associate this counter with */
 
         this.additionalTibQtyReqs[primarySUB] = new XMLHttpRequest();
         var tibQtyFetchURL; /* Our string to make our request to */
@@ -63,7 +67,7 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
     this.customCounterHandler = function(primaryTibQty, that){
         /* onreadystatechange handler for our primary QTY request. This is set from tib.js - a function is called
          onreadystatechange that executes and returns the product of running customCounterHandler, feeding the
-         tibqty and tibHandler objects in as parameters */
+          tibqty and tibHandler objects in as parameters */
 
         var SUB = primaryTibQty.SUB; /* Storing primaryTibQty in the SUB variable for more concise usage */
         var additionalTibQty = this.additionalTibQtyReqs[SUB]; /* Pulling in any HTTPRequest objects in the
@@ -86,7 +90,7 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
         }
         else{ /* As additionalTibQtys are initiated before getCounter, and thusly before customCounterHandler, if we
          have no HTTP request set for a given SUB, we can simply check the status of the primaryTibQty and proceed
-         accordingly */
+          accordingly */
             if (this.checkXMLReqCompletion(primaryTibQty)) {
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
                 primaryTibQty = { completed: true, QTY: QTY };
@@ -126,8 +130,8 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
             return;
         }
         else if (this.checkXMLReqCompletion(additionalTibQtyReq) && this.checkXMLReqCompletion(primaryTibQty)) {
-            /* In the unlikely case that the additionalCounter request comes back before the primary, we want to add the
-             QTY values of these together and call tibHandler.writeCounter */
+        /* In the unlikely case that the additionalCounter request comes back before the primary, we want to add the
+         QTY values of these together and call tibHandler.writeCounter */
             var QTY = JSON.parse(primaryTibQty.response).QTY;
             var additionalQTY = JSON.parse(additionalTibQtyReq.response).QTY;
             this.primaryTibQtyReqs[SUB] = { completed: true, QTY: QTY };
@@ -141,8 +145,8 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
      accessible within the event handler (would otherwise be the XMLHttpRequest object */
 
     this.getTxtBtnQueryParams = function(btn){
-        /* Taking our text button, grabbing the href from the tumblr redirect, extracting the GET params, and returning
-         the query params as a URI object  */
+    /* Taking our text button, grabbing the href from the tumblr redirect, extracting the GET params, and returning
+     the query params as a URI object  */
         var href = '';
         href = btn.getAttribute('href');
         href = decodeURIComponent(href);
@@ -160,7 +164,7 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
         selectors = ['article', '.post', '#post', '.posts', '.postcontent']; /* The array of selectors that we want
          to compare with */
         while(counter < 10){
-            /* Iterating 10 elements upwards in the DOM hierarchy */
+        /* Iterating 10 elements upwards in the DOM hierarchy */
             if(!el.parentNode){ return false; } /* If the element has no parent, give up */
             el = el.parentNode;
 
@@ -199,7 +203,7 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
     this.preAckBySubref = function(callback, SUB, QTY){
         /* Runs in place of preAckBySubref - adds the additional QTY attached to the provided subref if present, and
          runs ackBySubref using Function.prototype.call to ensure the function runs in the context of the tibHandler
-         rather than the BDTibExtension object */
+          rather than the BDTibExtension object */
         var additionalTibQty = this.additionalTibQtyReqs[SUB];
         if(additionalTibQty){
             QTY += additionalTibQty.QTY || 0;
@@ -223,5 +227,7 @@ BDtibExtension = function( PAD, DUR, CBK, ASN, PLT, params){
         }
     }
 
+};
 
-}
+
+console.log('tumblr extension loaded');

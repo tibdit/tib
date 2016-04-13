@@ -40,13 +40,19 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     $script.ready(scriptsToImport, function () {
 
-        bd = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
-
         if (obj.PLT) { /* If a PLT is specified, we initialise a BDtibExtension object, passing our tibHandler to the
          constructor */
-            ext = new BDtibExtension(bd);
-            ext.extensionInit();
+
+            BDtibExtension.prototype = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
+            BDtibExtension.prototype.constructor = BDtibExtension;
+
+            bd = new BDtibExtension(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
+
+            bd.extensionInit();
             /* Having constructed our object, we run extensionInit immediately */
+        }
+        else{
+            bd = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
         }
 
         // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
