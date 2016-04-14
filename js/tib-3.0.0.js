@@ -139,48 +139,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         }
     };
 
-    this.initButton = function(e, defaultBTN, buttonResourcesUrl, tibButtonsClass){
-
-        var SUB, TIB, dataASN, BTS, ASN;
-        SUB= e.getAttribute("data-bd-SUB");
-        SUB= SUB || "blank";
-        e.classList.add("bd-subref-" + SUB);
-
-        var PAD = e.getAttribute("data-bd-PAD") || PAD;
-
-        var BTN= e.getAttribute("data-bd-BTN") || defaultBTN;
-
-        e.classList.add( tibButtonsClass + "-" + BTN);
-        e.dataset.bdBtn = e.dataset.dataBdBtn || BTN;
-
-        BTS = e.getAttribute('data-bd-BTS');
-        BTS = BTS || buttonResourcesUrl;
-        buttonSources[BTN] = BTS;
-
-        TIB= e.getAttribute("data-bd-TIB");
-        TIB= TIB || window.location.hostname + window.location.pathname;
-
-        ASN = e.getAttribute("data-bd-ASN");
-        ASN = ASN || this.params.ASN;
-
-        if ( localStorage["bd-subref-" + SUB] ) {
-            e.classList.add("tibbed");  // add the tibbed class
-        }
-        if (testnet) {
-            e.classList.add("testnet");
-        }
-
-        e.addEventListener("click", this.tib( SUB, TIB, ASN));
-        buttonNames.push( BTN);
-        pageSUBs.push(SUB);
-
-        this.test();
-
-    }
-
-    this.test = function(){
-        console.log(PAD);
-    }
 
     this.initButtons= function( defaultBTN, buttonResourcesUrl, tibButtonsClass) {
 
@@ -194,18 +152,43 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
         tibButtonsClass= tibButtonsClass || "bd-tib-btn";
         defaultBTN= defaultBTN || "default";
-        buttonSources = [];
-
 
         this.sweepOldTibs();
 
         var buttons= document.getElementsByClassName( tibButtonsClass);
-        var buttonNames= [],
+        var buttonNames= [], buttonSources = [];
         pageSUBs= [];
 
         for (var i=0, n=buttons.length; i<n; i++) {
-            this.initButton(buttons[i], defaultBTN, buttonResourcesUrl, tibButtonsClass);
+            var e = buttons[i];
+            var SUB= e.getAttribute("data-bd-SUB") || "blank";
+            e.classList.add("bd-subref-" + SUB);
+
+            var BTN = e.getAttribute("data-bd-BTN") || this.params.BTN || defaultBTN;
+            /* data-attributes > tibInit params > defaults */
+            e.classList.add( tibButtonsClass + "-" + BTN);
+            e.dataset.bdBtn = BTN;
+
+            var BTS = e.getAttribute('data-bd-BTS') || this.params.BTS || buttonResourcesUrl;
+            buttonSources[BTN] = BTS; /* This seems redundant? Maybe copy the forced data-bd-BTN above? */
+
+            var TIB= e.getAttribute("data-bd-TIB") || TIB || window.location.hostname + window.location.pathname;
+
+            var ASN = e.getAttribute("data-bd-ASN") || ASN || this.params.ASN;;
+
+            if ( localStorage["bd-subref-" + SUB] ) {
+                e.classList.add("tibbed");  // add the tibbed class
+            }
+            if (testnet) {
+                e.classList.add("testnet");
+            }
+
+            e.addEventListener("click", this.tib( SUB, TIB, ASN));
+            buttonNames.push( BTN);
+            pageSUBs.push(SUB);
         }
+
+
         // Install storage event handler
         if (!pollForToken) {
             window.addEventListener('storage', function(e) {
@@ -219,8 +202,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
             });
         }
 
-
-
         // load inline button SVG into DOM
         buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) === i; }); // deduplicate buttonNames
         for (var j=0, m=buttonNames.length; j<m; j++) {
@@ -230,6 +211,21 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         }
 
         this.manageCounters();
+
+        /* Main issue is how to handle passing the tibInit paramaters, overrided by data-bd-x paramaters, to
+        * the manageCounters + loadButton functions - both functions are generic to potentially groups of buttons.
+        * In the case of manageCounters, it's generic to subreferences, whereas loadButton is generic to
+        * buttonNames. Both at some point make an asynchronous request, and at least in the case of writeCounter,
+        * BOTH requests need to be completed for the counter to be written. In the case of the counters, we need
+        * to pass the appropriate paramaters, as overridden by data-bd-x attributes to get the correct counter -
+        * e.g. if we're using data-bd-ASN we want the getqty request to use this ASN, not the ASN from the
+        * tibhandler closure. The closest thing I have to a working solution is requiring that every button,
+        * by the end of the for loop above, has a data-bd-x attribute for each paramater, and reading
+        * directly from this when writing the counters. But even then, I think we'd have to change
+        * writeCounters to writeCounter and execute it on a button-by-button basis (e.g. in the case that
+        * we have two buttons with the same SUB, but one of them has data-bd-ASN set and one is using
+        * tibHandler.params.PAD */
+
     };
 
     this.manageCounters = function(){
@@ -240,6 +236,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
     }
 
     this.counterHandler = function(tibqty, that){
+    /* See below - this is the onreadystatechangehandler for tibqty requests, wrapped in a function to allow us to
+     pass both tibqty and tibHandler(that) to it - default only gives us tibqty. "that" isn't used here, but is
+      potentiall used in extensions */
         if (tibqty.readyState === 4 && tibqty.status === 200) {
             that.writeCounter(tibqty.SUB, JSON.parse(tibqty.response).QTY);
         }
@@ -294,6 +293,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 if (ASN && TIB) {
                     tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
                 }
+                /* Changed from an if/else to assuming use of PAD, and overwriting if ASN and TIB are both present */
 
 
                 tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
@@ -330,7 +330,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
             if (c) {
                 c.textContent= QTY;
             }
-            e.dataset.bdQty = QTY;
+            e.dataset.bdQty = QTY; /* Potentially use this in loadButton, in the case that tibQty comes back
+             first? */
         }
     };
 
