@@ -1,5 +1,5 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
-    tibCss();
+
 
     $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
@@ -14,6 +14,13 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     obj.VER = '2.4';
 
+    if(window.location.hostname.search("tibit.local") !== -1){ /* Get assets from tibit.local rather than tibit.com,
+     if running on tibit.local */
+        obj.ENP = 'tibit.local'
+    }
+    obj.ENP = obj.ENP || 'tibdit.com';
+
+    tibCss(obj.ENP);
 
     var scriptsToImport = ['urijs']; /* Initialising an array of scripts to be imported before initialising
      tibHandler */
@@ -26,7 +33,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     $script.ready(scriptsToImport, function(){
 
-        bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
+        bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj.ENP);
 
         if(obj.PLT){ /* If a PLT is specified, we initialise a BDtibExtension object, passing our tibHandler to the
          constructor */
@@ -48,7 +55,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     });
 
-    function tibCss() {
+    function tibCss(ENP) {
         if (! document.getElementById('bd-css-tib-btn')) {
 
             var headElement= document.getElementsByTagName('head')[0];
@@ -57,7 +64,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
             linkElement.id= 'bd-css-tib-btn';
             linkElement.rel= 'stylesheet';
             linkElement.type= 'text/css';
-            linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
+            linkElement.href= 'https://widget.' + ENP +'/assets/css/tib.css';
             // linkElement.href= 'css/tib.css';
             headElement.appendChild(linkElement);
         }
@@ -70,9 +77,10 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT) {
+function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
 
-
+    this.params = {};
+    this.params.ENP = ENP;
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -464,7 +472,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         // cache-friendly load button SVG and inline it inside the DOM <buttons>
         // svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
         BTN= BTN || "default";
-        BTS = BTS || "//widget.tibdit.com/buttons/";
+        BTS = BTS || "https://widget." + this.params.ENP + "/assets/buttons/";
 
         // TODO add a slash to end of URL when using custom BTS
 
