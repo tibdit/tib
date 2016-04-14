@@ -43,12 +43,14 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         if (obj.PLT) { /* If a PLT is specified, we initialise a BDtibExtension object, passing our tibHandler to the
          constructor */
 
-            BDtibExtension.prototype = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
-            BDtibExtension.prototype.constructor = BDtibExtension;
+            BDTibExtension.prototype = new tibHandler(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
+            BDTibExtension.prototype.constructor = BDTibExtension;
 
-            bd = new BDtibExtension(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
+            bd = new BDTibExtension(obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj);
 
-            bd.extensionInit();
+            if(bd.extensionInit){
+                bd.extensionInit();
+            }
             /* Having constructed our object, we run extensionInit immediately */
         }
         else{

@@ -12,13 +12,15 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj= arg;
     }
 
+    obj.VER = '2.4';
+
 
     var scriptsToImport = ['urijs']; /* Initialising an array of scripts to be imported before initialising
      tibHandler */
 
     if(obj.PLT){ /* If a PLT is specified, import the corresponding extension JS file and add it to the list of
      scripts to import */
-        $script('https://widget.tibdit.com/assets/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
+        $script('https://widget.tibdit.com/assets/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '-' + obj.VER + '.js', 'extension');
         scriptsToImport.push('extension');
     }
 

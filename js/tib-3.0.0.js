@@ -139,6 +139,49 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         }
     };
 
+    this.initButton = function(e, defaultBTN, buttonResourcesUrl, tibButtonsClass){
+
+        var SUB, TIB, dataASN, BTS, ASN;
+        SUB= e.getAttribute("data-bd-SUB");
+        SUB= SUB || "blank";
+        e.classList.add("bd-subref-" + SUB);
+
+        var PAD = e.getAttribute("data-bd-PAD") || PAD;
+
+        var BTN= e.getAttribute("data-bd-BTN") || defaultBTN;
+
+        e.classList.add( tibButtonsClass + "-" + BTN);
+        e.dataset.bdBtn = e.dataset.dataBdBtn || BTN;
+
+        BTS = e.getAttribute('data-bd-BTS');
+        BTS = BTS || buttonResourcesUrl;
+        buttonSources[BTN] = BTS;
+
+        TIB= e.getAttribute("data-bd-TIB");
+        TIB= TIB || window.location.hostname + window.location.pathname;
+
+        ASN = e.getAttribute("data-bd-ASN");
+        ASN = ASN || this.params.ASN;
+
+        if ( localStorage["bd-subref-" + SUB] ) {
+            e.classList.add("tibbed");  // add the tibbed class
+        }
+        if (testnet) {
+            e.classList.add("testnet");
+        }
+
+        e.addEventListener("click", this.tib( SUB, TIB, ASN));
+        buttonNames.push( BTN);
+        pageSUBs.push(SUB);
+
+        this.test();
+
+    }
+
+    this.test = function(){
+        console.log(PAD);
+    }
+
     this.initButtons= function( defaultBTN, buttonResourcesUrl, tibButtonsClass) {
 
         // install button click handlers
@@ -151,58 +194,18 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
         tibButtonsClass= tibButtonsClass || "bd-tib-btn";
         defaultBTN= defaultBTN || "default";
+        buttonSources = [];
 
 
         this.sweepOldTibs();
 
         var buttons= document.getElementsByClassName( tibButtonsClass);
-        var buttonNames= [], pageSUBs= [], buttonSources = [];
-
+        var buttonNames= [],
+        pageSUBs= [];
 
         for (var i=0, n=buttons.length; i<n; i++) {
-            var e= buttons[i];
-            var SUB, BTN, TIB, dataASN, BTS;
-            SUB= e.getAttribute("data-bd-SUB");
-            SUB= SUB || "blank";
-            e.classList.add("bd-subref-" + SUB);
-
-
-            BTN= e.getAttribute("data-bd-BTN");
-            BTN= BTN || defaultBTN;
-            e.classList.add( tibButtonsClass + "-" + BTN);
-            e.dataset.bdBtn = e.dataset.dataBdBtn || BTN;
-
-            BTS = e.getAttribute('data-bd-BTS');
-            BTS = BTS || buttonResourcesUrl;
-            buttonSources[BTN] = BTS;
-
-            TIB= e.getAttribute("data-bd-TIB");
-            TIB= TIB || window.location.hostname + window.location.pathname;
-
-            dataASN = e.getAttribute("data-bd-ASN");
-            ASN = dataASN || ASN;
-
-            if ( localStorage["bd-subref-" + SUB] ) {
-                e.classList.add("tibbed");  // add the tibbed class
-            }
-            if (testnet) {
-                e.classList.add("testnet");
-            }
-
-            e.addEventListener("click", this.tib( SUB, TIB, ASN));
-            buttonNames.push( BTN);
-            pageSUBs.push(SUB);
+            this.initButton(buttons[i], defaultBTN, buttonResourcesUrl, tibButtonsClass);
         }
-
-        function manageCounters(){
-            // retrieve counters for SUBs on page with couunter buttons
-            pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) === i; });  // deduplicate pageSUBs
-            for (var k=0, u=pageSUBs.length; k<u; k++) {
-                that.getCounter( pageSUBs[k]);
-            }
-        }
-
-
         // Install storage event handler
         if (!pollForToken) {
             window.addEventListener('storage', function(e) {
@@ -222,14 +225,19 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) === i; }); // deduplicate buttonNames
         for (var j=0, m=buttonNames.length; j<m; j++) {
             if (buttonNames[j] !== "none") {
-                this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
-            }
-            else {
-                manageCounters();
+                this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
             }
         }
 
+        this.manageCounters();
     };
+
+    this.manageCounters = function(){
+        pageSUBs = pageSUBs.filter(function (v, i, a) { return a.indexOf (v) === i; });  // deduplicate pageSUBs
+        for (var k=0, u=pageSUBs.length; k<u; k++) {
+            this.getCounter( pageSUBs[k]);
+        }
+    }
 
     this.counterHandler = function(tibqty, that){
         if (tibqty.readyState === 4 && tibqty.status === 200) {
@@ -264,58 +272,51 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
         if (hasCounter) {
 
             try{
-                // Check the localStorage JSON string for a QTY value
+                /* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+                 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+                 try/catch to prevent the script halting */
                 QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
                 QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
-                if(!QTY){
-                    throw 'QTY is empty'; /* If the JSON array has no QTY value, we throw an error, meaning we
-                     query tib.me/getqty/ for the QTY value we need instead */
-                }
+            }
+            catch(err) { }
+            /* We don't do anything in this catch block because we don't want to actually output every time we
+             fail to parse JSON */
 
+
+            if(QTY) {
                 that.writeCounter(SUB, QTY);
             }
+            else{
+                /* TODO Delay this based on XMLRequest events rather than a flat delay */
+                var tibqty= new XMLHttpRequest();
 
-            catch(err){
-                // If unable to find a QTY value in localStorage, because it's not a JSON string, or because the
-                // JSON array contains no QTY value, then make an XML request to tib.me/getqty/
+                var tibQtyFetch = "?PAD=" + PAD + (TIB ? "&TIB=" + TIB : '') + (SUB ? "&SUB=" + SUB : '');
+                if (ASN && TIB) {
+                    tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
+                }
 
-                setTimeout(function(){
-                    /* TODO Delay this based on XMLRequest events rather than a flat delay */
-                    var tibqty= new XMLHttpRequest();
 
-                    var tibQtyFetch;
+                tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+                // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
-                    if (ASN && TIB) {
-                        tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
-                    } else {
-                        tibQtyFetch = "?PAD=" + PAD + (TIB ? "&TIB=" + TIB : '') + (SUB ? "&SUB=" + SUB : '') + (ASN ? "&ASN=" + ASN + "&DSP=TRUE" : '');
-                    }
+                tibqty.open( 'GET', tibQtyFetch, true);
+                tibqty.SUB = SUB;
+                tibqty.onreadystatechange = function(){
+                    return that.counterHandler(tibqty, that);
+                    /* Returning that.counterHandler within an anonymous function in order to allow us to
+                     * pass that as a parameter to that.counterHandler (used in processing in
+                     * tibHandler extensions) */
+                }
 
-                    tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch;
-
-                    tibqty.open( 'GET', tibQtyFetch, true);
-                    tibqty.send();
-                    tibqty.SUB = SUB;
-
-                    tibqty.onreadystatechange = function(){
-                        return that.counterHandler(tibqty, that);
-                        /* Returning that.counterHandler within an anonymous function in order to allow us to
-                         * pass that as a parameter to that.counterHandler (used in processing in
-                          * tibHandler extensions) */
-                    }
-
-                }, 10);
+                tibqty.send();
 
             }
-
-        } else {
+        }
+        else {
             return false;
         }
+
     };
-
-
-
-
 
     this.writeCounter= function( SUB, QTY) {
 
@@ -329,6 +330,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
             if (c) {
                 c.textContent= QTY;
             }
+            e.dataset.bdQty = QTY;
         }
     };
 
@@ -382,7 +384,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
 
 
-    this.loadButton= function( BTN, BTS, callback ){
+    this.loadButton= function( BTN, BTS){
 
         // cache-friendly load button SVG and inline it inside the DOM <buttons>
         // svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
@@ -429,6 +431,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
             for (var i=0, n=buttons.length; i<n; i++) {
                 var e= buttons[i];
+
                 if (e.children.length === 0) {
                     e.appendChild(document.importNode(btnImport,true));
                 } else {
@@ -438,7 +441,13 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 var s = e.children[0];   // we don't want duplicate id's in the DOM
                 s.removeAttribute("id");
 
-                if (s.style.width === ""  && s.classList.contains('bd-tib-btn-svg')) { // width of SVG element needs to be set for MSIE/EDGE
+                var c= e.getElementsByClassName('bd-btn-counter')[0];
+                if(e.dataset.bdQty && c){
+                    var QTY = e.dataset.bdQty;
+                    c.textContent= QTY;
+                }
+
+                    if (s.style.width === ""  && s.classList.contains('bd-tib-btn-svg')) { // width of SVG element needs to be set for MSIE/EDGE
                     s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
                 }
                 // prevent default submit type/action if placed within a form
@@ -483,7 +492,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
             // TODO This is reloading all counters (ManageCounters) for each button type‽‽
             // managecounters should be called only once after all buttons loaded?
-            callback();
         }
 
 
