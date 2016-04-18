@@ -1,6 +1,5 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
 tibCss();
-
 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
 var bd;
@@ -264,7 +263,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		// retrieve counters for SUBs on page with couunter buttons
 		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-		for (var k=0, u=buttonNames.length; k<u; k++) { 
+		for (var k=0, u=buttonNames.length; k<u; k++) {
 			this.getCounter( pageSUBs[k]);
 		}
 	};
@@ -308,7 +307,10 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 					
 			tibqty.onreadystatechange= function( ) {
 				if (tibqty.readyState == 4 && tibqty.status == 200) {
-					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+					setTimeout(function(){
+						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+					},350);
+					/* TEMPORARY FIX FOR COUNTER REQ COMING BACK BEFORE BUTTON */
 				}
 			};
 
