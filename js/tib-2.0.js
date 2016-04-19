@@ -213,6 +213,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
 			e.classList.add("bd-subref-" + SUB);
+			e.dataset.bdSub = SUB;
 
 
 			BTN= e.getAttribute("data-bd-BTN");
@@ -226,8 +227,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname;
 
-			if ( localStorage["bd-subref-" + SUB] ) {
-				e.classList.add("tibbed");  // add the tibbed class 
+			if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ) {
+					e.classList.add("tibbed");  // add the tibbed class
 			}
 			if (testnet) {
 				e.classList.add("testnet");
@@ -265,8 +266,10 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// load inline button SVG into DOM
 		buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) == i; }); // deduplicate buttonNames
 		for (var j=0, m=buttonNames.length; j<m; j++) {
-			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
+			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
 		}
+
+		manageCounters();
 
 	};
 
@@ -276,56 +279,63 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
 		var hasCounter= false;
+		var QTY;
 
 		var TIB;
 
-		that= this;
+		var that= this;
 
-		for (var i=0, n=buttons.length; i<n; i++) {
-			var e= buttons[i];
-			c = e.getElementsByClassName('bd-btn-counter');
-			if (c.length !== 0) {
-				hasCounter= true;
+		/* Set QTY from localstorage if present */
+		if(localStorage.getItem('bd-subref-' + SUB)) {
+			QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+			QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+		}
 
-				TIB= e.getAttribute("data-bd-TIB");
-				TIB= TIB || window.location.hostname + window.location.pathname;
+		/* If QTY retrieved from localstorage, write counter using this QTY */
+		if(QTY){
+			that.writeCounter(SUB, QTY);
+		}
+		else{
 
-				break;
+			var tibqty= new XMLHttpRequest();
+			var tibQtyFetch;
+			if (ASN && TIB) {
+				tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
+			} else {
+				tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
-		}
+			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
-		if (hasCounter) {
-			setTimeout(function(){
-				/* TODO Delay this based on XMLRequest events rather than a flat delay */
-				var tibqty= new XMLHttpRequest();
+			tibqty.open( 'GET', tibQtyFetch, true);
+			tibqty.send();
 
-				var tibQtyFetch;
+			tibqty.onreadystatechange= function( ) {
+				if (tibqty.readyState == 4 && tibqty.status == 200) {
 
-				if (ASN && TIB) {
-					tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
-				} else {
-					tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
-				}
-
-
-
-				tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-				// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-
-				tibqty.open( 'GET', tibQtyFetch, true);
-				tibqty.send();
-
-				tibqty.onreadystatechange= function( ) {
-					if (tibqty.readyState == 4 && tibqty.status == 200) {
-						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+					/* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+					 * one to store this QTY */
+					if(localStorage.getItem('bd-subref-' + SUB)){
+						var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
 					}
-				};
+					else{
+						var newLocalStorageEntry = {};
+					}
 
-			}, 10);
+					newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
+					newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+					/* Set the new QTY, convert back to JSON string */
+					localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+					/* Re-set the localStorage entry to our new JSON string */
+					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+				}
+			};
 
-		} else {
-			return false;
 		}
+
+
+
+
 	};
 
 
@@ -339,7 +349,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
 			c= e.getElementsByClassName('bd-btn-counter')[0];
-			if (c) {
+			if (c && e.classList.contains('bd-load-set-QTY')) {
+			/* If element has a counter, and has the 'bd-load-set-QTY' class set to designate
+			 * that it's counter required writing, then write it */
 				c.textContent= QTY;
 			}
 		}
@@ -359,8 +371,26 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var keysToRemove = [];
 			for (var i=0, n=localStorage.length; i<n; i++) {
 				var key= localStorage.key(i);
+				var ISS;
+
 				if ( key.substr(0,10) === "bd-subref-" ) {
-					if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
+					var localStorageJSON;
+					try{
+						/* Attempt to parse JSON string and save ISS for later usage */
+						localStorageJSON = JSON.parse(localStorage.getItem(key));
+						ISS = localStorageJSON.ISS;
+					}
+					catch(err){
+						/* If localStorage value is not a JSON string, convert it to one and continue */
+						localStorageJSON = localStorage.getItem(key); /* Get raw date string from localstorage */
+						localStorageJSON = {'ISS' : localStorageJSON}; /* Convert string to JS object */
+						localStorageJSON = JSON.stringify(localStorageJSON); /* Convert JS object to JSON string */
+						ISS = localStorageJSON.ISS; /* Save ISS to variable for later usage */
+						localStorage.setItem(key, localStorageJSON); /* Re-set localstorage value to JSON string */
+
+					}
+
+					if ( Date.parse(ISS) < expireLimit ) {
 						keysToRemove.push(key);
 					}
 				}
@@ -375,7 +405,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.loadButton= function( BTN, BTS, callback ){
+	this.loadButton= function( BTN, BTS ){
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
@@ -383,6 +413,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		BTS = BTS || "https://widget.tibdit.com/buttons/";
 
 		// TODO add a slash to end of URL when using custom BTS
+
+		var that = this;
 
 		var tibbtn= new XMLHttpRequest();
 		tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -416,6 +448,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				s = e.children[0];   // we don't want duplicate id's in the DOM
 				s.removeAttribute("id");
 
+				var SUB = e.getAttribute("data-bd-SUB");
+				e.classList.add('bd-load-set-QTY');
+
 				if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
 					s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
 				}
@@ -425,7 +460,22 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 
-			callback();
+			var QTY;
+			try{
+				/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+				 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+				 try/catch to prevent the script halting */
+				QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+				QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+			}
+			catch(err) {
+				/* We don't do anything in this catch block because we don't want to actually output every time we
+				 fail to parse JSON */
+			}
+
+			if(QTY){
+				that.writeCounter(SUB, QTY);
+			}
 		}
 
 
@@ -594,7 +644,20 @@ function tibCallback( inline) {
 
 		// [TODO] fallback to cookie storage
 
-		localStorage.setItem("bd-subref-" + SUB, ISS);
+		if(localStorage.getItem("bd-subref-" + SUB)){
+			var newLocalStorageEntry = JSON.parse(localStorage.getItem("bd-subref-" + SUB));
+		}
+		else{
+			var newLocalStorageEntry = {};
+		}
+		/* Grab current localstorage entry for a particular SUB as a JS object if present, create new JS object otherwise */
+
+		newLocalStorageEntry.ISS = ISS;
+		newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+		/* Save our ISS to the new localstorage entry and convert back to JSON string */
+
+		localStorage.setItem("bd-subref-" + SUB, newLocalStorageEntry);
+		/* Re-set localstorage entry to our newly generated JSON string */
 
 		// SUB is the subreference provided in the tib initiator
 		// ISS is the timestamp of when the token for this tib was first issued
