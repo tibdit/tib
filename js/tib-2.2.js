@@ -206,6 +206,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
             SUB= e.getAttribute("data-bd-SUB");
             SUB= SUB || "blank";
             e.classList.add("bd-subref-" + SUB);
+            e.dataset.bdSub = SUB;
 
 
             BTN= e.getAttribute("data-bd-BTN");
@@ -222,7 +223,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
             dataASN = e.getAttribute("data-bd-ASN");
             ASN = dataASN || ASN;
 
-            if ( localStorage["bd-subref-" + SUB] ) {
+            if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS) {
                 e.classList.add("tibbed");  // add the tibbed class
             }
             if (testnet) {
@@ -261,8 +262,10 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         // load inline button SVG into DOM
         buttonNames= buttonNames.filter(function (v, i, a) { return a.indexOf (v) === i; }); // deduplicate buttonNames
         for (var j=0, m=buttonNames.length; j<m; j++) {
-            this.loadButton( buttonNames[j], buttonSources[buttonNames[j]], manageCounters);
+            this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
         }
+
+        manageCounters();
 
     };
 
@@ -271,77 +274,73 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         // TODO counter caching in localStorage
 
         var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
-        var hasCounter= false;
         var TIB;
         var QTY;
-
         var that= this;
 
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
-            var c = e.getElementsByClassName('bd-btn-counter');
-            if (c.length !== 0) {
-                hasCounter= true;
-
-                TIB= e.getAttribute("data-bd-TIB");
-                TIB= TIB || window.location.hostname + window.location.pathname;
-
-                break;
-            }
+            TIB= e.getAttribute("data-bd-TIB");
+            TIB= TIB || window.location.hostname + window.location.pathname;
         }
 
-        if (hasCounter) {
 
-            try{
-                // Check the localStorage JSON string for a QTY value
-                QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
-                QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
-                if(!QTY){
-                    throw 'QTY is empty'; /* If the JSON array has no QTY value, we throw an error, meaning we
-                     query tib.me/getqty/ for the QTY value we need instead */
-                }
+        /* Set QTY from localstorage if present */
+        if(localStorage.getItem('bd-subref-' + SUB)) {
+            QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+            QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+        }
 
+        /* If QTY retrieved from localstorage, write counter using this QTY */
+        if(QTY % 1 === 0){
+            that.writeCounter(SUB, QTY);
+        }
+        else{
 
-                that.writeCounter(SUB, QTY);
+            /* TODO Delay this based on XMLRequest events rather than a flat delay */
+            var tibqty= new XMLHttpRequest();
+
+            var tibQtyFetch;
+
+            if (ASN && TIB) {
+                tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
+            } else {
+                tibQtyFetch = "?PAD=" + PAD + (TIB ? "&TIB=" + TIB : '') + (SUB ? "&SUB=" + SUB : '') + (ASN ? "&ASN=" + ASN + "&DSP=TRUE" : '');
             }
 
-            catch(err){
-                // If unable to find a QTY value in localStorage, because it's not a JSON string, or because the
-                // JSON array contains no QTY value, then make an XML request to tib.me/getqty/
+            tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+            // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
-                setTimeout(function(){
-                    /* TODO Delay this based on XMLRequest events rather than a flat delay */
-                    var tibqty= new XMLHttpRequest();
+            tibqty.open( 'GET', tibQtyFetch, true);
+            tibqty.send();
 
-                    var tibQtyFetch;
-
-                    if (ASN && TIB) {
-                        tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
-                    } else {
-                        tibQtyFetch = "?PAD=" + PAD + (TIB ? "&TIB=" + TIB : '') + (SUB ? "&SUB=" + SUB : '') + (ASN ? "&ASN=" + ASN + "&DSP=TRUE" : '');
+            tibqty.onreadystatechange= function( ) {
+                if (tibqty.readyState === 4 && tibqty.status === 200) {
+                    /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+                     * one to store this QTY */
+                    if(localStorage.getItem('bd-subref-' + SUB)){
+                        var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+                    }
+                    else{
+                        var newLocalStorageEntry = {};
                     }
 
+                    /* Set the new QTY, convert back to JSON string */
+                    newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
+                    newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
 
+                    /* Re-set the localStorage entry to our new JSON string */
+                    localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
 
-                    tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-                    // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+                    that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+                }
+            };
 
-                    tibqty.open( 'GET', tibQtyFetch, true);
-                    tibqty.send();
-
-                    tibqty.onreadystatechange= function( ) {
-                        if (tibqty.readyState === 4 && tibqty.status === 200) {
-                            that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
-                        }
-                    };
-
-                }, 10);
-
-            }
-
-        } else {
-            return false;
         }
+
+
+
+
     };
 
 
@@ -355,8 +354,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
             var c= e.getElementsByClassName('bd-btn-counter')[0];
-            if (c) {
+            if (c && e.classList.contains('bd-load-set-QTY')) {
                 c.textContent= QTY;
+                e.classList.remove('bd-load-set-QTY');
             }
         }
     };
@@ -410,12 +410,13 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-    this.loadButton= function( BTN, BTS, callback ){
+    this.loadButton= function( BTN, BTS){
 
         // cache-friendly load button SVG and inline it inside the DOM <buttons>
         // svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
         BTN= BTN || "default";
         BTS = BTS || "//widget.tibdit.com/buttons/";
+        var that = this;
 
         // TODO add a slash to end of URL when using custom BTS
 
@@ -451,6 +452,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
                 var s = e.children[0];   // we don't want duplicate id's in the DOM
                 s.removeAttribute("id");
 
+                var SUB = e.getAttribute("data-bd-SUB");
+                e.classList.add('bd-load-set-QTY');
+
                 if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
                     s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
                 }
@@ -458,8 +462,29 @@ function tibHandler( PAD, DUR, CBK, ASN) {
                 if (e.tagName === 'BUTTON' && !e.getAttribute('type') ) {
                     e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
                 }
+
+                var QTY;
+                try{
+                    /* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+                     isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+                     try/catch to prevent the script halting */
+                    QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+                    QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+                }
+                catch(err) {
+                    /* We don't do anything in this catch block because we don't want to actually output every time we
+                     fail to parse JSON */
+                }
+
+                /* writeCounter using QTY retrieved from local storage - we can't use
+                 * if(QTY) because 0 would resolve to false */
+                if(QTY % 1 === 0){
+                    that.writeCounter(SUB, QTY);
+                }
+
             }
-            callback();
+
+
         }
 
 

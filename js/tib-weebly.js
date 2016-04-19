@@ -307,7 +307,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		if (hasCounter) {
 
-			if(QTY){
+			if(QTY % 1 === 0){
 				that.writeCounter( SUB, QTY);
 			}
 			else{
@@ -455,27 +455,28 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
 			var SUB = e.getAttribute("data-bd-SUB");
 			e.classList.add('bd-load-set-QTY');
+
+			var QTY;
+			try{
+				/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+				 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+				 try/catch to prevent the script halting */
+				QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+				QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+			}
+			catch(err) {
+				/* We don't do anything in this catch block because we don't want to actually output every time we
+				 fail to parse JSON */
+			}
+
+			if(QTY % 1 === 0){
+				that.writeCounter(SUB, QTY);
+			}
+
 		}
 
 
-		var QTY;
-		try{
-			/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
-			 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
-			 try/catch to prevent the script halting */
-			QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
-			QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
-		}
-		catch(err) {
-			/* We don't do anything in this catch block because we don't want to actually output every time we
-			 fail to parse JSON */
-		}
 
-
-
-		if(QTY){
-			that.writeCounter(SUB, QTY);
-		}
 	}
 };
 

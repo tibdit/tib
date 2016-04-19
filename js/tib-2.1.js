@@ -301,48 +301,49 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		}
 
 		/* If QTY retrieved from localstorage, write counter using this QTY */
-		if(QTY){
+		if(QTY % 1 === 0){
 			that.writeCounter(SUB, QTY);
 		}
+		else{
 
-		var tibqty= new XMLHttpRequest();
+			var tibqty= new XMLHttpRequest();
 
-		var tibQtyFetch;
+			var tibQtyFetch;
 
-		if (ASN && TIB) {
-			tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
-		} else {
-			tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
-		}
-
-		tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-		// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-
-		tibqty.open( 'GET', tibQtyFetch, true);
-		tibqty.send();
-
-		tibqty.onreadystatechange= function( ) {
-			if (tibqty.readyState == 4 && tibqty.status == 200) {
-				/* Grab existing localstorage entry for this SUB as a JS Object, or create a new
-				 * one to store this QTY */
-				if(localStorage.getItem('bd-subref-' + SUB)){
-					var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
-				}
-				else{
-					var newLocalStorageEntry = {};
-				}
-
-				/* Set the new QTY, convert back to JSON string */
-				newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
-				newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
-
-				/* Re-set the localStorage entry to our new JSON string */
-				localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
-
-				that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+			if (ASN && TIB) {
+				tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
+			} else {
+				tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
-		};
 
+			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+
+			tibqty.open( 'GET', tibQtyFetch, true);
+			tibqty.send();
+
+			tibqty.onreadystatechange= function( ) {
+				if (tibqty.readyState == 4 && tibqty.status == 200) {
+					/* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+					 * one to store this QTY */
+					if(localStorage.getItem('bd-subref-' + SUB)){
+						var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+					}
+					else{
+						var newLocalStorageEntry = {};
+					}
+
+					/* Set the new QTY, convert back to JSON string */
+					newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
+					newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+					/* Re-set the localStorage entry to our new JSON string */
+					localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+
+					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+				}
+			};
+		}
 
 	};
 
@@ -405,7 +406,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 			if(keysToRemove.length){
-				for(i= 0, n = keysToRemove.length; i < n; i++){
+				for(var i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}
@@ -466,7 +467,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
 			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
 			}
-		}
 
 			var QTY;
 			try{
@@ -481,9 +481,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				 fail to parse JSON */
 			}
 
-			if(QTY){
+			if(QTY % 1 === 0){
 				that.writeCounter(SUB, QTY);
 			}
+		}
+
+
 
 		}
 
