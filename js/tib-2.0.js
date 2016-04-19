@@ -298,7 +298,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		}
 
 		/* If QTY retrieved from localstorage, write counter using this QTY */
-		if(QTY % 1 === 0){
+		if(QTY && QTY % 1 === 0){
 			that.writeCounter(SUB, QTY);
 		}
 		else{
@@ -479,7 +479,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 					 fail to parse JSON */
 				}
 
-				if(QTY % 1 === 0){
+				if(QTY && QTY % 1 === 0){
 					that.writeCounter(SUB, QTY);
 				}
 			}

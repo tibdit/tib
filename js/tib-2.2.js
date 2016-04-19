@@ -292,7 +292,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
         }
 
         /* If QTY retrieved from localstorage, write counter using this QTY */
-        if(QTY % 1 === 0){
+        if(QTY && QTY % 1 === 0){
             that.writeCounter(SUB, QTY);
         }
         else{
@@ -478,7 +478,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
                 /* writeCounter using QTY retrieved from local storage - we can't use
                  * if(QTY) because 0 would resolve to false */
-                if(QTY % 1 === 0){
+                if(QTY && QTY % 1 === 0){
                     that.writeCounter(SUB, QTY);
                 }
 
