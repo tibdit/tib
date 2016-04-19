@@ -80,6 +80,23 @@ BDtibExtension = function(that){
                 this.additionalTibQtyReqs[SUB] = { completed: true, QTY: additionalQTY };
                 QTY += additionalQTY || 0; /* Parse the
                  response from additionalTibQty and add this QTY to our primary QTY if present, otherwise add nothing */
+
+                /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+                 * one to store this QTY */
+                if(localStorage.getItem('bd-subref-' + SUB)){
+                    var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+                }
+                else{
+                    var newLocalStorageEntry = {};
+                }
+
+                /* Set the new QTY, convert back to JSON string */
+                newLocalStorageEntry.QTY = QTY;
+                newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+                /* Re-set the localStorage entry to our new JSON string */
+                localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+
                 that.writeCounter(SUB, QTY);
                 /* At this point, our custom handling is complete and we can call tibHandler.writeCounter with our
                  new values to proceed through tib.js as usual */
@@ -91,6 +108,23 @@ BDtibExtension = function(that){
             if (this.checkXMLReqCompletion(primaryTibQty)) {
                 var QTY = JSON.parse(primaryTibQty.response).QTY;
                 primaryTibQty = { completed: true, QTY: QTY };
+
+                /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+                 * one to store this QTY */
+                if(localStorage.getItem('bd-subref-' + SUB)){
+                    var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+                }
+                else{
+                    var newLocalStorageEntry = {};
+                }
+
+                /* Set the new QTY, convert back to JSON string */
+                newLocalStorageEntry.QTY = QTY;
+                newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+                /* Re-set the localStorage entry to our new JSON string */
+                localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+
                 that.writeCounter(SUB, QTY);
                 /* We have no additional counter to combine with our primary counter, so we call
                  tibHandler.writeCounter and proceed with the flow of tib.js as usual */
@@ -134,6 +168,23 @@ BDtibExtension = function(that){
             this.primaryTibQtyReqs[SUB] = { completed: true, QTY: QTY };
             this.additionalTibQtyReqs[SUB] = { completed: true, QTY: additionalQTY};
             QTY += additionalQTY || 0;
+
+            /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+             * one to store this QTY */
+            if(localStorage.getItem('bd-subref-' + SUB)){
+                var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+            }
+            else{
+                var newLocalStorageEntry = {};
+            }
+
+            /* Set the new QTY, convert back to JSON string */
+            newLocalStorageEntry.QTY = QTY;
+            newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+            /* Re-set the localStorage entry to our new JSON string */
+            localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+
             that.writeCounter(SUB, QTY);
         }
     }
