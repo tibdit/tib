@@ -283,6 +283,12 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		var TIB;
 
+		for (var i=0, n=buttons.length; i<n; i++) {
+			var e= buttons[i];
+			TIB= e.getAttribute("data-bd-TIB");
+			TIB= TIB || window.location.hostname + window.location.pathname;
+		}
+
 		var that= this;
 
 		/* Set QTY from localstorage if present */
@@ -353,6 +359,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			/* If element has a counter, and has the 'bd-load-set-QTY' class set to designate
 			 * that it's counter required writing, then write it */
 				c.textContent= QTY;
+				e.classList.remove('bd-load-set-QTY');
 			}
 		}
 	};
