@@ -348,49 +348,38 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             tibqty.send();
             tibqty.SUB = SUB;
 
-            if (typeof ext === "undefined") { /* If no extension is defined, set the tibqty onreadystatechange
-             handler as normal */
+            if(typeof ext === "undefined" || !ext.customCounterHandler){
+                /* If ext is undefined, or the ext constructed has no customCounterHandler attached, we want to use
+                 the default handler for onreadystatechange */
                 tibqty.onreadystatechange = function () {
                     if (tibqty.readyState === 4 && tibqty.status === 200) {
-                        that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
-                    }
-                };
-            }
-            else {
-                if (ext.customCounterHandler) { /* If an extension is present, and a customCounterHandler is
-                 specified, set the tibqty onreadystatechange handler to a function that returns this
-                 customCounterHandler - this allows us to pass in both the XMLHttpRequest object and the
-                 tibHandler object */
-                    ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
-                    tibqty.onreadystatechange = function () {
-                        return ext.customCounterHandler(tibqty, that);
-                    };
-                }
-                else { /* If an extension is present but no custom handler is specified, set the default
-                 handler as normal */
-                    tibqty.onreadystatechange = function () {
-                        if (tibqty.readyState === 4 && tibqty.status === 200) {
-                            /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
-                             * one to store this QTY */
-                            if(localStorage.getItem('bd-subref-' + SUB)){
-                                var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
-                            }
-                            else{
-                                var newLocalStorageEntry = {};
-                            }
-
-                            /* Set the new QTY, convert back to JSON string */
-                            newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
-                            newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
-
-                            /* Re-set the localStorage entry to our new JSON string */
-                            localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
-
-                            that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
+                        /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
+                         * one to store this QTY */
+                        if(localStorage.getItem('bd-subref-' + SUB)){
+                            var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+                        }
+                        else{
+                            var newLocalStorageEntry = {};
                         }
 
-                    };
+                        /* Set the new QTY, convert back to JSON string */
+                        newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
+                        newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+                        /* Re-set the localStorage entry to our new JSON string */
+                        localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+
+                        that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+                    }
                 }
+            }
+            else {
+                /* If we have a customCounterHandler specified in our ext object, we use this instead of the default
+                 handler */
+                ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
+                tibqty.onreadystatechange = function () {
+                    return ext.customCounterHandler(tibqty, that);
+                };
             }
         }
 
