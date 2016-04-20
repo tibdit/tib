@@ -83,6 +83,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
     var cbkHandler, cbkPoller;
 
+    this.counters = {};
+
     if (PAD) {
         if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
             // console.log(PAD);
@@ -267,14 +269,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             pageSUBs.push(SUB);
         }
 
-        function manageCounters(){
-            // retrieve counters for SUBs on page with couunter buttons
-            pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) === i; });  // deduplicate pageSUBs
-            for (var k=0, u=pageSUBs.length; k<u; k++) {
-                that.getCounter( pageSUBs[k]);
-            }
-        }
-
 
         // Install storage event handler
         if (!pollForToken) {
@@ -298,7 +292,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
             }
         }
-        manageCounters();
 
     };
 
@@ -368,6 +361,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                         /* Re-set the localStorage entry to our new JSON string */
                         localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
 
+                        delete that.counters[SUB];
+
                         that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
                     }
                 }
@@ -382,6 +377,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             }
 
             tibqty.send();
+            that.counters[SUB] = tibqty;
         }
 
 
@@ -526,6 +522,11 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 // prevent default submit type/action if placed within a form
                 if (e.tagName === 'BUTTON' && !e.getAttribute('type') ) {
                     e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+                }
+
+                var c= e.getElementsByClassName('bd-btn-counter')[0];
+                if(c && !that.counters[SUB]){
+                    that.getCounter(SUB);
                 }
             }
         }
