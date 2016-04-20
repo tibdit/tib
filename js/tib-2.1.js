@@ -52,6 +52,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 	DUR= DUR || 1;
 	ASN = ASN;
 	var testnet= false, pollForToken= false, mDUR= DUR * (3600000*24);
+	this.counters = {};
 
 	var prefix= '';  // NOT IN PRODUCTION
 	
@@ -243,15 +244,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			pageSUBs.push(SUB);
 		}
 
-		function manageCounters(){
-			// retrieve counters for SUBs on page with couunter buttons
-			pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-			for (var k=0, u=pageSUBs.length; k<u; k++) {
-				that.getCounter( pageSUBs[k]);
-			}
-		}
-
-
 		// Install storage event handler
 		if (!pollForToken) {
 			window.addEventListener('storage', function(e) {
@@ -272,8 +264,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		for (var j=0, m=buttonNames.length; j<m; j++) {
 			this.loadButton( buttonNames[j], buttonSources[buttonNames[j]]);
 		}
-
-		manageCounters();
 
 	};
 
@@ -339,10 +329,13 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 					/* Re-set the localStorage entry to our new JSON string */
 					localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+					delete that.counters[SUB];
 
 					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
 				}
 			};
+
+			that.counters[SUB] = tibqty;
 		}
 
 	};
@@ -483,6 +476,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			if(QTY && QTY % 1 === 0){
 				that.writeCounter(SUB, QTY);
+			}
+
+			var c= e.getElementsByClassName('bd-btn-counter')[0];
+			if(c && !that.counters[SUB]){
+				that.getCounter(SUB);
 			}
 		}
 
