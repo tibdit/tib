@@ -50,6 +50,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 0;
 	ASN = ASN;
+	this.counters = {};
 	var testnet= false, pollForToken= false, mDUR= 0;
 
 	var prefix= '';  // NOT IN PRODUCTION
@@ -267,11 +268,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			this.loadButton( buttonNames[j], buttonResourcesUrl);
 		}
 
-		// retrieve counters for SUBs on page with couunter buttons
-		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-		for (var k=0, u=buttonNames.length; k<u; k++) {
-			this.getCounter( pageSUBs[k]);
-		}
 	};
 
 
@@ -285,7 +281,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		var QTY;
 		var TIB;
 
-		that= this;
+		var that= this;
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
@@ -336,6 +332,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 						/* Set the new QTY, convert back to JSON string */
 						localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
 						/* Re-set the localStorage item */
+
+						that.counters[SUB] = tibqty;
 						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
 					}
 				};
@@ -350,9 +348,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 	this.writeCounter= function( SUB, QTY) {
-		
+
 		QTY= Number(QTY); // protect against injection
-		
+
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
 
 		for (var i=0, n=buttons.length; i<n; i++) {
@@ -436,9 +434,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		function writeButtons( ){
 
     	// overwrites <object> embedded svg with inline SVG to allow external CSS styling
-    	
+
     	var buttons= document.getElementsByClassName( "bd-tib-btn-" + BTN);
-    	
+
     	var btnImport= tibbtn.responseXML.getElementById( "tib-btn-" + BTN);
     	if (! btnImport) {
     		throw( "bd: failed to load svg element tib-btn-" + BTN + " from " + tibbtn.responseURL );
@@ -471,6 +469,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			if(QTY && QTY % 1 === 0){
 				that.writeCounter(SUB, QTY);
+			}
+
+			var c= e.getElementsByClassName('bd-btn-counter')[0];
+			if(c && !that.counters[SUB]){
+				that.getCounter(SUB);
 			}
 
 		}
