@@ -81,6 +81,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
 
     this.params = {};
     this.params.ENP = ENP;
+    this.counters = {};
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -277,15 +278,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
             pageSUBs.push(SUB);
         }
 
-        function manageCounters(){
-            // retrieve counters for SUBs on page with couunter buttons
-            pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) === i; });  // deduplicate pageSUBs
-            for (var k=0, u=pageSUBs.length; k<u; k++) {
-                that.getCounter( pageSUBs[k]);
-            }
-        }
-
-
         // Install storage event handler
         if (!pollForToken) {
             window.addEventListener('storage', function(e) {
@@ -309,8 +301,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
             }
         }
 
-        manageCounters();
-
     };
 
     this.getCounter= function( SUB) {
@@ -326,7 +316,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
 
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
-            e.classList.add('bd-load-set-QTY');
             TIB= e.getAttribute("data-bd-TIB");
             TIB= TIB || window.location.hostname + window.location.pathname;
         }
@@ -380,6 +369,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
                         /* Re-set the localStorage entry to our new JSON string */
                         localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
 
+                        delete that.counters[SUB];
+
+
                         that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
                     }
                 }
@@ -393,6 +385,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
                 };
             }
             tibqty.send();
+            that.counters[SUB] = tibqty;
 
         }
 
@@ -537,6 +530,11 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
                 // prevent default submit type/action if placed within a form
                 if (e.tagName === 'BUTTON' && !e.getAttribute('type') ) {
                     e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+                }
+
+                var c= e.getElementsByClassName('bd-btn-counter')[0];
+                if(c && !that.counters[SUB]){
+                    that.getCounter(SUB);
                 }
             }
         }
