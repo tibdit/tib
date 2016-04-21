@@ -278,7 +278,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                         localStorageJSON = JSON.stringify(localStorageJSON); /* Convert JS object to JSON string */
                         ISS = localStorageJSON.ISS; /* Save ISS to variable for later usage */
                         localStorage.setItem(key, localStorageJSON); /* Re-set localstorage value to JSON string */
-
                     }
 
                     if ( Date.parse(ISS) < expireLimit ) {
@@ -381,8 +380,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
                 styleElement.appendChild(document.createTextNode(cssStr));
 
-
-
                 getQtyParams = {};
                 getQtyParams.SUB = e.getAttribute('data-bd-SUB');
                 getQtyParams.ASN = e.getAttribute('data-bd-ASN');
@@ -397,6 +394,12 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                     /* If we can't find a functionally equivalent counterHandler, we create a new one */
                     that.counterHandlers[getQtyQueryString] = new CounterHandler(getQtyParams, getQtyQueryString, that);
                 }
+                else if(c){
+                    var localStorageEntry = localStorage.getItem(getQtyQueryString);
+                    var QTY = JSON.parse(localStorageEntry).QTY;
+                    that.counterHandlers[getQtyQueryString].writeCounter( QTY)
+                }
+
 
             }
 
@@ -516,7 +519,7 @@ function CounterHandler(tibParams, queryString, parent){
     this.parent = parent;
     var prefix = '';
     this.queryString = queryString;
-    this.getqtyOnReadyHandler = function(tibqty, that){
+    this.OnReadyHandler = function(tibqty, that){
         /* See below - this is the onreadystatechangehandler for tibqty requests, wrapped in a function to allow us to
          pass both tibqty and the current counterHandler to it - default only gives us tibqty. "that" isn't used
           here, but is
@@ -534,34 +537,14 @@ function CounterHandler(tibParams, queryString, parent){
             newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
 
             localStorage.setItem(this.queryString, newLocalStorageEntry);
-            that.writeCounter(this.queryString, JSON.parse(tibqty.response).QTY);
+            that.writeCounter(JSON.parse(tibqty.response).QTY);
         }
     }
 
     this.getCounter= function( tibParams) {
 
-        // TODO counter caching in localStorage
-
-        var buttons= document.getElementsByClassName( "bd-subref-" + tibParams.SUB);
-        var hasCounter= false;
-        var TIB;
-        var QTY;
-
+        var TIB, QTY;
         var that= this;
-
-        for (var i=0, n=buttons.length; i<n; i++) {
-            var e= buttons[i];
-            var c = e.getElementsByClassName('bd-btn-counter');
-            if (c.length !== 0) {
-                hasCounter= true;
-
-                TIB= e.getAttribute("data-bd-TIB");
-                TIB= TIB || window.location.hostname + window.location.pathname;
-
-                break;
-            }
-        }
-
 
         try{
             /* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
@@ -576,7 +559,7 @@ function CounterHandler(tibParams, queryString, parent){
 
 
         if(QTY) {
-            that.writeCounter(this.queryString, QTY);
+            that.writeCounter( QTY);
         }
         else{
             /* TODO Delay this based on XMLRequest events rather than a flat delay */
@@ -586,9 +569,8 @@ function CounterHandler(tibParams, queryString, parent){
             // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
             tibqty.open( 'GET', tibQtyFetch, true);
-            tibqty.SUB = tibParams.SUB;
             tibqty.onreadystatechange = function(){
-                return that.getqtyOnReadyHandler(tibqty, that);
+                return that.OnReadyHandler(tibqty, that);
                 /* Returning that.counterHandler within an anonymous function in order to allow us to
                  * pass that as a parameter to that.counterHandler (used in processing in
                  * tibHandler extensions) */
@@ -601,11 +583,11 @@ function CounterHandler(tibParams, queryString, parent){
 
     };
 
-    this.writeCounter= function( queryString, QTY) {
+    this.writeCounter= function(QTY) {
 
         QTY= Number(QTY); // protect against injection
 
-        var buttons= document.querySelectorAll('[data-bd-counter-id="' + queryString + '"]');
+        var buttons= document.querySelectorAll('[data-bd-counter-id="' + this.queryString + '"]');
 
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
