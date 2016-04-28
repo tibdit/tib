@@ -115,7 +115,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
 
 
-    this.tib= function( SUB, TIB, ASN) {
+    this.tib= function( SUB, TIB, ASN, PAD) {
         // construct tib initiator and open tibit popup
 
         var that= this;
@@ -237,6 +237,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
             var SUB, BTN, TIB, dataASN, BTS;
+            var lPAD = null;
+            var lASN = null;
             SUB= e.getAttribute("data-bd-SUB");
             SUB= SUB || "blank";
             e.classList.add("bd-subref-" + SUB);
@@ -255,7 +257,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             TIB= TIB || window.location.hostname + window.location.pathname;
 
             dataASN = e.getAttribute("data-bd-ASN");
-            ASN = dataASN || ASN;
+            lASN = dataASN || ASN;
+
+            lPAD = e.getAttribute('data-bd-PAD') || PAD;
 
             if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ) {
                 e.classList.add("tibbed");  // add the tibbed class
@@ -264,7 +268,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 e.classList.add("testnet");
             }
 
-            e.addEventListener("click", this.tib( SUB, TIB, ASN));
+            e.addEventListener("click", this.tib( SUB, TIB, lASN, lPAD));
             buttonNames.push( BTN);
             pageSUBs.push(SUB);
         }
