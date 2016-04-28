@@ -543,7 +543,7 @@ function CounterHandler(tibParams, queryString, parent){
 
     this.getCounter= function( tibParams) {
 
-        var TIB, QTY;
+        var QTY;
         var that= this;
 
         try{
@@ -557,16 +557,14 @@ function CounterHandler(tibParams, queryString, parent){
         /* We don't do anything in this catch block because we don't want to actually output every time we
          fail to parse JSON */
 
-
-        if(QTY) {
-            that.writeCounter( QTY);
+        if(QTY) { // If QTY retrieved from localstorage, write the QTY to buttons with same ID as this CounterHandler
+            that.writeCounter(QTY);
         }
         else{
             /* TODO Delay this based on XMLRequest events rather than a flat delay */
             var tibqty= new XMLHttpRequest();
 
-            var tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + this.queryString; // + "&noclose=true";
-            // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+            var tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + this.queryString;
 
             tibqty.open( 'GET', tibQtyFetch, true);
             tibqty.onreadystatechange = function(){
@@ -601,12 +599,7 @@ function CounterHandler(tibParams, queryString, parent){
 
 
     /* Functions/assignments here are to be executed on CounterHandler initialisation */
-
-    this.buttons = [];
-
     this.getCounter(tibParams);
-    /* Wrapped in a setTimeout so that it's added to the event loop - we want all of our buttons indexed before
-     * we start sending getQty requests */
 
 }
 
