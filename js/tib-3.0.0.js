@@ -45,7 +45,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
 
 
 
-    this.tib= function( SUB, TIB, ASN) {
+    this.tib= function( SUB, TIB, ASN, PAD) {
         // construct tib initiator and open tibit popup
 
         var that= this;
@@ -197,7 +197,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
                 e.classList.add("testnet");
             }
 
-            e.addEventListener("click", this.tib( lSUB, lTIB, lASN));
+            e.addEventListener("click", this.tib( lSUB, lTIB, lASN, lPAD));
             buttonNames.push(lBTN);
             pageSUBs.push(lSUB);
 
