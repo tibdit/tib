@@ -34,7 +34,7 @@ Import the javascript magics from us and set your initiator parameters
 <script src="https://cdnjs.cloudflare.com/ajax/libs/script.js/2.5.8/script.min.js"></script>
     <script>$script('https://widget.tibdit.com/assets/js/tib.js', function() { tibInit( { 
         'PAD': 'myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz', // Your bitcoin address
-        'DUR': '3', // Duration in days of the tibbing cookie which will be set when a tib is confirmed (optional)
+        'DUR': '1', // Duration in days of the tibbing cookie which will be set when a tib is confirmed (optional)
         'TIB': 'https://www.website.com/', // Content you wish to be tibbed for (optional)
         'BTN': 'bubble', // Button styles which can be set site-wide (optional)
         'CBK' : 'https://www.website.com/thanks', // Site which the tib windo will redirect after a tib is confirmed (optional)
