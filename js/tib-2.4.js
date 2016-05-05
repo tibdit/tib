@@ -468,7 +468,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
         // cache-friendly load button SVG and inline it inside the DOM <buttons>
         // svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
         BTN= BTN || "default";
-        BTS = BTS || "https://widget." + this.params.ENP + "/assets/buttons/";
+        BTS = BTS || "https://widget." + this.params.ENP + "/buttons/";
         var that = this;
 
         // TODO add a slash to end of URL when using custom BTS
