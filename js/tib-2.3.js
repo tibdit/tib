@@ -271,6 +271,13 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             e.addEventListener("click", this.tib( SUB, TIB, lASN, lPAD));
             buttonNames.push( BTN);
             pageSUBs.push(SUB);
+
+            // If using BTN="none", and the button has a counter, add the bd-load-set-QTY to indicate a counter is
+            // pending, and then execute getCounter for this SUB
+            if(BTN === "none" && e.getElementsByClassName('bd-btn-counter')[0]){
+                e.classList.add('bd-load-set-QTY');
+                this.getCounter(SUB);
+            }
         }
 
 
