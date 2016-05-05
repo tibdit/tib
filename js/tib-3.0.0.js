@@ -205,6 +205,13 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
             var getQtyQueryString = this.buildQueryString(getQtyParams);
 
             e.dataset.bdCounterId = getQtyQueryString;
+
+            // If using BTN="none", and the button has a counter, add the bd-load-set-QTY to indicate a counter is
+            // pending, and then execute getCounter for this SUB
+            if(lBTN === "none" && e.getElementsByClassName('bd-btn-counter')[0]){
+                e.classList.add('bd-load-set-QTY');
+                this.getCounter(lSUB);
+            }
         }
 
         // Install storage event handler
