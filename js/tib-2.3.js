@@ -1,17 +1,15 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
     tibCss();
-
+    console.log('tibInit running');
     $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
     var bd;
     var obj = {};
-
     if (typeof arg === 'string') {
         obj.PAD = arg;
     } else if (typeof arg === 'object') {
         obj= arg;
     }
-
 
     var scriptsToImport = ['urijs']; /* Initialising an array of scripts to be imported before initialising
      tibHandler */
@@ -69,8 +67,6 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
 
 function tibHandler( PAD, DUR, CBK, ASN, PLT) {
-
-
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -106,7 +102,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
     if (!CBK) {
         // console.log(window.location.hostname);
-        CBK= window.location.protocol+"//"+window.location.host + "/nothing_to_see_here/tib_callback/404.err";
+        CBK= window.location.protocol+"//"+window.location.host;
         pollForToken= true;
         cbkHandler = new tibCallback( true);
         cbkPoller = 0;
