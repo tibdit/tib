@@ -535,7 +535,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
                 }
 
                 if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-                    s.style.width=(s.getBBox().width*(s.parentElement.clientHeight / s.getBBox().height )).toString()+"px";
+                    s.style.width=(s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
                 }
                 // prevent default submit type/action if placed within a form
                 if (e.tagName === 'BUTTON' && !e.getAttribute('type') ) {
