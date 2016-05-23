@@ -37,7 +37,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, params) {
     // otherwise, assume it will be handled inline in the tibbee window button window
     if (!CBK) {
         // console.log(window.location.hostname);
-        CBK= window.location.protocol+"//"+window.location.host + "/nothing_to_see_here/tib_callback/404.err";
+        CBK= window.location.protocol+"//"+window.location.host;
         pollForToken= true;
         cbkHandler = new tibCallback( true);
         cbkPoller = 0;
