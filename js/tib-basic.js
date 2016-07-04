@@ -95,6 +95,40 @@ function TibHandler(obj){
 
     this.sweepOldTibs = function(){
         console.log('sweepOldTibs running');
+        var expireLimit = Date.now() - this.params.DUR;
+        var keysToRemove = [];
+
+        if(localStorage.length){
+            for(var k = 0, o = localStorage.length; k < o; k++){
+                var key = localStorage.key(k);
+                var ISS;
+                if(key.substr(0,10) === "bd-subref-" ){
+                    var localStorageJSON;
+                    try{
+                        localStorageJSON = JSON.parse(localStorage.getItem(key));
+                        ISS = localStorageJSON.ISS;
+                    }
+                    catch(err){
+                        console.log(err);
+                        /* If localStorage value is not a JSON string, convert it to one and continue */
+                        localStorageJSON = localStorage.getItem(key); /* Get raw date string from localstorage */
+                        localStorageJSON = {'ISS' : localStorageJSON}; /* Convert string to JS object */
+                        localStorageJSON = JSON.stringify(localStorageJSON); /* Convert JS object to JSON string */
+                        ISS = localStorageJSON.ISS; /* Save ISS to variable for later usage */
+                        localStorage.setItem(key, localStorageJSON); /* Re-set localstorage value to JSON string */
+                    }
+                }
+                if(Date.parse(ISS) < expireLimit){
+                    keysToRemove.push(key);
+                }
+            }
+        }
+        if(keysToRemove.length){
+            for(var i= 0, n = keysToRemove.length; i < n; i++){
+                localStorage.removeItem(keysToRemove[i]);
+            }
+        }
+
     }
 
 }
