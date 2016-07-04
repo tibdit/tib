@@ -105,7 +105,7 @@ div.bd-tib-btn svg { vertical-align: middle; }
 /*POSTER*/
 	.bd-tib-btn-poster {height: 50px}
 	.bd-tib-btn-poster .bd-btn-hover { opacity:0.2; }
-	.bd-tib-btn-poster .bd-ai-st4 { opacity:0.5; fill: black; } /* colour two */
+	.bd-tib-btn-poster .bd-ai-st4 { opacity:0.5; fill: black; stroke: white;} /* colour two */
 	.bd-tib-btn-poster .bd-ai-st10 { font-size:18; }
 
 
