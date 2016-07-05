@@ -22,15 +22,13 @@ function tibInit(obj){
             bd.initButtons( obj, 'bd-tib-btn' );
         }
 
-    });
+        return bd;
 
-    return bd;
+    });
 }
 
 function TibHandler(obj){
     this.tibParams = new TibInitiator({}, obj);
-    var tibWindowName= "tibit";
-    var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
 
     this.initButtons = function(){
         var that = this;
@@ -93,7 +91,12 @@ function TibHandler(obj){
 
         // Sweep localStorage for old tibs and open tib window
         return function tib(e){
+            if ( e.currentTarget.classList.contains('tibbed') ) {
+                return false;
+            }
             that.sweepOldTibs();
+            var tibWindowName= "tibit";
+            var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
             // Use initiator params to generate URL, and open in new window
             return window.open(initiator.generateInitiatorURL(), tibWindowName, tibWindowOptions);
         }
@@ -103,10 +106,10 @@ function TibHandler(obj){
         var that = this;
 
         var tibqty = new XMLHttpRequest();
+        // generate URL to query, passing in "true" to specify that it is a /getqty/ request
         var initiatorURL = initiator.generateInitiatorURL(true);
 
         tibqty.open('GET', initiatorURL, true);
-        tibqty.SUB = initiator.SUB;
 
         tibqty.onreadystatechange = function(){
             if (tibqty.readyState === 4 && tibqty.status === 200) {
@@ -114,18 +117,17 @@ function TibHandler(obj){
                 that.writeCounters(initiator, QTY)
             }
         };
-
         tibqty.send();
-
-
     };
 
     this.writeCounters = function(initiator, QTY){
+        // Grab buttons matching the passed initiator's subref
         var buttons = document.getElementsByClassName("bd-subref-" + initiator.SUB);
         for(var l = 0, p = buttons.length; l < p; l++){
             var e = buttons[l];
-            console.log(buttons);
             var c = e.getElementsByClassName('bd-btn-counter')[0];
+            // If the button has a counter and the counter has been marked pending, replace
+            // the counter content with the retrieved QTY
             if(c && e.classList.contains('bd-qty-pending')){
                 c.textContent = QTY;
                 e.classList.remove('bd-qty-pending')
@@ -134,13 +136,15 @@ function TibHandler(obj){
     };
 
     this.ackElementsInClass = function(key){
+        // Attempt to grab QTY from localStorage item matching passed key
         var QTY = JSON.parse(localStorage.getItem(key)).QTY;
-        console.log(QTY);
         var buttons = document.getElementsByClassName(key);
         for (var j = 0, m = buttons.length; j < m; j++){
             var e = buttons[j];
             e.classList.add("tibbed");
+            // Attempt to grab counter element for current button
             var c = e.getElementsByClassName('bd-btn-counter')[0];
+            // If QTY obtained from storage, and button has a counter, write to it
             if(c && QTY){
                 c.textContent = QTY;
             }
@@ -151,19 +155,23 @@ function TibHandler(obj){
         var expireLimit = Date.now() - this.tibParams.DUR;
         var keysToRemove = [];
 
+        // Iterate over localStorage items
         if(localStorage.length){
             for(var k = 0, o = localStorage.length; k < o; k++){
                 var key = localStorage.key(k);
                 var ISS;
                 if(key.substr(0,10) === "bd-subref-" ){
+                    // Grab timestamp for given subref from localStorage
                     var localStorageJSON = JSON.parse(localStorage.getItem(key));
                     ISS = localStorageJSON.ISS;
                 }
+                // If sufficient time has passed, mark the localStorage item to be removed
                 if(Date.parse(ISS) < expireLimit){
                     keysToRemove.push(key);
                 }
             }
         }
+        // If any items added to keysToRemove array, delete matching items from localStorage
         if(keysToRemove.length){
             for(var i= 0, n = keysToRemove.length; i < n; i++){
                 localStorage.removeItem(keysToRemove[i]);
@@ -182,25 +190,19 @@ function TibInitiator(localParams, globalParams){
         // Remove protocol + www.
         this.SUB = this.TIB.replace(/.*?:\/\//g, '');
         this.SUB = this.SUB.replace('www.', '');
-        console.log(this.SUB);
         this.SUB = Crypto.SHA256(this.SUB);
         this.SUB = this.SUB.substr(0, 10);
         this.SUB = "TIB-SHA256-" + this.SUB;
-        console.log(this.SUB);
     }
     this.CBK = globalParams.CBK;
     this.ASN = localParams.ASN || globalParams.ASN;
     this.DUR = 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d )
 
+    // build initiator URL with generated params
     this.generateInitiatorURL = function(getQty){
-
-        var initiator =  "?PAD=" + this.PAD
-            + (this.TIB ? "&TIB=" + this.TIB : '')
-            + (this.CBK ? "&CBK=" + this.CBK : '')
-            + (this.SUB ? "&SUB=" + this.SUB : '')
+        var initiator =  "?PAD=" + this.PAD + (this.TIB ? "&TIB=" + this.TIB : '')
+            + (this.CBK ? "&CBK=" + this.CBK : '') + (this.SUB ? "&SUB=" + this.SUB : '')
             + (this.ASN ? "&ASN=" + this.ASN + "&DSP=TRUE" : '');
-
-
         initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
         return initiator;
     };
