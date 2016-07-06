@@ -184,7 +184,10 @@ function TibHandler(obj){
 function TibInitiator(localParams, globalParams){
     this.PAD = localParams.PAD || globalParams.PAD;
     this.TIB = localParams.TIB || globalParams.TIB;
-    this.SUB = localParams.SUB;
+    this.SUB = localParams.SUB || globalParams.SUB;
+    this.CBK = globalParams.CBK;
+    this.ASN = localParams.ASN || globalParams.ASN;
+
     // If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
     if(!this.SUB){
         // Remove protocol + www.
@@ -194,8 +197,7 @@ function TibInitiator(localParams, globalParams){
         this.SUB = this.SUB.substr(0, 10);
         this.SUB = "TIB-SHA256-" + this.SUB;
     }
-    this.CBK = globalParams.CBK;
-    this.ASN = localParams.ASN || globalParams.ASN;
+
     this.DUR = 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d )
 
     // build initiator URL with generated params
