@@ -28,7 +28,7 @@ function tibInit(obj){
 }
 
 function TibHandler(obj){
-    this.tibParams = new TibInitiator({}, obj);
+    this.defaultInitiator = new TibInitiator(window, obj);
 
     this.initButtons = function(){
         var that = this;
@@ -50,7 +50,7 @@ function TibHandler(obj){
             localParams.PAD = e.getAttribute("data-bd-PAD");
 
             // Generate TibInitiator for button, feeding in global/default params + local params
-            e.tibInitiator = new TibInitiator(localParams, this.tibParams);
+            e.tibInitiator = new TibInitiator(e, this.defaultInitiator.tibParams);
             // Add subref class for easier reference later
             e.classList.add("bd-subref-" + e.tibInitiator.SUB);
 
@@ -59,22 +59,7 @@ function TibHandler(obj){
             }
 
             // Watch for button clicks and initiate tib
-            e.addEventListener("click", this.tib(e.tibInitiator));
 
-            // Attempt to grab counter
-            var c = e.getElementsByClassName('bd-btn-counter')[0];
-
-            // If the button has a counter, either send a new QTY
-            if(c){
-                // indexOf returns -1 if the item is not found in array
-                if( pageSUBs.indexOf(e.tibInitiator.SUB) === -1){
-                    pageSUBs.push(e.tibInitiator.SUB);
-                    // Initiate counter request for given SUB
-                    this.getCounter(e.tibInitiator);
-                }
-                // Marks counter to be updated when counter request comes back
-                e.classList.add('bd-qty-pending');
-            }
 
         }
 
@@ -86,54 +71,6 @@ function TibHandler(obj){
         });
     };
 
-    this.tib = function(initiator){
-        var that = this;
-
-        // Sweep localStorage for old tibs and open tib window
-        return function tib(e){
-            if ( e.currentTarget.classList.contains('tibbed') ) {
-                return false;
-            }
-            that.sweepOldTibs();
-            var tibWindowName= "tibit";
-            var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
-            // Use initiator params to generate URL, and open in new window
-            return window.open(initiator.generateInitiatorURL(), tibWindowName, tibWindowOptions);
-        }
-    };
-
-    this.getCounter = function(initiator){
-        var that = this;
-
-        var tibqty = new XMLHttpRequest();
-        // generate URL to query, passing in "true" to specify that it is a /getqty/ request
-        var initiatorURL = initiator.generateInitiatorURL(true);
-
-        tibqty.open('GET', initiatorURL, true);
-
-        tibqty.onreadystatechange = function(){
-            if (tibqty.readyState === 4 && tibqty.status === 200) {
-                var QTY = JSON.parse(tibqty.response).QTY;
-                that.writeCounters(initiator, QTY)
-            }
-        };
-        tibqty.send();
-    };
-
-    this.writeCounters = function(initiator, QTY){
-        // Grab buttons matching the passed initiator's subref
-        var buttons = document.getElementsByClassName("bd-subref-" + initiator.SUB);
-        for(var l = 0, p = buttons.length; l < p; l++){
-            var e = buttons[l];
-            var c = e.getElementsByClassName('bd-btn-counter')[0];
-            // If the button has a counter and the counter has been marked pending, replace
-            // the counter content with the retrieved QTY
-            if(c && e.classList.contains('bd-qty-pending')){
-                c.textContent = QTY;
-                e.classList.remove('bd-qty-pending')
-            }
-        }
-    };
 
     this.ackElementsInClass = function(key){
         // Attempt to grab QTY from localStorage item matching passed key
@@ -152,7 +89,7 @@ function TibHandler(obj){
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = Date.now() - this.tibParams.DUR;
+        var expireLimit = Date.now() - this.defaultInitiator.DUR;
         var keysToRemove = [];
 
         // Iterate over localStorage items
@@ -181,33 +118,143 @@ function TibHandler(obj){
     }
 }
 
-function TibInitiator(localParams, globalParams){
-    this.PAD = localParams.PAD || globalParams.PAD;
-    this.TIB = localParams.TIB || globalParams.TIB;
-    this.SUB = localParams.SUB || globalParams.SUB;
-    this.CBK = globalParams.CBK;
-    this.ASN = localParams.ASN || globalParams.ASN;
+function TibButton(defaultParams, e){
+    this.tibInitiator = new TibInitiator(defaultParams, e);
+    this.tibInitiator.loadElementData(e);
 
-    // If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
-    if(!this.SUB){
-        // Remove protocol + www.
-        this.SUB = this.TIB.replace(/.*?:\/\//g, '');
-        this.SUB = this.SUB.replace('www.', '');
-        this.SUB = Crypto.SHA256(this.SUB);
-        this.SUB = this.SUB.substr(0, 10);
-        this.SUB = "TIB-SHA256-" + this.SUB;
+    var that = this;
+    this.e = e;
+    this.writeCounter = function(that){
+
+        return function(that){
+
+            var c = that.e.getElementsByClassName('bd-btn-counter')[0];
+            // If the button has a counter and the counter has been marked pending, replace
+            // the counter content with the retrieved QTY
+            if(c){
+                c.textContent = QTY;
+            }
+        }
+
+    };
+
+    this.tibInitiator.getQTY(this.writeCounter);
+
+}
+
+function TibInitiator(defaultParams, e){
+
+    this.tibParams = new TibParams(defaultParams);
+
+    this.loadElementData = function(e){
+        for(prop in this.tibParams){
+            if(e.getAttribute('data-bd-' + prop)){
+                this.tibParams[prop] = e.getAttribute('data-bd-' + prop);
+            }
+        }
+
+    };
+
+    if(!this.tibParams.TIB){
+        this.tibParams.TIB = window.location.hostname + window.location.pathname;
     }
+    console.log(this.tibParams.TIB);
+    //If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
+    if(!this.tibParams.SUB){
+        // Remove protocol + www.
+        this.tibParams.SUB = this.tibParams.TIB.replace(/.*?:\/\//g, '');
+        this.tibParams.SUB = this.tibParams.SUB.replace('www.', '');
+        this.tibParams.SUB = Crypto.SHA256(this.tibParams.SUB);
+        this.tibParams.SUB = this.tibParams.SUB.substr(0, 10);
+        this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
+    }
+    console.log(this.tibParams.SUB);
 
-    this.DUR = 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d )
 
-    // build initiator URL with generated params
+
+
     this.generateInitiatorURL = function(getQty){
-        var initiator =  "?PAD=" + this.PAD + (this.TIB ? "&TIB=" + this.TIB : '')
-            + (this.CBK ? "&CBK=" + this.CBK : '') + (this.SUB ? "&SUB=" + this.SUB : '')
-            + (this.ASN ? "&ASN=" + this.ASN + "&DSP=TRUE" : '');
+        var initiator =  "?PAD=" + this.tibParams.PAD + (this.tibParams.TIB ? "&TIB=" + this.tibParams.TIB : '')
+            + (this.tibParams.CBK ? "&CBK=" + this.tibParams.CBK : '') + (this.tibParams.SUB ? "&SUB=" + this.tibParams.SUB : '')
+            + (this.tibParams.ASN ? "&ASN=" + this.tibParams.ASN + "&DSP=TRUE" : '');
         initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
         return initiator;
     };
+
+    //this.tibClick = function(initiatorURL){
+    //    var that = this;
+    //
+    //    // Sweep localStorage for old tibs and open tib window
+    //    return function tib(e){
+    //        if ( e.currentTarget.classList.contains('tibbed') ) {
+    //            return false;
+    //        }
+    //        //that.sweepOldTibs();
+    //        var tibWindowName= "tibit";
+    //        var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
+    //        // Use initiator params to generate URL, and open in new window
+    //        return window.open(initiatorURL, tibWindowName, tibWindowOptions);
+    //    }
+    //};
+
+    this.tib = function(){
+        //that.sweepOldTibs();
+        var tibWindowName= "tibit";
+        var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
+        // Use initiator params to generate URL, and open in new window
+        window.open(this.generateInitiatorURL(), tibWindowName, tibWindowOptions);
+    };
+
+    this.getQTY = function(callback){
+        var that = this;
+        var tibqty = new XMLHttpRequest();
+        // generate URL to query, passing in "true" to specify that it is a /getqty/ request
+        var initiatorURL = this.generateInitiatorURL(true);
+        tibqty.open('GET', initiatorURL, true);
+
+        tibqty.onreadystatechange = function(){
+            if (tibqty.readyState === 4 && tibqty.status === 200) {
+                that.QTY = JSON.parse(tibqty.response).QTY;
+                callback();
+                console.log(that.QTY);
+            }
+        };
+        tibqty.send();
+    };
+
+
+    // move to tib button
+    //e.addEventListener("click", this.tib(this.initiatorURL));
+
+    //this.tibParams.DUR = 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d )
+
+    //this.counter = this.parent.getElementsByClassName('bd-btn-counter')[0];
+    //if(this.counter){
+    //    this.getCounter();
+    //}
+    //
+    //// build initiator URL with generated params
+
+    //
+
+    //
+
+
+    return this;
+}
+
+function TibParams(obj) {
+
+    this.PAD = "";
+    this.SUB = "";
+    this.CBK = "";
+    this.ASN = "";
+    this.DUR = "";
+    this.TIB = "";
+
+    for (prop in this) {
+        this[prop] = obj[prop];
+    }
 
     return this;
 }
