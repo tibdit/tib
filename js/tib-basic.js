@@ -27,8 +27,11 @@ function tibInit(obj){
     });
 }
 
+// Our TibHandler object, concerned with initialising our buttons and processing relevant local
+// storage entries. We also initialise our defaultTibParams object using the parameters fed to
+// the tibInit function.
 function TibHandler(obj){
-    defaultTibParams = new TibParams(obj);
+    this.defaultTibParams = new TibParams(obj);
 
     this.initButtons = function(){
         var that = this;
@@ -40,7 +43,10 @@ function TibHandler(obj){
             var e = buttons[i];
 
             // Generate TibInitiator for button, feeding in global/default params + local params
-            e.tibButton = new TibButton(defaultTibParams, e);
+            e.tibButton = new TibButton(this.defaultTibParams, e);
+            if ( localStorage["bd-subref-" + e.tibButton.tibInitiator.tibParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.tibInitiator.tibParams.SUB)).ISS ){
+                e.tibButton.acknowledgeTib();
+            }
         }
 
         // Localstorage event listener - watches for changes to bd-subref-x items in localStorage
@@ -57,18 +63,15 @@ function TibHandler(obj){
         var buttons = document.getElementsByClassName(key);
         for (var j = 0, m = buttons.length; j < m; j++){
             var e = buttons[j];
-            e.classList.add("tibbed");
-            // Attempt to grab counter element for current button
-            var c = e.getElementsByClassName('bd-btn-counter')[0];
+            e.tibButton.acknowledgeTib();
             // If QTY obtained from storage, and button has a counter, write to it
-            if(c && QTY){
-                c.textContent = QTY;
-            }
+            e.tibButton.writeCounter(QTY);
+
         }
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = Date.now() - defaultTibParams.DUR;
+        var expireLimit = Date.now() - this.calculateDUR(this.defaultTibParams);
         var keysToRemove = [];
 
         // Iterate over localStorage items
@@ -94,12 +97,62 @@ function TibHandler(obj){
             }
         }
 
-    }
+    };
+
+    this.calculateDUR = function(params){
+        return params.DUR * 86400000;
+    };
+
+    return this;
 }
 
+// Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
+// assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
     this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.tibInitiator.loadElementData(e);
+    this.buttonParams = new ButtonParams(defaultParams, e);
+
+    this.loadElementData = function(params, e){
+        for(prop in params){
+            if(e.getAttribute('data-bd-' + prop)){
+                params[prop] = e.getAttribute('data-bd-' + prop);
+            }
+        }
+
+    };
+
+    this.loadElementData(this.tibInitiator.tibParams, e);
+    this.loadElementData(this.buttonParams, e);
+
+
+    console.log(this.buttonParams);
+
+    this.loadButton = function(){
+        var BTN = this.buttonParams.BTN || "default";
+        if(BTN === "none"){ return false; }
+        var BTH = this.buttonParams.BTH || 20;
+        var BTC = this.buttonParams.BTC || "#f0f";
+        var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+
+        var that = this;
+        var tibbtn = new XMLHttpRequest();
+        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+        tibbtn.send();
+
+        tibbtn.onreadystatechange = function(){
+            if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+                that.writeButton(this.responseXML, BTN);
+            }
+        }
+    };
+
+    this.writeButton = function(content, BTN){
+        console.log('test');
+        content = content.getElementById("tib-btn-" + BTN);
+        e.replaceChild(document.importNode(content, true), e.children[0])
+    };
+
+    this.loadButton();
 
     var that = this;
     this.e = e;
@@ -123,35 +176,30 @@ function TibButton(defaultParams, e){
         }
     };
 
+    this.acknowledgeTib = function(){
+        e.classList.add('tibbed');
+    };
+
     // move to tib button
     e.addEventListener("click", this.tibClick());
 
     // Add subref class for easier reference later
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
 
-    if ( localStorage["bd-subref-" + this.tibInitiator.tibParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + this.tibInitiator.SUB)).ISS ){
-        e.classList.add("tibbed");  // add the tibbed class
-    }
+    return this;
 
 }
 
+// Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
+// to open our tibbing window, retrieve counters, and validate our tib params.
 function TibInitiator(defaultParams, e){
 
     this.tibParams = new TibParams(defaultParams);
 
-    this.loadElementData = function(e){
-        for(prop in this.tibParams){
-            if(e.getAttribute('data-bd-' + prop)){
-                this.tibParams[prop] = e.getAttribute('data-bd-' + prop);
-            }
-        }
-
-    };
 
     if(!this.tibParams.TIB){
         this.tibParams.TIB = window.location.hostname + window.location.pathname;
     }
-    console.log(this.tibParams.TIB);
     //If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
     if(!this.tibParams.SUB){
         // Remove protocol + www.
@@ -161,13 +209,17 @@ function TibInitiator(defaultParams, e){
         this.tibParams.SUB = this.tibParams.SUB.substr(0, 10);
         this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
     }
-    console.log(this.tibParams.SUB);
 
-
+    // Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
+    // properties
     this.generateInitiatorURL = function(getQty){
-        var initiator =  "?PAD=" + this.tibParams.PAD + (this.tibParams.TIB ? "&TIB=" + this.tibParams.TIB : '')
-            + (this.tibParams.CBK ? "&CBK=" + this.tibParams.CBK : '') + (this.tibParams.SUB ? "&SUB=" + this.tibParams.SUB : '')
-            + (this.tibParams.ASN ? "&ASN=" + this.tibParams.ASN + "&DSP=TRUE" : '');
+        var initiator = "?";
+        for(prop in this.tibParams){
+            initiator += prop;
+            initiator += "=";
+            initiator += this.tibParams[prop];
+            initiator += "&";
+        }
         initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
         return initiator;
     };
@@ -191,7 +243,6 @@ function TibInitiator(defaultParams, e){
             if (tibqty.readyState === 4 && tibqty.status === 200) {
                 that.QTY = JSON.parse(tibqty.response).QTY;
                 callback.call(caller);
-                console.log(that.QTY);
             }
         };
         tibqty.send();
@@ -200,6 +251,9 @@ function TibInitiator(defaultParams, e){
     return this;
 }
 
+// Our parameters object - currently just recieves an object and returns a new object with
+// the relevant properties, but this gives us room to apply data validation etc inside of the
+// object as a later date.
 function TibParams(obj) {
 
     this.PAD = "";
@@ -214,4 +268,18 @@ function TibParams(obj) {
     }
 
     return this;
+}
+
+function ButtonParams(obj){
+
+    this.BTN = "";
+    this.BTC = "";
+    this.BTH = "";
+
+    for (prop in this) {
+        this[prop] = obj[prop];
+    }
+
+    return this;
+
 }
