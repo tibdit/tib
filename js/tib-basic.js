@@ -145,22 +145,28 @@ function TibButton(defaultParams, e){
     };
 
     this.writeButton = function(content, BTN){
-        console.log('test');
+        console.log(BTN);
         var content = content.getElementById("tib-btn-" + BTN);
         console.log(content);
 
+        // Inject the button, either as a new child of the container element or a replacement
+        // for the immediate child
         if (e.children.length === 0) {
             e.appendChild(document.importNode(content, true));
         } else {
             // target <button> element should have <object> as first or only child
             e.replaceChild(document.importNode(content, true),e.children[0]);
         }
+
+        // Write the stored QTY to the newly injected button
+        this.writeCounter();
     };
 
     this.loadButton();
 
     var that = this;
     this.e = e;
+
     this.writeCounter = function(){
         var c = that.e.getElementsByClassName('bd-btn-counter')[0];
         // If the button has a counter and the counter has been marked pending, replace
