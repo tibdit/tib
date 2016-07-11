@@ -135,23 +135,6 @@ function TibButton(defaultParams, e){
         }
     };
 
-    this.writeButton = function(content, BTN){
-
-        var content = content.getElementById("tib-btn-" + BTN);
-
-        // Inject the button, either as a new child of the container element or a replacement
-        // for the immediate child
-        if (e.children.length === 0) {
-            e.appendChild(document.importNode(content, true));
-        } else {
-            // target <button> element should have <object> as first or only child
-            e.replaceChild(document.importNode(content, true),e.children[0]);
-        }
-
-        this.tibInitiator.getQty(this.writeCounter);
-
-    };
-
     this.loadButton();
     this.e = e;
 
@@ -204,6 +187,23 @@ function TibButton(defaultParams, e){
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
 
 }
+
+TibButton.prototype.writeButton = function(content, BTN){
+
+    var content = content.getElementById("tib-btn-" + BTN);
+
+    // Inject the button, either as a new child of the container element or a replacement
+    // for the immediate child
+    if (this.e.children.length === 0) {
+        this.e.appendChild(document.importNode(content, true));
+    } else {
+        // target <button> element should have <object> as first or only child
+        this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
+    }
+
+    this.tibInitiator.getQty(this.writeCounter);
+
+};
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
@@ -265,7 +265,6 @@ TibInitiator.prototype.getQty= function( callback){
     };
     qtyHttp.send();
 };
-
 
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
