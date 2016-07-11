@@ -202,9 +202,7 @@ TibButton.prototype.writeButton = function(content, BTN){
         this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
     }
 
-    var that = this;
-
-    this.tibInitiator.getQty(function(){that.writeCounter()});
+    this.tibInitiator.getQty(this.writeCounter.bind(this));
 
 };
 
