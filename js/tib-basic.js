@@ -225,41 +225,42 @@ function TibButton(defaultParams, e){
 function TibInitiator( defaultParams, e){
 
     this.tibParams = new TibParams( defaultParams);
-
-    // If no TIB specified, assume the current page URL
+    
     if ( !this.tibParams.TIB ) {
+        // If no TIB specified, assume the current page URL
         this.tibParams.TIB = window.location.hostname + window.location.pathname;
     }
 
-    //If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
-    if ( !this.tibParams.SUB ){
-        // Remove protocol + www.
-        this.tibParams.SUB = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');
-        this.tibParams.SUB = Crypto.SHA256(this.tibParams.SUB);  // https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
-        this.tibParams.SUB = this.tibParams.SUB.substr(0, 10);
-        this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
+    if ( !this.tibParams.SUB ) {
+        // If no SUB is provided, use a hash of the TIB url
+        this.tibParams.SUB= "TIB-SHA256-" + this.hashedSub();
     }
-
-
 }
 
 
-
+TibInitiator.prototype.hashedSub= function() {
+    // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
+    hash = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
+    hash = Crypto.SHA256(hash);   // possibly move to https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
+    hash = hash.substr(0, 10);
+    return hash;
+};
 
 
 TibInitiator.prototype.tib= function() {
     var tibWindowName= "tibit";
     var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
     // Use initiator params to generate URL, and open in new window
-    window.open(this.generateInitiatorURL(), tibWindowName, tibWindowOptions);
-}
+    window.open( "https://tib.me/" + this.querystring(), tibWindowName, tibWindowOptions);
+};
 
-Tibinitiator.prototype.getQty= function( callback){
+
+TibInitiator.prototype.getQty= function( callback){
     var that = this;
     var qtyHttp = new XMLHttpRequest();
 
-    var initiatorURL = "https://tib.me/getqty/" + this.querystring();
-    qtyHttp.open('GET', initiatorURL, true);
+    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
+    qtyHttp.open('GET', initiatorUrl, true);
 
     tibqty.onreadystatechange = function(){
         if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
@@ -267,11 +268,13 @@ Tibinitiator.prototype.getQty= function( callback){
             callback.call(caller);
         }
     };
-    tibqty.send();
-}
 
-    // Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
-    // properties
+    tibqty.send();
+};
+
+
+// Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
+// properties
 Tibinitiator.prototype.querystring= function() {
     var querystring = "?";
     for ( var param in this.params ) {
@@ -281,7 +284,9 @@ Tibinitiator.prototype.querystring= function() {
         querystring += "&";
     }
     return querystring.substr(0,querystring.length);  // truncate trailing ampersand
-}
+};
+
+
 
 
 // Our parameters object - currently just recieves an object and returns a new object with
