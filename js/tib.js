@@ -18,7 +18,7 @@ bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
     if (document.readyState === 'loading') {
     	document.addEventListener('DOMContentLoaded', function() {
-    		bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn'); 
+    		bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn');
     	});
     } else {
     	bd.initButtons( obj.BTN, 'https://widget.tibdit.com/buttons/' , 'bd-tib-btn');
@@ -81,7 +81,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	if (!CBK) {
 		// console.log(window.location.hostname);
-		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
+		CBK= window.location.protocol+"//"+window.location.host;
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
 		cbkPoller = 0;
@@ -114,7 +114,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
-			console.log(tibInitiator);
+			// console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);

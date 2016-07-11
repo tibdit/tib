@@ -1,6 +1,5 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
 tibCss();
-
 $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
 var bd;
@@ -51,6 +50,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 0;
 	ASN = ASN;
+	this.counters = {};
 	var testnet= false, pollForToken= false, mDUR= 0;
 
 	var prefix= '';  // NOT IN PRODUCTION
@@ -81,7 +81,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	if (!CBK) {
 		// console.log(window.location.hostname);
-		CBK= window.location.hostname + "/nothing_to_see_here/tib_callback/404.err";
+		CBK= window.location.protocol+"//"+window.location.host;
 		pollForToken= true;
 		cbkHandler = new tibCallback( true);  
 		cbkPoller = 0;
@@ -109,7 +109,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (SUB ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
-			console.log(tibInitiator);
+			// console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
 
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
@@ -222,6 +222,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 
 			e.classList.add("bd-subref-" + SUB);
+			e.dataset.bdSub = SUB;
 
 			BTN= e.getAttribute("data-bd-BTN");
 			BTN= BTN || defaultBTN;
@@ -230,8 +231,13 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname;
 
-			if ( localStorage["bd-subref-" + SUB] ) { 
-				e.classList.add("tibbed");  // add the tibbed class 
+
+
+			if ( localStorage["bd-subref-" + SUB] ) {
+				var ISS = JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS;
+				if(ISS){
+					e.classList.add("tibbed");  // add the tibbed class
+				}
 			}
 			if (testnet) {
 				e.classList.add("testnet");
@@ -262,11 +268,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			this.loadButton( buttonNames[j], buttonResourcesUrl);
 		}
 
-		// retrieve counters for SUBs on page with couunter buttons
-		pageSUBs= pageSUBs.filter(function (v, i, a) { return a.indexOf (v) == i; });  // deduplicate pageSUBs
-		for (var k=0, u=buttonNames.length; k<u; k++) { 
-			this.getCounter( pageSUBs[k]);
-		}
 	};
 
 
@@ -277,10 +278,10 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
 		var hasCounter= false;
-
+		var QTY;
 		var TIB;
 
-		that= this;
+		var that= this;
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
@@ -295,24 +296,51 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			}
 		}
 
+		if(localStorage.getItem('bd-subref-' + SUB)) {
+			QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+			QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+		}
+
 		if (hasCounter) {
-			
-			var tibqty= new XMLHttpRequest();
 
-			var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
-			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
-			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+			if(QTY && QTY % 1 === 0){
+				that.writeCounter( SUB, QTY);
+			}
+			else{
 
-			tibqty.open( 'GET', tibQtyFetch, true);
-			tibqty.send();
-					
-			tibqty.onreadystatechange= function( ) {
-				if (tibqty.readyState == 4 && tibqty.status == 200) {
-					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
-				}
-			};
+				var tibqty= new XMLHttpRequest();
 
-		} else {
+				var tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '');
+				tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+				// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+
+				tibqty.open( 'GET', tibQtyFetch, true);
+				tibqty.send();
+
+				tibqty.onreadystatechange= function( ) {
+					if (tibqty.readyState == 4 && tibqty.status == 200) {
+
+						if(localStorage.getItem('bd-subref-' + SUB)){
+							var newLocalStorageEntry = JSON.parse(localStorage.getItem('bd-subref-' + SUB));
+						}
+						else{
+							var newLocalStorageEntry = {};
+						}
+						/* Either pulling the current localStorage entry in as a JS object, or creating a new JS Object */
+						newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
+						newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+						/* Set the new QTY, convert back to JSON string */
+						localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+						/* Re-set the localStorage item */
+
+						that.counters[SUB] = tibqty;
+						that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+					}
+				};
+
+			}
+		}
+		else {
 			return false;
 		}
 	};
@@ -320,16 +348,17 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 	this.writeCounter= function( SUB, QTY) {
-		
+
 		QTY= Number(QTY); // protect against injection
-		
+
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
 			c= e.getElementsByClassName('bd-btn-counter')[0];
-			if ( c) {
+			if ( c && e.classList.contains('bd-load-set-QTY')) {
 				c.textContent= QTY;
+				e.classList.remove('bd-load-set-QTY');
 			}
 		}
 	};
@@ -341,21 +370,39 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// deletes all expired tibs from localStorage
 		// nb: all tibs for the domain must have the same acknowledgement duration for this to be reliable
 
-		expireLimit = Date.now() - mDUR;
+		var expireLimit = Date.now() - mDUR;
 
 		// any tibs with an issue time prior to expireLimit are out of date, and can be removed
 		if(localStorage.length){
 			var keysToRemove = [];
 			for (var i=0, n=localStorage.length; i<n; i++) {
 				var key= localStorage.key(i);
+				var ISS;
+
 				if ( key.substr(0,10) === "bd-subref-" ) {
-					if ( Date.parse(localStorage.getItem(key)) < expireLimit ) {
+					var localStorageJSON;
+					try{
+						/* Attempt to parse JSON string and save ISS for later usage */
+						localStorageJSON = JSON.parse(localStorage.getItem(key));
+						ISS = localStorageJSON.ISS;
+					}
+					catch(err){
+						/* If localStorage value is not a JSON string, convert it to one and continue */
+						localStorageJSON = localStorage.getItem(key); /* Get raw date string from localstorage */
+						localStorageJSON = {'ISS' : localStorageJSON}; /* Convert string to JS object */
+						localStorageJSON = JSON.stringify(localStorageJSON); /* Convert JS object to JSON string */
+						ISS = localStorageJSON.ISS; /* Save ISS to variable for later usage */
+						localStorage.setItem(key, localStorageJSON); /* Re-set localstorage value to JSON string */
+
+					}
+
+					if ( Date.parse(ISS) < expireLimit ) {
 						keysToRemove.push(key);
 					}
 				}
 			}
 			if(keysToRemove.length){
-				for(i= 0, n = keysToRemove.length; i < n; i++){
+				for(var i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}
@@ -372,6 +419,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		buttonResourcesUrl= buttonResourcesUrl || "http://widget.tibdit.com/buttons";
 
 		BTN= BTN || "default";
+		var that = this;
 
 		var tibbtn= new XMLHttpRequest();
 		tibbtn.open("GET", buttonResourcesUrl + "tib-btn-" + BTN + ".svg", true);
@@ -386,9 +434,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		function writeButtons( ){
 
     	// overwrites <object> embedded svg with inline SVG to allow external CSS styling
-    	
+
     	var buttons= document.getElementsByClassName( "bd-tib-btn-" + BTN);
-    	
+
     	var btnImport= tibbtn.responseXML.getElementById( "tib-btn-" + BTN);
     	if (! btnImport) {
     		throw( "bd: failed to load svg element tib-btn-" + BTN + " from " + tibbtn.responseURL );
@@ -403,7 +451,35 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
 			}
 			e.children[0].removeAttribute("id");   // we don't want duplicate id's in the DOM
+			var SUB = e.getAttribute("data-bd-SUB");
+			e.classList.add('bd-load-set-QTY');
+
+			var QTY;
+			try{
+				/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+				 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+				 try/catch to prevent the script halting */
+				QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+				QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
+			}
+			catch(err) {
+				/* We don't do anything in this catch block because we don't want to actually output every time we
+				 fail to parse JSON */
+			}
+
+			if(QTY && QTY % 1 === 0){
+				that.writeCounter(SUB, QTY);
+			}
+
+			var c= e.getElementsByClassName('bd-btn-counter')[0];
+			if(c && !that.counters[SUB]){
+				that.getCounter(SUB);
+			}
+
 		}
+
+
+
 	}
 };
 
@@ -570,7 +646,17 @@ function tibCallback( inline) {
 
 		// [TODO] fallback to cookie storage
 
-		localStorage.setItem("bd-subref-" + SUB, ISS);
+		if(localStorage.getItem("bd-subref-" + SUB)){
+			var newLocalStorageEntry = JSON.parse(localStorage.getItem("bd-subref-" + SUB));
+		}
+		else{
+			var newLocalStorageEntry = {};
+		}
+
+		newLocalStorageEntry.ISS = ISS;
+		newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
+
+		localStorage.setItem("bd-subref-" + SUB, newLocalStorageEntry);
 
 		// SUB is the subreference provided in the tib initiator
 		// ISS is the timestamp of when the token for this tib was first issued

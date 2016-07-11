@@ -31,12 +31,12 @@
 	height: inherit;
 	pointer-events: none;
 	}
+
 .bd-tib-btn .bd-btn-cover { pointer-events: all; }
 
 div.bd-tib-btn { display:inline; width: auto; }
 div.bd-tib-btn svg { vertical-align: middle; }
 .bd-tib-btn svg { vertical-align: middle;   cursor:pointer; }
-
 
 /*FACE*/
 	.bd-tib-btn .bd-btn-backdrop 	{ fill: #8cc63f; }  /* customised background-color: */
@@ -74,7 +74,8 @@ div.bd-tib-btn svg { vertical-align: middle; }
 
 
 /*CHEVRON*/
-	.bd-tib-btn-chevron {height: 22px}
+	.bd-tib-btn-chevron {height: 22px; }
+	.bd-tib-btn-chevron svg { overflow: visible;}
 	.bd-tib-btn-chevron .bd-ai-st1,
 	.bd-tib-btn-chevron .bd-ai-st3 { fill: black; stroke: black; opacity: 0.4; }  /*counter tag*/
 	.bd-tib-btn-chevron .bd-btn-hover { opacity: 0.4; fill: black; }
@@ -104,7 +105,7 @@ div.bd-tib-btn svg { vertical-align: middle; }
 /*POSTER*/
 	.bd-tib-btn-poster {height: 50px}
 	.bd-tib-btn-poster .bd-btn-hover { opacity:0.2; }
-	.bd-tib-btn-poster .bd-ai-st4 { opacity:0.5; fill: black; } /* colour two */
+	.bd-tib-btn-poster .bd-ai-st4 { opacity:0.5; fill: black; stroke: white;} /* colour two */
 	.bd-tib-btn-poster .bd-ai-st10 { font-size:18; }
 
 

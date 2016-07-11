@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>css based bar tib button</title>
+		<!-- <link id="tib-btn-bar-css" rel='stylesheet' type="text/css" href='http://play.local/tib-btn-bar.css'> -->
+		<link id="tib-btn-bar-css" rel='stylesheet' type="text/css" href='https://widget.tibit.com/buttons/tib-btn-bar.css'>
+	</head>
+	<body>
+
+		<style>
+			.bd-tib-btn[data-bd-BTN='bar'] .bd-btn-text .bd-btn-pretib::after { content: 'html-pretib'; }
+			.bd-tib-btn[data-bd-BTN='bar'] .bd-btn-text span::after {content: 'html-tibbed'; }
+
+			.bd-tib-btn[data-bd-BTN='bar'] {
+				height: 22px; 
+				background-color: #93DF40; 
+				color: white; 
+				font-size: 15pt; /* <= 6px smaller than height (3px padding) */
+ 			}
+			.bd-tib-btn[data-bd-BTN='bar'].tibbed {
+				background-color: green; 
+			}
+		</style>
+
+
+		<button class="bd-tib-btn">
+			<div id="tib-btn-bar" class="bd-btn-container">
+				<div class="bd-helper-vam bd-btn-icon">
+					<img class='bd-btn-posttib' src="https://widget.tibit.com/assets/img/checkmark-65x111.png">
+					<img class='bd-btn-pretib' src="https://widget.tibit.com/assets/img/tibicon-65x111.png">
+				</div>
+				<div class="bd-btn-text">
+					<div class='bd-helper-vam bd-btn-pretib'><span></span></div>
+					<div class='bd-helper-vam bd-btn-posttib'><span></span></div>
+				</div>
+				<div class="bd-helper-vam "><span class="bd-btn-counter">123</span></div>
+			</div>
+		</button>
+
+	</body>
+</html>
