@@ -254,17 +254,13 @@ TibInitiator.prototype.querystring= function() {
 
 
 TibInitiator.prototype.getQty= function( callback){
-    var that = this;
     var qtyHttp = new XMLHttpRequest();
-
     var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
     console.log(initiatorUrl);
     qtyHttp.open('GET', initiatorUrl, true);
-
     qtyHttp.onreadystatechange = function(){
         if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
-            that.QTY = JSON.parse(qtyHttp.response).QTY;
-            callback(that.QTY);
+            callback( JSON.parse(qtyHttp.response).QTY);
         }
     };
     qtyHttp.send();
