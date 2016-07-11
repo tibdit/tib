@@ -212,7 +212,7 @@ function TibButton(defaultParams, e){
 // to open our tibbing window, retrieve counters, and validate our tib params.
 function TibInitiator( defaultParams, e){
 
-    this.tibParams = new TibParams( defaultParams);
+    this.params = new TibInitiatorParams( defaultParams);
     
     if ( !this.tibParams.TIB ) {
         // If no TIB specified, assume the current page URL
@@ -236,6 +236,7 @@ TibInitiator.prototype.hashedSub= function() {
 
 
 TibInitiator.prototype.tib= function() {
+    // initiate the tib by opening the tib.me popup window 
     var tibWindowName= "tibit";
     var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
     // Use initiator params to generate URL, and open in new window
@@ -244,11 +245,12 @@ TibInitiator.prototype.tib= function() {
 
 
 TibInitiator.prototype.getQty= function( callback){
-    var qtyHttp = new XMLHttpRequest();
-    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
+    // retreive the current tib count for this initiator
+    var qtyHttp= new XMLHttpRequest();
+    var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
     qtyHttp.open('GET', initiatorUrl, true);
-    qtyHttp.onreadystatechange = function(){
-        if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
+    qtyHttp.onreadystatechange= function(){
+        if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
             callback( JSON.parse(qtyHttp.response).QTY);
         }
     };
@@ -274,7 +276,7 @@ TibInitiator.prototype.querystring= function() {
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
 // object as a later date.
-function TibParams( copyFrom) {
+function TibInitiatorParams( copyFrom) {
 
     this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
     this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
