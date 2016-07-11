@@ -136,9 +136,8 @@ function TibButton(defaultParams, e){
     };
 
     this.writeButton = function(content, BTN){
-        console.log(BTN);
+
         var content = content.getElementById("tib-btn-" + BTN);
-        console.log(content);
 
         // Inject the button, either as a new child of the container element or a replacement
         // for the immediate child
@@ -149,8 +148,8 @@ function TibButton(defaultParams, e){
             e.replaceChild(document.importNode(content, true),e.children[0]);
         }
 
-        // Write the stored QTY to the newly injected button
-        this.writeCounter(that.QTY);
+        this.tibInitiator.getQty(this.writeCounter);
+
     };
 
     this.loadButton();
@@ -165,8 +164,6 @@ function TibButton(defaultParams, e){
             c.textContent = QTY;
         }
     };
-
-    this.tibInitiator.getQty(this.writeCounter, this);
 
     this.tibClick = function(){
         return function(){
@@ -242,37 +239,36 @@ TibInitiator.prototype.tib= function() {
     window.open( "https://tib.me/" + this.querystring(), tibWindowName, tibWindowOptions);
 };
 
-
-TibInitiator.prototype.getQty= function( callback){
-    var that = this;
-    var qtyHttp = new XMLHttpRequest();
-
-    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
-    qtyHttp.open('GET', initiatorUrl, true);
-
-    qtyHttp.onreadystatechange = function(){
-        if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
-            that.QTY = JSON.parse(qtyHttp.response).QTY;
-            callback.call(caller);
-        }
-    };
-    qtyHttp.send();
-};
-
 // Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
 // properties
 TibInitiator.prototype.querystring= function() {
     var querystring = "?";
-    for ( var param in this.params ) {
+    for ( var param in this.tibParams ) {
         querystring += param;
         querystring += "=";
-        querystring += this.params[param];
+        querystring += this.tibParams[param];
         querystring += "&";
     }
     return querystring.substr(0,querystring.length);  // truncate trailing ampersand
 };
 
 
+TibInitiator.prototype.getQty= function( callback){
+    var that = this;
+    var qtyHttp = new XMLHttpRequest();
+
+    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
+    console.log(initiatorUrl);
+    qtyHttp.open('GET', initiatorUrl, true);
+
+    qtyHttp.onreadystatechange = function(){
+        if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
+            that.QTY = JSON.parse(qtyHttp.response).QTY;
+            callback(that.QTY);
+        }
+    };
+    qtyHttp.send();
+};
 
 
 // Our parameters object - currently just recieves an object and returns a new object with
