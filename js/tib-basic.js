@@ -109,6 +109,7 @@ function TibHandler(obj){
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
+    var that = this;
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
 
@@ -158,19 +159,17 @@ function TibButton(defaultParams, e){
         }
 
         // Write the stored QTY to the newly injected button
-        this.writeCounter();
+        this.writeCounter(that.QTY);
     };
 
     this.loadButton();
-
-    var that = this;
     this.e = e;
 
-    this.writeCounter = function(){
+    this.writeCounter = function(QTY){
+        console.log(that);
         var c = that.e.getElementsByClassName('bd-btn-counter')[0];
         // If the button has a counter and the counter has been marked pending, replace
         // the counter content with the retrieved QTY
-        var QTY = that.tibInitiator.QTY;
         if(c && QTY){
             c.textContent = QTY;
         }
@@ -215,8 +214,6 @@ function TibButton(defaultParams, e){
 
     // Add subref class for easier reference later
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
-
-    return this;
 
 }
 
@@ -272,13 +269,12 @@ function TibInitiator(defaultParams, e){
         tibqty.onreadystatechange = function(){
             if (tibqty.readyState === 4 && tibqty.status === 200) {
                 that.QTY = JSON.parse(tibqty.response).QTY;
-                callback.call(caller);
+                callback(that.QTY);
             }
         };
         tibqty.send();
     };
 
-    return this;
 }
 
 // Our parameters object - currently just recieves an object and returns a new object with
@@ -297,7 +293,6 @@ function TibParams(obj) {
         this[prop] = obj[prop];
     }
 
-    return this;
 }
 
 function ButtonParams(obj){
@@ -313,9 +308,5 @@ function ButtonParams(obj){
     if(!this.BTN){
         this.BTN = 'default';
     }
-
-    console.log(this);
-
-    return this;
 
 }
