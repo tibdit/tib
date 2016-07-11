@@ -114,14 +114,15 @@ function TibButton(defaultParams, e){
     this.buttonParams = new ButtonParams(defaultParams, e);
 
     if(!this.buttonParams.BTN){
+        console.log(this.buttonParams);
         this.buttonParams.BTN = 'default';
     }
-
-    this.loadButton();
     this.e = e;
 
-    this.loadElementData(this.tibInitiator.tibParams, e);
-    this.loadElementData(this.buttonParams, e);
+    this.loadElementData(this.tibInitiator.tibParams);
+    this.loadElementData(this.buttonParams);
+
+    this.loadButton();
 
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
@@ -137,36 +138,18 @@ function TibButton(defaultParams, e){
 
 }
 
-TibButton.prototype.loadElementData = function(params, e){
+TibButton.prototype.loadElementData = function(params){
     for( prop in params ){
-        if(e.getAttribute('data-bd-' + prop)){
-            params[prop] = e.getAttribute('data-bd-' + prop);
+        if(this.e.getAttribute('data-bd-' + prop)){
+            params[prop] = this.e.getAttribute('data-bd-' + prop) || params[prop];
         }
     }
-
+    console.log(params);
+    return params;
 };
 
 TibButton.prototype.acknowledgeTib = function( ){
-    e.classList.add('tibbed');
-};
-
-TibButton.prototype.loadButton = function(){
-    var BTN = this.buttonParams.BTN || "default";
-    if(BTN === "none"){ return false; }
-    var BTH = this.buttonParams.BTH || 20;
-    var BTC = this.buttonParams.BTC || "#f0f";
-    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
-
-    var that = this;
-    var tibbtn = new XMLHttpRequest();
-    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
-    tibbtn.send();
-
-    tibbtn.onreadystatechange = function(){
-        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-            that.writeButton(this.responseXML, BTN);
-        }
-    }
+    this.e.classList.add('tibbed');
 };
 
 TibButton.prototype.tibClick = function(){
@@ -186,6 +169,26 @@ TibButton.prototype.writeCounter = function( QTY){
     }
 };
 
+TibButton.prototype.loadButton = function(){
+    var BTN = this.buttonParams.BTN || "default";
+    if(BTN === "none"){ return false; }
+    var BTH = this.buttonParams.BTH || 20;
+    var BTC = this.buttonParams.BTC || "#f0f";
+    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+
+    var tibbtn = new XMLHttpRequest();
+    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+    tibbtn.send();
+
+    var that = this;
+
+    tibbtn.onreadystatechange = function(){
+        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+            that.writeButton(this.responseXML, BTN);
+        }
+    }
+};
+
 TibButton.prototype.writeButton = function(content, BTN){
 
     var content = content.getElementById("tib-btn-" + BTN);
@@ -199,7 +202,9 @@ TibButton.prototype.writeButton = function(content, BTN){
         this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
     }
 
-    this.tibInitiator.getQty(this.writeCounter);
+    var that = this;
+
+    this.tibInitiator.getQty(function(){that.writeCounter()});
 
 };
 
@@ -275,7 +280,7 @@ function TibParams( copyFrom) {
     this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
     this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
-    for ( var prop in this) this[prop] = copyFrom[prop];
+    for ( var prop in this) this[prop] = copyFrom[prop] || this[prop];
 }
 
 function ButtonParams( copyFrom){
@@ -286,7 +291,6 @@ function ButtonParams( copyFrom){
     // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
     for (prop in this) {
-        this[prop] = copyFrom[prop];
+        this[prop] = copyFrom[prop] || this[prop];
     }
-
 }
