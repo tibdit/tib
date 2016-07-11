@@ -70,7 +70,7 @@ function TibHandler(obj){
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = calcExpireLimit( this.defaultTibParams.DUR);
+        var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
         var keysToRemove = [];
 
         // Iterate over localStorage items
@@ -110,6 +110,11 @@ function TibButton(defaultParams, e){
     var that = this;
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
+
+    if(!this.buttonParams.BTN){
+        this.buttonParams.BTN = 'default';
+    }
+
 
     this.loadElementData = function(params, e){
         for( prop in params ){
@@ -298,10 +303,6 @@ function ButtonParams( copyFrom){
 
     for (prop in this) {
         this[prop] = copyFrom[prop];
-    }
-
-    if(!this.BTN){
-        this.BTN = 'default';
     }
 
 }
