@@ -95,71 +95,6 @@ function TibHandler(obj){
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
-    var that = this;
-    this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.buttonParams = new ButtonParams(defaultParams, e);
-
-    if(!this.buttonParams.BTN){
-        this.buttonParams.BTN = 'default';
-    }
-
-
-    this.loadElementData = function(params, e){
-        for( prop in params ){
-            if(e.getAttribute('data-bd-' + prop)){
-                params[prop] = e.getAttribute('data-bd-' + prop);
-            }
-        }
-
-    };
-
-    this.loadElementData(this.tibInitiator.tibParams, e);
-    this.loadElementData(this.buttonParams, e);
-
-    this.loadButton = function(){
-        var BTN = this.buttonParams.BTN || "default";
-        if(BTN === "none"){ return false; }
-        var BTH = this.buttonParams.BTH || 20;
-        var BTC = this.buttonParams.BTC || "#f0f";
-        var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
-
-        var that = this;
-        var tibbtn = new XMLHttpRequest();
-        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
-        tibbtn.send();
-
-        tibbtn.onreadystatechange = function(){
-            if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-                that.writeButton(this.responseXML, BTN);
-            }
-        }
-    };
-
-    this.loadButton();
-    this.e = e;
-
-
-    this.writeCounter = function( QTY){
-        var c = that.e.getElementsByClassName('bd-btn-counter')[0];
-        // If the button has a counter and the counter has been marked pending, replace
-        // the counter content with the retrieved QTY
-        if(c && QTY){
-            c.textContent = QTY;
-        }
-    };
-
-    this.tibClick = function(){
-        return function(){
-            // "this" context is the button element, since this occurs in the context of an
-            // onclick event
-            this.tibButton.tibInitiator.tib();
-        }
-    };
-
-    this.acknowledgeTib = function( ){
-        e.classList.add('tibbed');
-    };
-
 
     if (! document.getElementById('bd-css-tib-btn')) {
 
@@ -174,6 +109,20 @@ function TibButton(defaultParams, e){
         headElement.appendChild(linkElement);
     }
 
+    var that = this;
+    this.tibInitiator = new TibInitiator(defaultParams, e);
+    this.buttonParams = new ButtonParams(defaultParams, e);
+
+    if(!this.buttonParams.BTN){
+        this.buttonParams.BTN = 'default';
+    }
+
+    this.loadButton();
+    this.e = e;
+
+    this.loadElementData(this.tibInitiator.tibParams, e);
+    this.loadElementData(this.buttonParams, e);
+
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
     if(this.BTH){
@@ -187,6 +136,55 @@ function TibButton(defaultParams, e){
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
 
 }
+
+TibButton.loadElementData = function(params, e){
+    for( prop in params ){
+        if(e.getAttribute('data-bd-' + prop)){
+            params[prop] = e.getAttribute('data-bd-' + prop);
+        }
+    }
+
+};
+
+TibButton.prototype.acknowledgeTib = function( ){
+    e.classList.add('tibbed');
+};
+
+TibButton.prototype.loadButton = function(){
+    var BTN = this.buttonParams.BTN || "default";
+    if(BTN === "none"){ return false; }
+    var BTH = this.buttonParams.BTH || 20;
+    var BTC = this.buttonParams.BTC || "#f0f";
+    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+
+    var that = this;
+    var tibbtn = new XMLHttpRequest();
+    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+    tibbtn.send();
+
+    tibbtn.onreadystatechange = function(){
+        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+            that.writeButton(this.responseXML, BTN);
+        }
+    }
+};
+
+TibButton.prototype.tibClick = function(){
+    return function(){
+        // "this" context is the button element, since this occurs in the context of an
+        // onclick event
+        this.tibButton.tibInitiator.tib();
+    }
+};
+
+TibButton.prototype.writeCounter = function( QTY){
+    var c = this.e.getElementsByClassName('bd-btn-counter')[0];
+    // If the button has a counter and the counter has been marked pending, replace
+    // the counter content with the retrieved QTY
+    if(c && QTY){
+        c.textContent = QTY;
+    }
+};
 
 TibButton.prototype.writeButton = function(content, BTN){
 
