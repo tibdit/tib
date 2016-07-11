@@ -137,7 +137,7 @@ function TibButton(defaultParams, e){
 
 }
 
-TibButton.loadElementData = function(params, e){
+TibButton.prototype.loadElementData = function(params, e){
     for( prop in params ){
         if(e.getAttribute('data-bd-' + prop)){
             params[prop] = e.getAttribute('data-bd-' + prop);
