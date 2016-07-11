@@ -66,7 +66,6 @@ function TibHandler(obj){
             e.tibButton.acknowledgeTib();
             // If QTY obtained from storage, and button has a counter, write to it
             e.tibButton.writeCounter(QTY);
-
         }
     };
 
@@ -75,25 +74,23 @@ function TibHandler(obj){
         var keysToRemove = [];
 
         // Iterate over localStorage items
-        if(localStorage.length){
-            for(var k = 0, o = localStorage.length; k < o; k++){
-                var key = localStorage.key(k);
-                var ISS;
-                if(key.substr(0,10) === "bd-subref-" ){
-                    // Grab timestamp for given subref from localStorage
-                    var localStorageJSON = JSON.parse(localStorage.getItem(key));
-                    ISS = localStorageJSON.ISS;
-                }
-                // If sufficient time has passed, mark the localStorage item to be removed
-                if(Date.parse(ISS) < expireLimit){
+        for ( var k = 0; k < localStorage.length; k++) {
+            var key = localStorage.key(k);
+            if ( key.substr(0,10) === "bd-subref-" ) {
+                // Grab timestamp for given subref from localStorage
+                var oldTib = JSON.parse(localStorage.getItem(key));
+                var ISS = oldTib.ISS;  
+                
+                if ( Date.parse(ISS) < expireLimit ) { 
+                    // If sufficient time has passed, mark the localStorage item to be removed
                     keysToRemove.push(key);
                 }
             }
         }
         
         // If any items added to keysToRemove array, delete matching items from localStorage
-        if(keysToRemove.length){
-            for(var i= 0, n = keysToRemove.length; i < n; i++){
+        if ( keysToRemove.length){
+            for ( var i= 0, n = keysToRemove.length; i < n; i++){
                 localStorage.removeItem(keysToRemove[i]);
             }
         }
@@ -101,7 +98,7 @@ function TibHandler(obj){
     };
 
     this.calcExpireLimit = function( DUR){
-        return Date.now() - params.DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
+        return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
     };
 
     return this;
@@ -114,7 +111,7 @@ function TibButton(defaultParams, e){
     this.buttonParams = new ButtonParams(defaultParams, e);
 
     this.loadElementData = function(params, e){
-        for(prop in params){
+        for( prop in params ){
             if(e.getAttribute('data-bd-' + prop)){
                 params[prop] = e.getAttribute('data-bd-' + prop);
             }
@@ -167,7 +164,7 @@ function TibButton(defaultParams, e){
     var that = this;
     this.e = e;
 
-    this.writeCounter = function(){
+    this.writeCounter = function( QTY){
         var c = that.e.getElementsByClassName('bd-btn-counter')[0];
         // If the button has a counter and the counter has been marked pending, replace
         // the counter content with the retrieved QTY
@@ -187,7 +184,7 @@ function TibButton(defaultParams, e){
         }
     };
 
-    this.acknowledgeTib = function(){
+    this.acknowledgeTib = function( ){
         e.classList.add('tibbed');
     };
 
@@ -203,7 +200,7 @@ function TibButton(defaultParams, e){
         linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
         // linkElement.href= 'css/tib.css';
         headElement.appendChild(linkElement);
-    };
+    }
 
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
@@ -251,7 +248,7 @@ function TibInitiator( defaultParams, e){
             initiator += this.tibParams[prop];
             initiator += "&";
         }
-        initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
+       //  initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
         return initiator;
     };
 
@@ -285,7 +282,7 @@ function TibInitiator( defaultParams, e){
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
 // object as a later date.
-function TibParams(obj) {
+function TibParams( copyFrom) {
 
     this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
     this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
@@ -293,22 +290,18 @@ function TibParams(obj) {
     this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
     this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
-    for (prop in this) {
-        this[prop] = obj[prop];
-    }
-
-    return this;
+    for ( var prop in this) this[prop] = copyFrom[prop];
 }
 
-function ButtonParams(obj){
+function ButtonParams( copyFrom){
 
-    this.BTN = "";
-    this.BTC = "";
-    this.BTH = "";
-    this.DUR = "";  // 
+    this.BTN = "";  // Name of the button style to retreive/inject
+    this.BTC = "";  // Colour for the face of the button
+    this.BTH = "";  // Height in pixels
+    // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
     for (prop in this) {
-        this[prop] = obj[prop];
+        this[prop] = copyFrom[prop];
     }
 
     if(!this.BTN){
