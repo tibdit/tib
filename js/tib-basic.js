@@ -71,7 +71,7 @@ function TibHandler(obj){
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = Date.now() - this.calculateDUR(this.defaultTibParams);
+        var expireLimit = calcExpireLimit( this.defaultTibParams.DUR);
         var keysToRemove = [];
 
         // Iterate over localStorage items
@@ -90,6 +90,7 @@ function TibHandler(obj){
                 }
             }
         }
+        
         // If any items added to keysToRemove array, delete matching items from localStorage
         if(keysToRemove.length){
             for(var i= 0, n = keysToRemove.length; i < n; i++){
@@ -99,8 +100,8 @@ function TibHandler(obj){
 
     };
 
-    this.calculateDUR = function(params){
-        return params.DUR * 86400000;
+    this.calcExpireLimit = function( DUR){
+        return Date.now() - params.DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
     };
 
     return this;
@@ -216,19 +217,19 @@ function TibButton(defaultParams, e){
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
-function TibInitiator(defaultParams, e){
+function TibInitiator( defaultParams, e){
 
-    this.tibParams = new TibParams(defaultParams);
+    this.tibParams = new TibParams( defaultParams);
 
-
-    if(!this.tibParams.TIB){
+    // If no TIB specified, assume the current page URL
+    if ( !this.tibParams.TIB ) {
         this.tibParams.TIB = window.location.hostname + window.location.pathname;
     }
+
     //If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
-    if(!this.tibParams.SUB){
+    if ( !this.tibParams.SUB ){
         // Remove protocol + www.
-        this.tibParams.SUB = this.tibParams.TIB.replace(/.*?:\/\//g, '');
-        this.tibParams.SUB = this.tibParams.SUB.replace('www.', '');
+        this.tibParams.SUB = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');
         this.tibParams.SUB = Crypto.SHA256(this.tibParams.SUB);
         this.tibParams.SUB = this.tibParams.SUB.substr(0, 10);
         this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
@@ -280,12 +281,11 @@ function TibInitiator(defaultParams, e){
 // object as a later date.
 function TibParams(obj) {
 
-    this.PAD = "";
-    this.SUB = "";
-    this.CBK = "";
-    this.ASN = "";
-    this.DUR = "";
-    this.TIB = "";
+    this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
+    this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
+    this.CBK = "";  // Callback - If specified, the users browser will be redirected here after the tib is confirmed
+    this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
+    this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
     for (prop in this) {
         this[prop] = obj[prop];
@@ -299,6 +299,7 @@ function ButtonParams(obj){
     this.BTN = "";
     this.BTC = "";
     this.BTH = "";
+    this.DUR = "";  // 
 
     for (prop in this) {
         this[prop] = obj[prop];
