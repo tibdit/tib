@@ -70,7 +70,7 @@ function TibHandler(obj){
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = calcExpireLimit( this.defaultTibParams.DUR);
+        var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
         var keysToRemove = [];
 
         // Iterate over localStorage items
@@ -107,8 +107,14 @@ function TibHandler(obj){
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
+    var that = this;
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
+
+    if(!this.buttonParams.BTN){
+        this.buttonParams.BTN = 'default';
+    }
+
 
     this.loadElementData = function(params, e){
         for( prop in params ){
@@ -156,19 +162,17 @@ function TibButton(defaultParams, e){
         }
 
         // Write the stored QTY to the newly injected button
-        this.writeCounter();
+        this.writeCounter(that.QTY);
     };
 
     this.loadButton();
-
-    var that = this;
     this.e = e;
+
 
     this.writeCounter = function( QTY){
         var c = that.e.getElementsByClassName('bd-btn-counter')[0];
         // If the button has a counter and the counter has been marked pending, replace
         // the counter content with the retrieved QTY
-        var QTY = that.tibInitiator.QTY;
         if(c && QTY){
             c.textContent = QTY;
         }
@@ -214,8 +218,6 @@ function TibButton(defaultParams, e){
     // Add subref class for easier reference later
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
 
-    return this;
-
 }
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
@@ -238,19 +240,12 @@ function TibInitiator( defaultParams, e){
         this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
     }
 
-    // Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
-    // properties
-    this.generateInitiatorURL = function(getQty){
-        
-    };
 
-    this.tib = function(){
-
-    };
-
-
-    return this;
 }
+
+
+
+
 
 TibInitiator.prototype.tib= function() {
     var tibWindowName= "tibit";
@@ -275,6 +270,8 @@ Tibinitiator.prototype.getQty= function( callback){
     tibqty.send();
 }
 
+    // Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
+    // properties
 Tibinitiator.prototype.querystring= function() {
     var querystring = "?";
     for ( var param in this.params ) {
@@ -311,13 +308,5 @@ function ButtonParams( copyFrom){
     for (prop in this) {
         this[prop] = copyFrom[prop];
     }
-
-    if(!this.BTN){
-        this.BTN = 'default';
-    }
-
-    console.log(this);
-
-    return this;
 
 }
