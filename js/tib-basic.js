@@ -66,41 +66,39 @@ function TibHandler(obj){
             e.tibButton.acknowledgeTib();
             // If QTY obtained from storage, and button has a counter, write to it
             e.tibButton.writeCounter(QTY);
-
         }
     };
 
     this.sweepOldTibs = function(){
-        var expireLimit = Date.now() - this.calculateDUR(this.defaultTibParams);
+        var expireLimit = calcExpireLimit( this.defaultTibParams.DUR);
         var keysToRemove = [];
 
         // Iterate over localStorage items
-        if(localStorage.length){
-            for(var k = 0, o = localStorage.length; k < o; k++){
-                var key = localStorage.key(k);
-                var ISS;
-                if(key.substr(0,10) === "bd-subref-" ){
-                    // Grab timestamp for given subref from localStorage
-                    var localStorageJSON = JSON.parse(localStorage.getItem(key));
-                    ISS = localStorageJSON.ISS;
-                }
-                // If sufficient time has passed, mark the localStorage item to be removed
-                if(Date.parse(ISS) < expireLimit){
+        for ( var k = 0; k < localStorage.length; k++) {
+            var key = localStorage.key(k);
+            if ( key.substr(0,10) === "bd-subref-" ) {
+                // Grab timestamp for given subref from localStorage
+                var oldTib = JSON.parse(localStorage.getItem(key));
+                var ISS = oldTib.ISS;  
+                
+                if ( Date.parse(ISS) < expireLimit ) { 
+                    // If sufficient time has passed, mark the localStorage item to be removed
                     keysToRemove.push(key);
                 }
             }
         }
+        
         // If any items added to keysToRemove array, delete matching items from localStorage
-        if(keysToRemove.length){
-            for(var i= 0, n = keysToRemove.length; i < n; i++){
+        if ( keysToRemove.length){
+            for ( var i= 0, n = keysToRemove.length; i < n; i++){
                 localStorage.removeItem(keysToRemove[i]);
             }
         }
 
     };
 
-    this.calculateDUR = function(params){
-        return params.DUR * 86400000;
+    this.calcExpireLimit = function( DUR){
+        return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
     };
 
     return this;
@@ -114,7 +112,7 @@ function TibButton(defaultParams, e){
     this.buttonParams = new ButtonParams(defaultParams, e);
 
     this.loadElementData = function(params, e){
-        for(prop in params){
+        for( prop in params ){
             if(e.getAttribute('data-bd-' + prop)){
                 params[prop] = e.getAttribute('data-bd-' + prop);
             }
@@ -165,8 +163,8 @@ function TibButton(defaultParams, e){
     this.loadButton();
     this.e = e;
 
-    this.writeCounter = function(QTY){
-        console.log(that);
+
+    this.writeCounter = function( QTY){
         var c = that.e.getElementsByClassName('bd-btn-counter')[0];
         // If the button has a counter and the counter has been marked pending, replace
         // the counter content with the retrieved QTY
@@ -185,7 +183,7 @@ function TibButton(defaultParams, e){
         }
     };
 
-    this.acknowledgeTib = function(){
+    this.acknowledgeTib = function( ){
         e.classList.add('tibbed');
     };
 
@@ -201,7 +199,7 @@ function TibButton(defaultParams, e){
         linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
         // linkElement.href= 'css/tib.css';
         headElement.appendChild(linkElement);
-    };
+    }
 
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
@@ -219,19 +217,19 @@ function TibButton(defaultParams, e){
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
-function TibInitiator(defaultParams, e){
+function TibInitiator( defaultParams, e){
 
-    this.tibParams = new TibParams(defaultParams);
+    this.tibParams = new TibParams( defaultParams);
 
-
-    if(!this.tibParams.TIB){
+    // If no TIB specified, assume the current page URL
+    if ( !this.tibParams.TIB ) {
         this.tibParams.TIB = window.location.hostname + window.location.pathname;
     }
+
     //If no SUB is provided, generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
-    if(!this.tibParams.SUB){
+    if ( !this.tibParams.SUB ){
         // Remove protocol + www.
-        this.tibParams.SUB = this.tibParams.TIB.replace(/.*?:\/\//g, '');
-        this.tibParams.SUB = this.tibParams.SUB.replace('www.', '');
+        this.tibParams.SUB = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');
         this.tibParams.SUB = Crypto.SHA256(this.tibParams.SUB);
         this.tibParams.SUB = this.tibParams.SUB.substr(0, 10);
         this.tibParams.SUB = "TIB-SHA256-" + this.tibParams.SUB;
@@ -247,7 +245,7 @@ function TibInitiator(defaultParams, e){
             initiator += this.tibParams[prop];
             initiator += "&";
         }
-        initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
+       //  initiator = "https://tib.me/" + (getQty === true ? 'getqty/' : '') + initiator;
         return initiator;
     };
 
@@ -280,29 +278,26 @@ function TibInitiator(defaultParams, e){
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
 // object as a later date.
-function TibParams(obj) {
+function TibParams( copyFrom) {
 
-    this.PAD = "";
-    this.SUB = "";
-    this.CBK = "";
-    this.ASN = "";
-    this.DUR = "";
-    this.TIB = "";
+    this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
+    this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
+    this.CBK = "";  // Callback - If specified, the users browser will be redirected here after the tib is confirmed
+    this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
+    this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
-    for (prop in this) {
-        this[prop] = obj[prop];
-    }
-
+    for ( var prop in this) this[prop] = copyFrom[prop];
 }
 
-function ButtonParams(obj){
+function ButtonParams( copyFrom){
 
-    this.BTN = "";
-    this.BTC = "";
-    this.BTH = "";
+    this.BTN = "";  // Name of the button style to retreive/inject
+    this.BTC = "";  // Colour for the face of the button
+    this.BTH = "";  // Height in pixels
+    // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
     for (prop in this) {
-        this[prop] = obj[prop];
+        this[prop] = copyFrom[prop];
     }
 
     if(!this.BTN){
