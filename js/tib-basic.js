@@ -6,7 +6,7 @@ function tibInit(obj){
     var bd;
 
     var scriptsToImport = [];
-    $script('http://widget.tibit.local/assets/platforms/tumblr/crypto-sha256.js', 'cryptojs');
+    $script('https://widget.tibit.local/assets/platforms/tumblr/crypto-sha256.js', 'cryptojs');
     scriptsToImport.push('cryptojs');
 
     $script.ready(scriptsToImport, function () {
@@ -71,27 +71,15 @@ function TibHandler(obj){
 
     this.sweepOldTibs = function(){
         var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
-        var keysToRemove = [];
 
-        // Iterate over localStorage items
-        for ( var k = 0; k < localStorage.length; k++) {
-            var key = localStorage.key(k);
+        for(key in localStorage){
             if ( key.substr(0,10) === "bd-subref-" ) {
-                // Grab timestamp for given subref from localStorage
-                var oldTib = JSON.parse(localStorage.getItem(key));
-                var ISS = oldTib.ISS;  
-                
-                if ( Date.parse(ISS) < expireLimit ) { 
+                var ISS = JSON.parse(localStorage.getItem(key)).ISS;
+
+                if ( Date.parse(ISS) < expireLimit ) {
                     // If sufficient time has passed, mark the localStorage item to be removed
-                    keysToRemove.push(key);
+                    localStorage.removeItem(key);
                 }
-            }
-        }
-        
-        // If any items added to keysToRemove array, delete matching items from localStorage
-        if ( keysToRemove.length){
-            for ( var i= 0, n = keysToRemove.length; i < n; i++){
-                localStorage.removeItem(keysToRemove[i]);
             }
         }
 
