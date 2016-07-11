@@ -244,24 +244,20 @@ TibInitiator.prototype.tib= function() {
 
 
 TibInitiator.prototype.getQty= function( callback){
-    var that = this;
     var qtyHttp = new XMLHttpRequest();
-
     var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
     qtyHttp.open('GET', initiatorUrl, true);
-
     qtyHttp.onreadystatechange = function(){
         if (qtyHttp.readyState === 4 && qtyHttp.status === 200) {
-            that.QTY = JSON.parse(qtyHttp.response).QTY;
-            callback.call(caller);
+            callback( JSON.parse(qtyHttp.response).QTY);
         }
     };
     qtyHttp.send();
 };
 
-// Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
-// properties
+
 TibInitiator.prototype.querystring= function() {
+    // returns a URL querystring for initiator parameters
     var querystring = "?";
     for ( var param in this.params ) {
         querystring += param;
