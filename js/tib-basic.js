@@ -6,7 +6,7 @@ function tibInit(obj){
     var bd;
 
     var scriptsToImport = [];
-    $script('https://widget.tibit.local/assets/platforms/tumblr/crypto-sha256.js', 'cryptojs');
+    $script('http://widget.tibit.local/assets/platforms/tumblr/crypto-sha256.js', 'cryptojs');
     scriptsToImport.push('cryptojs');
 
     $script.ready(scriptsToImport, function () {
@@ -124,9 +124,6 @@ function TibButton(defaultParams, e){
     this.loadElementData(this.tibInitiator.tibParams, e);
     this.loadElementData(this.buttonParams, e);
 
-
-    console.log(this.buttonParams);
-
     this.loadButton = function(){
         var BTN = this.buttonParams.BTN || "default";
         if(BTN === "none"){ return false; }
@@ -148,8 +145,15 @@ function TibButton(defaultParams, e){
 
     this.writeButton = function(content, BTN){
         console.log('test');
-        content = content.getElementById("tib-btn-" + BTN);
-        e.replaceChild(document.importNode(content, true), e.children[0])
+        var content = content.getElementById("tib-btn-" + BTN);
+        console.log(content);
+
+        if (e.children.length === 0) {
+            e.appendChild(document.importNode(content, true));
+        } else {
+            // target <button> element should have <object> as first or only child
+            e.replaceChild(document.importNode(content, true),e.children[0]);
+        }
     };
 
     this.loadButton();
@@ -179,6 +183,26 @@ function TibButton(defaultParams, e){
     this.acknowledgeTib = function(){
         e.classList.add('tibbed');
     };
+
+
+    if (! document.getElementById('bd-css-tib-btn')) {
+
+        var headElement= document.getElementsByTagName('head')[0];
+
+        var linkElement= document.createElement('link');
+        linkElement.id= 'bd-css-tib-btn';
+        linkElement.rel= 'stylesheet';
+        linkElement.type= 'text/css';
+        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
+        // linkElement.href= 'css/tib.css';
+        headElement.appendChild(linkElement);
+    };
+
+    e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
+
+    if(this.BTH){
+        e.style.height = this.BTH + "px";
+    }
 
     // move to tib button
     e.addEventListener("click", this.tibClick());
@@ -279,6 +303,12 @@ function ButtonParams(obj){
     for (prop in this) {
         this[prop] = obj[prop];
     }
+
+    if(!this.BTN){
+        this.BTN = 'default';
+    }
+
+    console.log(this);
 
     return this;
 
