@@ -20,6 +20,7 @@ TibCallback= function(url){
 
 
 TibCallback.prototype.extractUrlToken= function(url){
+    // fetch the token from the callback querystring and decompile to JSON
     var re= "[^\?]*\?(.*&)?tibtok=([^&]*)"; 
     var token= url.match(re)[2]; // extract the value of the tibtok= querystring parameter
     token= decodeURIComponent(token); // convert any percent-encoded characters
@@ -30,7 +31,7 @@ TibCallback.prototype.extractUrlToken= function(url){
 
 
 TibCallback.prototype.generateDates= function() {
-    // set the EXP param to the expiry of the tib acknowledgement
+    // convert ISS to date object and set the EXP param to the expiry of the tib acknowledgement
     this.ISS = new Date( token.ISS).getTime();
     var duration= this.DUR * ( this.isTestnet() ? 300000 : 86400000 );
     // 300000   = 1000 * 60 * 5        (5 mins)
@@ -45,7 +46,8 @@ TibCallback.prototype.isTestnet= function(){
 };
 
 
-TibCallback.prototype.persistAck= function(){
+TibCallback.prototype.persistAck= function() {
+    // store the record of the tib in localStorage (trigger localStorage listener on tib initating page)
     var tibDetails = {
         ISS: this.ISS, 
         QTY: this.token.QTY, 
@@ -56,14 +58,15 @@ TibCallback.prototype.persistAck= function(){
 
 
 TibCallback.prototype.closeWindow= function( ) {
+    // close the popup window once the tib callback has been processed
     var re= "[^\?]*\?(.*&)?noclose($|[=&])";  // add noclose  querystring parameter to initiator 
-    if ( this.url.search(re) ) return false;  // to prevent popup window from being automatically closed
+    if ( this.url.search(re) === -1 ) return false;  // to prevent popup window from being automatically closed
 
     try {
         var tibWindow= window.open('','_self');
         tibWindow.close();
     }
-    catch(ex) { console.error( "bd: attempt to close callback window failed"); }
+    catch(ex) { console.error( "attempt to automatically close callback window failed"); }
     return false; // function should never return, since window is gone
 };
 
