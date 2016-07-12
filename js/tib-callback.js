@@ -35,15 +35,16 @@ TibCallback.prototype.extractUrlToken= function(url){
 
 TibCallback.prototype.generateExpiry= function(){
     var DUR = DUR || 1;
+    console.log(DUR);
     var EXP;
     var ISS = new Date(this.token.ISS);
     // testnet PAD
     if(this.token.PAD && this.isTestnet(this.token.PAD)){
-        EXP = ISS - (DUR * 300000);  // 1000 * 60 * 5 (5 mins)
+        EXP = ISS.getTime() + (DUR * 300000);  // 1000 * 60 * 5 (5 mins)
     }
     // realmode PAD or ASN
     else{
-        EXP = ISS - (DUR * 86400000);
+        EXP = ISS.getTime() + (DUR * 86400000);
     }
 
     return new Date(EXP);
