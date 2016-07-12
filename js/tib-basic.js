@@ -27,6 +27,11 @@ function tibInit(obj){
     });
 }
 
+/*
+TIB HANDLER
+****************************************************************************************************
+*/
+
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
 // the tibInit function.
@@ -57,44 +62,49 @@ function TibHandler(obj){
         });
     };
 
-    this.ackElementsInClass = function(key){
-        // Attempt to grab QTY from localStorage item matching passed key
-        var QTY = JSON.parse(localStorage.getItem(key)).QTY;
-        var buttons = document.getElementsByClassName(key);
-        for (var j = 0, m = buttons.length; j < m; j++){
-            var e = buttons[j];
-            e.tibButton.acknowledgeTib();
-            // If QTY obtained from storage, and button has a counter, write to it
-            e.tibButton.writeCounter(QTY);
-        }
-    };
+}
 
-    this.sweepOldTibs = function(){
-        var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
+TibHandler.prototype.ackElementsInClass = function(key){
+    // Attempt to grab QTY from localStorage item matching passed key
+    var QTY = JSON.parse(localStorage.getItem(key)).QTY;
+    var buttons = document.getElementsByClassName(key);
+    for (var j = 0, m = buttons.length; j < m; j++){
+        var e = buttons[j];
+        e.tibButton.acknowledgeTib();
+        // If QTY obtained from storage, and button has a counter, write to it
+        e.tibButton.writeCounter(QTY);
+    }
+};
 
-        for(key in localStorage){
-            if ( key.substr(0,10) === "bd-subref-" ) {
-                var ISS = JSON.parse(localStorage.getItem(key)).ISS;
+TibHandler.prototype.sweepOldTibs = function(){
+    var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
 
-                if ( Date.parse(ISS) < expireLimit ) {
-                    // If sufficient time has passed, mark the localStorage item to be removed
-                    localStorage.removeItem(key);
-                }
+    for(key in localStorage){
+        if ( key.substr(0,10) === "bd-subref-" ) {
+            var ISS = JSON.parse(localStorage.getItem(key)).ISS;
+
+            if ( Date.parse(ISS) < expireLimit ) {
+                // If sufficient time has passed, mark the localStorage item to be removed
+                localStorage.removeItem(key);
             }
         }
+    }
+};
 
-    };
+TibHandler.prototype.calcExpireLimit = function( DUR){
+    return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
+};
 
-    this.calcExpireLimit = function( DUR){
-        return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
-    };
-
-    return this;
-}
+/*
+ TIB BUTTON
+****************************************************************************************************
+*/
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
+
+    this.e = e;
 
     if (! document.getElementById('bd-css-tib-btn')) {
 
@@ -108,8 +118,6 @@ function TibButton(defaultParams, e){
         // linkElement.href= 'css/tib.css';
         headElement.appendChild(linkElement);
     }
-
-    var that = this;
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
 
@@ -117,11 +125,14 @@ function TibButton(defaultParams, e){
         this.buttonParams.BTN = 'default';
     }
 
-    this.loadButton();
-    this.e = e;
+    if(this.tibInitiator.isTestnet()){
+        this.e.classList.add("testnet");
+    }
 
-    this.loadElementData(this.tibInitiator.tibParams, e);
-    this.loadElementData(this.buttonParams, e);
+    this.loadElementData(this.tibInitiator.tibParams);
+    this.loadElementData(this.buttonParams);
+
+    this.loadButton();
 
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
@@ -137,36 +148,17 @@ function TibButton(defaultParams, e){
 
 }
 
-TibButton.loadElementData = function(params, e){
+TibButton.prototype.loadElementData = function(params){
     for( prop in params ){
-        if(e.getAttribute('data-bd-' + prop)){
-            params[prop] = e.getAttribute('data-bd-' + prop);
+        if(this.e.getAttribute('data-bd-' + prop)){
+            params[prop] = this.e.getAttribute('data-bd-' + prop) || params[prop];
         }
     }
-
+    return params;
 };
 
 TibButton.prototype.acknowledgeTib = function( ){
-    e.classList.add('tibbed');
-};
-
-TibButton.prototype.loadButton = function(){
-    var BTN = this.buttonParams.BTN || "default";
-    if(BTN === "none"){ return false; }
-    var BTH = this.buttonParams.BTH || 20;
-    var BTC = this.buttonParams.BTC || "#f0f";
-    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
-
-    var that = this;
-    var tibbtn = new XMLHttpRequest();
-    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
-    tibbtn.send();
-
-    tibbtn.onreadystatechange = function(){
-        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-            that.writeButton(this.responseXML, BTN);
-        }
-    }
+    this.e.classList.add('tibbed');
 };
 
 TibButton.prototype.tibClick = function(){
@@ -186,6 +178,26 @@ TibButton.prototype.writeCounter = function( QTY){
     }
 };
 
+TibButton.prototype.loadButton = function(){
+    var BTN = this.buttonParams.BTN || "default";
+    if(BTN === "none"){ return false; }
+    var BTH = this.buttonParams.BTH || 20;
+    var BTC = this.buttonParams.BTC || "#f0f";
+    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+
+    var tibbtn = new XMLHttpRequest();
+    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+    tibbtn.send();
+
+    var that = this;
+
+    tibbtn.onreadystatechange = function(){
+        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+            that.writeButton(this.responseXML, BTN);
+        }
+    }
+};
+
 TibButton.prototype.writeButton = function(content, BTN){
 
     var content = content.getElementById("tib-btn-" + BTN);
@@ -199,7 +211,7 @@ TibButton.prototype.writeButton = function(content, BTN){
         this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
     }
 
-    this.tibInitiator.getQty(this.writeCounter);
+    this.tibInitiator.getQty(this.writeCounter.bind(this));
 
 };
 
@@ -220,6 +232,10 @@ function TibInitiator( defaultParams, e){
     }
 }
 
+/*
+TIB INITIATOR
+****************************************************************************************************
+* */
 
 TibInitiator.prototype.hashedSub= function() {
     // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
@@ -253,15 +269,11 @@ TibInitiator.prototype.querystring= function() {
 
 
 TibInitiator.prototype.getQty= function( callback){
-<<<<<<< HEAD
+
     // retreive the current tib count for this initiator
     var qtyHttp= new XMLHttpRequest();
     var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
-=======
-    var qtyHttp = new XMLHttpRequest();
-    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
     console.log(initiatorUrl);
->>>>>>> 0873cce511c6bf34b1f68e6385e2b55a437d7a6c
     qtyHttp.open('GET', initiatorUrl, true);
     qtyHttp.onreadystatechange= function(){
         if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
@@ -269,6 +281,13 @@ TibInitiator.prototype.getQty= function( callback){
         }
     };
     qtyHttp.send();
+};
+
+TibInitiator.prototype.isTestnet= function(){
+    if ( this.tibParams.PAD && "mn2".search(this.tibParams.PAD.substr(0,1)) !== -1 ) {
+        return true;
+    }
+    return false;
 };
 
 // Our parameters object - currently just recieves an object and returns a new object with
@@ -282,7 +301,7 @@ function TibInitiatorParams( copyFrom) {
     this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
     this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
-    for ( var prop in this) this[prop] = copyFrom[prop];
+    for ( var prop in this) this[prop] = copyFrom[prop] || this[prop];
 }
 
 function ButtonParams( copyFrom){
@@ -293,7 +312,6 @@ function ButtonParams( copyFrom){
     // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
     for (prop in this) {
-        this[prop] = copyFrom[prop];
+        this[prop] = copyFrom[prop] || this[prop];
     }
-
 }
