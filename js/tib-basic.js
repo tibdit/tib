@@ -215,6 +215,13 @@ TibButton.prototype.writeButton = function(content, BTN){
 
 };
 
+
+
+/************
+TIB INITIATOR
+************/
+
+
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
 function TibInitiator( defaultParams, e){
@@ -228,21 +235,17 @@ function TibInitiator( defaultParams, e){
 
     if ( !this.tibParams.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
-        this.tibParams.SUB= "TIB-SHA256-" + this.hashedSub();
+        this.tibParams.SUB=  this.getSub();
     }
 }
 
-/*
-TIB INITIATOR
-****************************************************************************************************
-* */
 
-TibInitiator.prototype.hashedSub= function() {
+TibInitiator.prototype.getSub= function() {
     // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
     hash = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
     hash = Crypto.SHA256(hash);   // possibly move to https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
     hash = hash.substr(0, 10);
-    return hash;
+    return "TIB-SHA256-" + hash;
 };
 
 
@@ -254,9 +257,9 @@ TibInitiator.prototype.tib= function() {
     window.open( "https://tib.me/" + this.querystring(), tibWindowName, tibWindowOptions);
 };
 
-// Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
-// properties
+
 TibInitiator.prototype.querystring= function() {
+    // assembles tib initiator parameters into URL querystring 
     var querystring = "?";
     for ( var param in this.tibParams ) {
         querystring += param;
@@ -269,7 +272,6 @@ TibInitiator.prototype.querystring= function() {
 
 
 TibInitiator.prototype.getQty= function( callback){
-
     // retreive the current tib count for this initiator
     var qtyHttp= new XMLHttpRequest();
     var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
@@ -283,12 +285,13 @@ TibInitiator.prototype.getQty= function( callback){
     qtyHttp.send();
 };
 
+
 TibInitiator.prototype.isTestnet= function(){
-    if ( this.tibParams.PAD && "mn2".search(this.tibParams.PAD.substr(0,1)) !== -1 ) {
-        return true;
-    }
-    return false;
+    // true if PAD set and first character not 'm', 'n', or '2'
+    return this.tibParams.PAD && ( "mn2".search(this.tibParams.PAD.substr(0,1)) !== -1 );
 };
+
+
 
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
@@ -301,8 +304,12 @@ function TibInitiatorParams( copyFrom) {
     this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
     this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
-    for ( var prop in this) this[prop] = copyFrom[prop] || this[prop];
+    if (typeof copyFrom !== "undefined") {
+        for ( var param in this) this[param] = copyFrom[param] || this[param];
+    }
 }
+
+
 
 function ButtonParams( copyFrom){
 
@@ -311,7 +318,7 @@ function ButtonParams( copyFrom){
     this.BTH = "";  // Height in pixels
     // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
-    for (prop in this) {
-        this[prop] = copyFrom[prop] || this[prop];
+    if (typeof copyFrom !== "undefined") {
+        for (var param in this) this[param] = copyFrom[param] || this[param];
     }
 }
