@@ -1,3 +1,3 @@
 TibCallback = function(){
-    console.log('bruv');
+    console.log('hi');
 };

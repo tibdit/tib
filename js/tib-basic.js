@@ -226,7 +226,7 @@ TIB INITIATOR
 function TibInitiator( globalParams, e){
 
 
-    this.params = new TibInitiatorParams( globalParams);
+    this.tibParams = new TibInitiatorParams( globalParams);
     
     if ( !this.tibParams.TIB ) {
         // If no TIB specified, assume the current page URL
