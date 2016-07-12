@@ -1,16 +1,15 @@
 TibCallback= function(url){
-    this.url = url;
-};
+    
+    this.url= url;
+    this.DUR= 1;  // multiplier to persist tib acknowedgement (1= 1-day or 5-mins for testnet)
 
-TibCallback.prototype.processToken = function(){
     try {
-
-        this.token = this.extractUrlToken(this.url);
-        if (this.storageAvailable('localStorage')) {
-            this.persistAck();
-        }
+        this.extractUrlToken();
+        this.generateExpiry();
+        if ( localStorageAvailable() ) this.persistAck();
         this.closeWindow();
     }
+
     catch (e) {
         var msg=  document.createElement('p');
         msg.appendChild(document.createTextNode( e.message + "<br>" + e.stack ));
@@ -19,43 +18,38 @@ TibCallback.prototype.processToken = function(){
     }
 };
 
+
 TibCallback.prototype.extractUrlToken= function(url){
-    // for clarity, steps are individually broken down, reusing a single variable
-
-    var token= new URI(url);
-
-    token= token.query(true); // retreive the querystring parameters into js object
-    token= token.tibtok; // pull out the value of the tibtok= querystring parameter
-    token= URI.decode(token); // convert any percent-encoded characters
+    var re= "[^\?]*\?.*tibtok=([^&]*)"; 
+    var token= url.match(re)[1]; // extract the value of the tibtok= querystring parameter
+    token= decodeURIComponent(token); // convert any percent-encoded characters
     token= atob(token); // base64 decode the token
     token= JSON.parse(token); // convert the serialised json token string into js object
-
-    return token;
+    this.token= token;
 };
 
-TibCallback.prototype.generateExpiry= function(){
-    var DUR = DUR || 1;
-    var EXP;
-    var ISS = new Date(this.token.ISS);
-    // testnet PAD
-    if(this.token.PAD && this.isTestnet(this.token.PAD)){
-        EXP = ISS - (DUR * 300000);  // 1000 * 60 * 5 (5 mins)
-    }
-    // realmode PAD or ASN
-    else{
-        EXP = ISS - (DUR * 86400000);
-    }
 
-    return new Date(EXP);
+TibCallback.prototype.generateExpiry= function() {
+    // set the EXP param to the expiry of the tib acknowledgement
+    var issue = new Date( token.ISS).getTime();
+    var duration= this.DUR * ( this.isTestnet() ? 300000 : 86400000 );
+    // 300000   = 1000 * 60 * 5        (5 mins)
+    // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
+    this.EXP= new Date( issue + DUR);
 };
 
-TibCallback.prototype.isTestnet= function(PAD){
+
+TibCallback.prototype.isTestnet= function(){
     // true if PAD set and first character not 'm', 'n', or '2'
-    return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
+    return this.token.PAD && ( "mn2".search(this.token.PAD.substr(0,1)) !== -1 );
 };
+
 
 TibCallback.prototype.persistAck= function(){
-    var tibDetails = {ISS: new Date(this.token.ISS), QTY: this.token.QTY, EXP: this.generateExpiry()};
+    var tibDetails = {
+        ISS: new Date(this.token.ISS), 
+        QTY: this.token.QTY, 
+        EXP: this.EXP()};
     localStorage.setItem("bd-subref-" + this.token.SUB, JSON.stringify(tibDetails));
 };
 
@@ -64,16 +58,7 @@ TibCallback.prototype.storageAvailable= function(type) {
     // test for available browser localStorage
     // developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
 
-    try {
-        var storage = window[type],
-            x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
-    }
-    catch(e) {
-        return false;
-    }
+
 };
 
 TibCallback.prototype.closeWindow= function( ) {
@@ -95,3 +80,16 @@ TibCallback.prototype.closeWindow= function( ) {
     return false;
     // function should never return, since window is gone
 };
+
+
+function localStorageAvailable() {
+    try {   
+        x = '__storage_test__';
+        window.localStorage.setItem(x, x);
+        window.localStorage.removeItem(x);
+        return true;
+    }
+    catch(e) {
+        return false;
+    }
+}
