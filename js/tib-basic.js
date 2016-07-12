@@ -48,7 +48,7 @@ function TibHandler(globalParams){
 
             // Generate TibInitiator for button, feeding in global/default params + local params
             e.tibButton = new TibButton(globalParams, e);
-            if ( localStorage["bd-subref-" + e.tibButton.tibInitiator.tibParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.tibInitiator.tibParams.SUB)).ISS ){
+            if ( localStorage["bd-subref-" + e.tibButton.tibInitiator.tibInitiatorParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.tibInitiator.tibInitiatorParams.SUB)).ISS ){
                 e.tibButton.acknowledgeTib();
             }
         }
@@ -119,22 +119,22 @@ function TibButton(globalParams, e){
         headElement.appendChild(linkElement);
     }
     this.tibInitiator = new TibInitiator(globalParams, e);
-    this.buttonParams = new ButtonParams(globalParams, e);
+    this.tibButtonParams = new TibButtonParams(globalParams, e);
 
-    if(!this.buttonParams.BTN){
-        this.buttonParams.BTN = 'default';
+    if(!this.tibButtonParams.BTN){
+        this.tibButtonParams.BTN = 'default';
     }
 
     if(this.tibInitiator.isTestnet()){
         this.e.classList.add("testnet");
     }
 
-    this.loadElementData(this.tibInitiator.tibParams);
-    this.loadElementData(this.buttonParams);
+    this.loadElementData(this.tibInitiator.tibInitiatorParams);
+    this.loadElementData(this.tibButtonParams);
 
     this.loadButton();
 
-    e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
+    e.classList.add('bd-tib-btn-' + this.tibButtonParams.BTN);
 
     if(this.BTH){
         e.style.height = this.BTH + "px";
@@ -144,7 +144,7 @@ function TibButton(globalParams, e){
     e.addEventListener("click", this.tibClick());
 
     // Add subref class for easier reference later
-    e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
+    e.classList.add("bd-subref-" + this.tibInitiator.tibInitiatorParams.SUB);
 
 }
 
@@ -179,10 +179,10 @@ TibButton.prototype.writeCounter = function( QTY){
 };
 
 TibButton.prototype.loadButton = function(){
-    var BTN = this.buttonParams.BTN || "default";
-    var BTH = this.buttonParams.BTH || 20;
-    var BTC = this.buttonParams.BTC || "#f0f";
-    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+    var BTN = this.tibButtonParams.BTN || "default";
+    var BTH = this.tibButtonParams.BTH || 20;
+    var BTC = this.tibButtonParams.BTC || "#f0f";
+    var BTS = this.tibButtonParams.BTS || "https://widget.tibit.com/buttons/";
 
     var tibbtn = new XMLHttpRequest();
     tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -229,16 +229,16 @@ TIB INITIATOR
 function TibInitiator( globalParams, e){
 
 
-    this.tibParams = new TibInitiatorParams( globalParams);
+    this.tibInitiatorParams = new TibInitiatorParams( globalParams);
     
-    if ( !this.tibParams.TIB ) {
+    if ( !this.tibInitiatorParams.TIB ) {
         // If no TIB specified, assume the current page URL
-        this.tibParams.TIB = window.location.hostname + window.location.pathname; // querystring
+        this.tibInitiatorParams.TIB = window.location.hostname + window.location.pathname; // querystring
     }
 
-    if ( !this.tibParams.SUB ) {
+    if ( !this.tibInitiatorParams.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
-        this.tibParams.SUB=  this.getSub();
+        this.tibInitiatorParams.SUB=  this.getSub();
     }
 }
 
@@ -246,7 +246,7 @@ function TibInitiator( globalParams, e){
 TibInitiator.prototype.getSub= function() {
     // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
     // potential to overload with platform specific code, but that will require DOM element (as argument?)
-    hash = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
+    hash = this.tibInitiatorParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
     hash = Crypto.SHA256(hash);   // possibly move to https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
     hash = hash.substr(0, 10);
     return "TIB-SHA256-" + hash;
@@ -265,10 +265,10 @@ TibInitiator.prototype.tib= function() {
 TibInitiator.prototype.querystring= function() {
     // assembles tib initiator parameters into URL querystring 
     var querystring = "?";
-    for ( var param in this.tibParams ) {
+    for ( var param in this.tibInitiatorParams ) {
         querystring += param;
         querystring += "=";
-        querystring += encodeURIComponent(this.tibParams[param]);
+        querystring += encodeURIComponent(this.tibInitiatorParams[param]);
         querystring += "&";
     }
     return querystring.substr(0,querystring.length);  // truncate trailing ampersand
@@ -292,10 +292,8 @@ TibInitiator.prototype.getQty= function( callback){
 
 TibInitiator.prototype.isTestnet= function(){
     // true if PAD set and first character not 'm', 'n', or '2'
-    return this.tibParams.PAD && ( "mn2".search(this.tibParams.PAD.substr(0,1)) !== -1 );
+    return this.tibInitiatorParams.PAD && ( "mn2".search(this.tibInitiatorParams.PAD.substr(0,1)) !== -1 );
 };
-
-
 
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
@@ -315,7 +313,7 @@ function TibInitiatorParams( copyFrom) {
 
 
 
-function ButtonParams( copyFrom){
+function TibButtonParams( copyFrom){
 
     this.BTN = "";  // Name of the button style to retreive/inject
     this.BTC = "";  // Colour for the face of the button
