@@ -210,6 +210,9 @@ TibButton.prototype.writeButton = function(content, BTN){
         this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
     }
 
+    // Removing potential duplicate SVG ID's
+    this.e.children[0].removeAttribute("id");
+
     this.tibInitiator.getQty(this.writeCounter.bind(this));
 
 };

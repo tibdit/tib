@@ -1,9 +1,22 @@
 TibCallback= function(url){
-    this.token = this.extractUrlToken(url);
-    if(this.storageAvailable('localStorage')){
-        this.persistAck();
+    this.url = url;
+};
+
+TibCallback.prototype.processToken = function(){
+    try {
+
+        this.token = this.extractUrlToken(this.url);
+        if (this.storageAvailable('localStorage')) {
+            this.persistAck();
+        }
+        this.closeWindow();
     }
-    this.closeWindow();
+    catch (e) {
+        var msg=  document.createElement('p');
+        msg.appendChild(document.createTextNode( e.message + "<br>" + e.stack ));
+        msg.appendChild(document.createTextNode( "bd: tib callback - tib paid but cannot persist"));
+        throw "bd: tib callback - tib paid but cannot persist";
+    }
 };
 
 TibCallback.prototype.extractUrlToken= function(url){
