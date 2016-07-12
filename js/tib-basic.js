@@ -95,10 +95,11 @@ TibHandler.prototype.calcExpireLimit = function( DUR){
     return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
 };
 
-/*
+
+
+/**********
  TIB BUTTON
-****************************************************************************************************
-*/
+**********/
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
@@ -106,22 +107,17 @@ function TibButton(defaultParams, e){
 
     this.e = e;
 
-    if (! document.getElementById('bd-css-tib-btn')) {
-
-        var headElement= document.getElementsByTagName('head')[0];
-
-        var linkElement= document.createElement('link');
-        linkElement.id= 'bd-css-tib-btn';
-        linkElement.rel= 'stylesheet';
-        linkElement.type= 'text/css';
-        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
-        // linkElement.href= 'css/tib.css';
-        headElement.appendChild(linkElement);
-    }
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
 
+    if (! document.getElementById('bd-css-tib-btn')) {
+        // needs to accomodate different CSS by button type.
+        this.injectCss();
+    }
+
+    
     if(!this.buttonParams.BTN){
+        // this was a cludge, should be move out to where it takes effect
         this.buttonParams.BTN = 'default';
     }
 
@@ -129,8 +125,8 @@ function TibButton(defaultParams, e){
         this.e.classList.add("testnet");
     }
 
-    this.loadElementData(this.tibInitiator.tibParams);
-    this.loadElementData(this.buttonParams);
+    this.loadElementParams(this.tibInitiator.tibParams);
+    this.loadElementParams(this.buttonParams);
 
     this.loadButton();
 
@@ -148,10 +144,21 @@ function TibButton(defaultParams, e){
 
 }
 
-TibButton.prototype.loadElementData = function(params){
-    for( prop in params ){
-        if(this.e.getAttribute('data-bd-' + prop)){
-            params[prop] = this.e.getAttribute('data-bd-' + prop) || params[prop];
+TibButton.prototype.injectCss = function(){
+        var headElement= document.getElementsByTagName('head')[0];
+        var linkElement= document.createElement('link');
+        linkElement.id= 'bd-css-tib-btn';
+        linkElement.rel= 'stylesheet';
+        linkElement.type= 'text/css';
+        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
+        // linkElement.href= 'css/tib.css';
+        headElement.appendChild(linkElement);
+};
+
+TibButton.prototype.loadElementParams = function(params){
+    for ( param in params ){
+        if ( this.e.getAttribute('data-bd-' + param) ){
+            params[param] = this.e.getAttribute('data-bd-' + param) || params[param];
         }
     }
     return params;
@@ -230,7 +237,7 @@ function TibInitiator( defaultParams, e){
     
     if ( !this.tibParams.TIB ) {
         // If no TIB specified, assume the current page URL
-        this.tibParams.TIB = window.location.hostname + window.location.pathname; // querystring
+        this.tibParams.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
     }
 
     if ( !this.tibParams.SUB ) {
