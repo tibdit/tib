@@ -2,7 +2,7 @@
 (function(e,t){typeof module!="undefined"&&module.exports?module.exports=t():typeof define=="function"&&define.amd?define(t):this[e]=t()})("$script",function(){function p(e,t){for(var n=0,i=e.length;n<i;++n)if(!t(e[n]))return r;return 1}function d(e,t){p(e,function(e){return t(e),1})}function v(e,t,n){function g(e){return e.call?e():u[e]}function y(){if(!--h){u[o]=1,s&&s();for(var e in f)p(e.split("|"),g)&&!d(f[e],g)&&(f[e]=[])}}e=e[i]?e:[e];var r=t&&t.call,s=r?t:n,o=r?e.join(""):t,h=e.length;return setTimeout(function(){d(e,function t(e,n){if(e===null)return y();!n&&!/^https?:\/\//.test(e)&&c&&(e=e.indexOf(".js")===-1?c+e+".js":c+e);if(l[e])return o&&(a[o]=1),l[e]==2?y():setTimeout(function(){t(e,!0)},0);l[e]=1,o&&(a[o]=1),m(e,y)})},0),v}function m(n,r){var i=e.createElement("script"),u;i.onload=i.onerror=i[o]=function(){if(i[s]&&!/^c|loade/.test(i[s])||u)return;i.onload=i[o]=null,u=1,l[n]=2,r()},i.async=1,i.src=h?n+(n.indexOf("?")===-1?"?":"&")+h:n,t.insertBefore(i,t.lastChild)}var e=document,t=e.getElementsByTagName("head")[0],n="string",r=!1,i="push",s="readyState",o="onreadystatechange",u={},a={},f={},l={},c,h;return v.get=m,v.order=function(e,t,n){(function r(i){i=e.shift(),e.length?v(i,r):v(i,t,n)})()},v.path=function(e){c=e},v.urlArgs=function(e){h=e},v.ready=function(e,t,n){e=e[i]?e:[e];var r=[];return!d(e,function(e){u[e]||r[i](e)})&&p(e,function(e){return u[e]})?t():!function(e){f[e]=f[e]||[],f[e][i](t),n&&n(r)}(e.join("|")),v},v.done=function(e){v([null],e)},v})
 
 // Takes a JS object as a parameter
-function tibInit(obj){
+function tibInit(globalParams){
     var bd;
 
     var scriptsToImport = [];
@@ -11,7 +11,7 @@ function tibInit(obj){
 
     $script.ready(scriptsToImport, function () {
 
-        bd = new TibHandler(obj);
+        bd = new TibHandler(globalParams);
 
         if(document.readyState === 'loading'){
             document.addEventListener('DOMContentLoaded', function(){
@@ -35,12 +35,11 @@ TIB HANDLER
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
 // the tibInit function.
-function TibHandler(obj){
-    this.defaultTibParams = new TibParams(obj);
+function TibHandler(globalParams){
 
     this.initButtons = function(){
         var that = this;
-        this.sweepOldTibs();
+        this.sweepOldTibs(globalParams.DUR);
 
         var buttons = document.getElementsByClassName('bd-tib-btn');
         for(var i = 0, n = buttons.length; i < n; i++){
@@ -48,7 +47,7 @@ function TibHandler(obj){
             var e = buttons[i];
 
             // Generate TibInitiator for button, feeding in global/default params + local params
-            e.tibButton = new TibButton(this.defaultTibParams, e);
+            e.tibButton = new TibButton(globalParams, e);
             if ( localStorage["bd-subref-" + e.tibButton.tibInitiator.tibParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.tibInitiator.tibParams.SUB)).ISS ){
                 e.tibButton.acknowledgeTib();
             }
@@ -64,9 +63,9 @@ function TibHandler(obj){
 
 }
 
-TibHandler.prototype.ackElementsInClass = function(key){
+TibHandler.prototype.ackElementsInClass= function ( key ) {
     // Attempt to grab QTY from localStorage item matching passed key
-    var QTY = JSON.parse(localStorage.getItem(key)).QTY;
+    var QTY = JSON.parse( localStorage.getItem( key ) ).QTY;
     var buttons = document.getElementsByClassName(key);
     for (var j = 0, m = buttons.length; j < m; j++){
         var e = buttons[j];
@@ -76,8 +75,8 @@ TibHandler.prototype.ackElementsInClass = function(key){
     }
 };
 
-TibHandler.prototype.sweepOldTibs = function(){
-    var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
+TibHandler.prototype.sweepOldTibs= function( DUR ){
+    var expireLimit = this.calcExpireLimit( DUR );
 
     for(key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
@@ -91,7 +90,8 @@ TibHandler.prototype.sweepOldTibs = function(){
     }
 };
 
-TibHandler.prototype.calcExpireLimit = function( DUR){
+TibHandler.prototype.calcExpireLimit= function( DUR){
+    DUR = DUR || 1;
     return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
 };
 
@@ -102,7 +102,7 @@ TibHandler.prototype.calcExpireLimit = function( DUR){
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
-function TibButton(defaultParams, e){
+function TibButton(globalParams, e){
 
     this.e = e;
 
@@ -118,8 +118,8 @@ function TibButton(defaultParams, e){
         // linkElement.href= 'css/tib.css';
         headElement.appendChild(linkElement);
     }
-    this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.buttonParams = new ButtonParams(defaultParams, e);
+    this.tibInitiator = new TibInitiator(globalParams, e);
+    this.buttonParams = new ButtonParams(globalParams, e);
 
     if(!this.buttonParams.BTN){
         this.buttonParams.BTN = 'default';
@@ -180,7 +180,6 @@ TibButton.prototype.writeCounter = function( QTY){
 
 TibButton.prototype.loadButton = function(){
     var BTN = this.buttonParams.BTN || "default";
-    if(BTN === "none"){ return false; }
     var BTH = this.buttonParams.BTH || 20;
     var BTC = this.buttonParams.BTC || "#f0f";
     var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
@@ -192,7 +191,7 @@ TibButton.prototype.loadButton = function(){
     var that = this;
 
     tibbtn.onreadystatechange = function(){
-        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+        if (tibbtn.readyState == 4 && tibbtn.status == 200 && tibbtn.responseXML) {
             that.writeButton(this.responseXML, BTN);
         }
     }
@@ -217,9 +216,9 @@ TibButton.prototype.writeButton = function(content, BTN){
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
-function TibInitiator( defaultParams, e){
+function TibInitiator( globalParams, e){
 
-    this.tibParams = new TibParams( defaultParams);
+    this.tibParams = new TibParams( globalParams);
     
     if ( !this.tibParams.TIB ) {
         // If no TIB specified, assume the current page URL
