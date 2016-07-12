@@ -95,91 +95,6 @@ function TibHandler(obj){
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(defaultParams, e){
-    var that = this;
-    this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.buttonParams = new ButtonParams(defaultParams, e);
-
-    if(!this.buttonParams.BTN){
-        this.buttonParams.BTN = 'default';
-    }
-
-
-    this.loadElementData = function(params, e){
-        for( prop in params ){
-            if(e.getAttribute('data-bd-' + prop)){
-                params[prop] = e.getAttribute('data-bd-' + prop);
-            }
-        }
-
-    };
-
-    this.loadElementData(this.tibInitiator.tibParams, e);
-    this.loadElementData(this.buttonParams, e);
-
-    this.loadButton = function(){
-        var BTN = this.buttonParams.BTN || "default";
-        if(BTN === "none"){ return false; }
-        var BTH = this.buttonParams.BTH || 20;
-        var BTC = this.buttonParams.BTC || "#f0f";
-        var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
-
-        var that = this;
-        var tibbtn = new XMLHttpRequest();
-        tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
-        tibbtn.send();
-
-        tibbtn.onreadystatechange = function(){
-            if (tibbtn.readyState == 4 && tibbtn.status == 200) {
-                that.writeButton(this.responseXML, BTN);
-            }
-        }
-    };
-
-    this.writeButton = function(content, BTN){
-        console.log(BTN);
-        var content = content.getElementById("tib-btn-" + BTN);
-        console.log(content);
-
-        // Inject the button, either as a new child of the container element or a replacement
-        // for the immediate child
-        if (e.children.length === 0) {
-            e.appendChild(document.importNode(content, true));
-        } else {
-            // target <button> element should have <object> as first or only child
-            e.replaceChild(document.importNode(content, true),e.children[0]);
-        }
-
-        // Write the stored QTY to the newly injected button
-        this.writeCounter(that.QTY);
-    };
-
-    this.loadButton();
-    this.e = e;
-
-
-    this.writeCounter = function( QTY){
-        var c = that.e.getElementsByClassName('bd-btn-counter')[0];
-        // If the button has a counter and the counter has been marked pending, replace
-        // the counter content with the retrieved QTY
-        if(c && QTY){
-            c.textContent = QTY;
-        }
-    };
-
-    this.tibInitiator.getQty(this.writeCounter, this);
-
-    this.tibClick = function(){
-        return function(){
-            // "this" context is the button element, since this occurs in the context of an
-            // onclick event
-            this.tibButton.tibInitiator.tib();
-        }
-    };
-
-    this.acknowledgeTib = function( ){
-        e.classList.add('tibbed');
-    };
-
 
     if (! document.getElementById('bd-css-tib-btn')) {
 
@@ -194,6 +109,20 @@ function TibButton(defaultParams, e){
         headElement.appendChild(linkElement);
     }
 
+    var that = this;
+    this.tibInitiator = new TibInitiator(defaultParams, e);
+    this.buttonParams = new ButtonParams(defaultParams, e);
+
+    if(!this.buttonParams.BTN){
+        this.buttonParams.BTN = 'default';
+    }
+
+    this.loadButton();
+    this.e = e;
+
+    this.loadElementData(this.tibInitiator.tibParams, e);
+    this.loadElementData(this.buttonParams, e);
+
     e.classList.add('bd-tib-btn-' + this.buttonParams.BTN);
 
     if(this.BTH){
@@ -207,6 +136,72 @@ function TibButton(defaultParams, e){
     e.classList.add("bd-subref-" + this.tibInitiator.tibParams.SUB);
 
 }
+
+TibButton.loadElementData = function(params, e){
+    for( prop in params ){
+        if(e.getAttribute('data-bd-' + prop)){
+            params[prop] = e.getAttribute('data-bd-' + prop);
+        }
+    }
+
+};
+
+TibButton.prototype.acknowledgeTib = function( ){
+    e.classList.add('tibbed');
+};
+
+TibButton.prototype.loadButton = function(){
+    var BTN = this.buttonParams.BTN || "default";
+    if(BTN === "none"){ return false; }
+    var BTH = this.buttonParams.BTH || 20;
+    var BTC = this.buttonParams.BTC || "#f0f";
+    var BTS = this.buttonParams.BTS || "https://widget.tibit.com/buttons/";
+
+    var that = this;
+    var tibbtn = new XMLHttpRequest();
+    tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
+    tibbtn.send();
+
+    tibbtn.onreadystatechange = function(){
+        if (tibbtn.readyState == 4 && tibbtn.status == 200) {
+            that.writeButton(this.responseXML, BTN);
+        }
+    }
+};
+
+TibButton.prototype.tibClick = function(){
+    return function(){
+        // "this" context is the button element, since this occurs in the context of an
+        // onclick event
+        this.tibButton.tibInitiator.tib();
+    }
+};
+
+TibButton.prototype.writeCounter = function( QTY){
+    var c = this.e.getElementsByClassName('bd-btn-counter')[0];
+    // If the button has a counter and the counter has been marked pending, replace
+    // the counter content with the retrieved QTY
+    if(c && QTY){
+        c.textContent = QTY;
+    }
+};
+
+TibButton.prototype.writeButton = function(content, BTN){
+
+    var content = content.getElementById("tib-btn-" + BTN);
+
+    // Inject the button, either as a new child of the container element or a replacement
+    // for the immediate child
+    if (this.e.children.length === 0) {
+        this.e.appendChild(document.importNode(content, true));
+    } else {
+        // target <button> element should have <object> as first or only child
+        this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
+    }
+
+    this.tibInitiator.getQty(this.writeCounter);
+
+};
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
@@ -243,11 +238,30 @@ TibInitiator.prototype.tib= function() {
     window.open( "https://tib.me/" + this.querystring(), tibWindowName, tibWindowOptions);
 };
 
+// Grabs tibParams object attached to this initiator and returns a tib.me URL based on these
+// properties
+TibInitiator.prototype.querystring= function() {
+    var querystring = "?";
+    for ( var param in this.tibParams ) {
+        querystring += param;
+        querystring += "=";
+        querystring += this.tibParams[param];
+        querystring += "&";
+    }
+    return querystring.substr(0,querystring.length);  // truncate trailing ampersand
+};
+
 
 TibInitiator.prototype.getQty= function( callback){
+<<<<<<< HEAD
     // retreive the current tib count for this initiator
     var qtyHttp= new XMLHttpRequest();
     var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
+=======
+    var qtyHttp = new XMLHttpRequest();
+    var initiatorUrl = "https://tib.me/getqty/" + this.querystring();
+    console.log(initiatorUrl);
+>>>>>>> 0873cce511c6bf34b1f68e6385e2b55a437d7a6c
     qtyHttp.open('GET', initiatorUrl, true);
     qtyHttp.onreadystatechange= function(){
         if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
@@ -256,22 +270,6 @@ TibInitiator.prototype.getQty= function( callback){
     };
     qtyHttp.send();
 };
-
-
-TibInitiator.prototype.querystring= function() {
-    // returns a URL querystring for initiator parameters
-    var querystring = "?";
-    for ( var param in this.params ) {
-        querystring += param;
-        querystring += "=";
-        querystring += this.params[param];
-        querystring += "&";
-    }
-    return querystring.substr(0,querystring.length);  // truncate trailing ampersand
-};
-
-
-
 
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
