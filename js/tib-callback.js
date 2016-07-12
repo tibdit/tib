@@ -33,8 +33,29 @@ TibCallback.prototype.extractUrlToken= function(url){
     return token;
 };
 
+TibCallback.prototype.generateExpiry= function(){
+    var DUR = DUR || 1;
+    var EXP;
+    var ISS = new Date(this.token.ISS);
+    // testnet PAD
+    if(this.token.PAD && this.isTestnet(this.token.PAD)){
+        EXP = ISS - (DUR * 300000);  // 1000 * 60 * 5 (5 mins)
+    }
+    // realmode PAD or ASN
+    else{
+        EXP = ISS - (DUR * 86400000);
+    }
+
+    return new Date(EXP);
+};
+
+TibCallback.prototype.isTestnet= function(PAD){
+    // true if PAD set and first character not 'm', 'n', or '2'
+    return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
+};
+
 TibCallback.prototype.persistAck= function(){
-    var tibDetails = {ISS: this.token.ISS, QTY: this.token.QTY};
+    var tibDetails = {ISS: new Date(this.token.ISS), QTY: this.token.QTY, EXP: this.generateExpiry()};
     localStorage.setItem("bd-subref-" + this.token.SUB, JSON.stringify(tibDetails));
 };
 

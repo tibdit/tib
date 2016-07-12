@@ -79,9 +79,9 @@ TibHandler.prototype.sweepOldTibs= function( DUR ){
 
     for(var key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
-            var ISS = JSON.parse(localStorage.getItem(key)).ISS;
-
-            if ( Date.parse(ISS) < expireLimit ) {
+            var item = JSON.parse(localStorage.getItem(key))
+            var EXP = new Date(item.EXP)
+            if ( Date.now() <  EXP) {
                 // If sufficient time has passed, mark the localStorage item to be removed
                 localStorage.removeItem(key);
             }
@@ -109,12 +109,15 @@ function TibButton(globalParams, e){
     this.tibInitiator = new TibInitiator(defaultParams, this.domElement);
     this.params = new TibButtonParams(defaultParams, this.domElement);
 
+
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
         this.injectCss();
     }
     
+
     this.loadElementParams(e);
+
 
     this.loadButton();
 
@@ -180,8 +183,10 @@ TibButton.prototype.writeCounter= function( QTY){
 
 
 TibButton.prototype.loadButton= function(){
+
     var buttonFile = this.params.BTN || "default";
     var buttonLocation = this.params.BTS || "https://widget.tibit.com/buttons/";
+
 
     var tibbtn = new XMLHttpRequest();
     tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -216,7 +221,9 @@ TibButton.prototype.writeButton= function( source, BTN){
     }
 
     var bg = this.e.getElementsByClassName('bd-btn-backdrop')[0];
+
     if(bg && this.params.BTC) {
+
         bg.style.fill = this.params.BTC;
     }
 
