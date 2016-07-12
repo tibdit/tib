@@ -108,8 +108,8 @@ function TibButton(globalParams, e){
     this.e = e;
 
 
-    this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.buttonParams = new ButtonParams(defaultParams, e);
+    this.tibInitiator = new TibInitiator(globalParams, e);
+    this.params = new TibButtonParams(globalParams, e);
 
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
@@ -117,9 +117,9 @@ function TibButton(globalParams, e){
     }
 
     
-    if(!this.buttonParams.BTN){
+    if(!this.params.BTN){
         // this was a cludge, should be move out to where it takes effect
-        this.buttonParams.BTN = 'default';
+        this.params.BTN = 'default';
 
     }
 
@@ -128,11 +128,11 @@ function TibButton(globalParams, e){
     }
 
     this.loadElementParams(this.tibInitiator.tibParams);
-    this.loadElementParams(this.buttonParams);
+    this.loadElementParams(this.params);
 
     this.loadButton();
 
-    e.classList.add('bd-tib-btn-' + this.tibButtonParams.BTN);
+    e.classList.add('bd-tib-btn-' + this.params.BTN);
 
     // move to tib button
     e.addEventListener("click", this.tibClick());
@@ -184,10 +184,10 @@ TibButton.prototype.writeCounter= function( QTY){
 };
 
 TibButton.prototype.loadButton= function(){
-    var BTN = this.tibButtonParams.BTN || "default";
-    var BTH = this.tibButtonParams.BTH || 20;
-    var BTC = this.tibButtonParams.BTC || "#f0f";
-    var BTS = this.tibButtonParams.BTS || "https://widget.tibit.com/buttons/";
+    var BTN = this.params.BTN || "default";
+    var BTH = this.params.BTH || 20;
+    var BTC = this.params.BTC || "#f0f";
+    var BTS = this.params.BTS || "https://widget.tibit.com/buttons/";
 
     var tibbtn = new XMLHttpRequest();
     tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -221,12 +221,12 @@ TibButton.prototype.writeButton= function( source, BTN){
     }
 
     var bg = this.e.getElementsByClassName('bd-btn-backdrop')[0];
-    if(bg && this.tibButtonParams.BTC){
-        bg.style.fill = this.tibButtonParams.BTC;
+    if(bg && this.params.BTC){
+        bg.style.fill = this.params.BTC;
     }
 
-    if(this.tibButtonParams.BTH){
-        this.e.style.height = this.tibButtonParams.BTH + "px";
+    if(this.params.BTH){
+        this.e.style.height = this.params.BTH + "px";
     }
 
     // Removing potential duplicate SVG ID's
