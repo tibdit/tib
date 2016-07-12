@@ -57,40 +57,38 @@ function TibHandler(obj){
         });
     };
 
-    this.ackElementsInClass = function(key){
-        // Attempt to grab QTY from localStorage item matching passed key
-        var QTY = JSON.parse(localStorage.getItem(key)).QTY;
-        var buttons = document.getElementsByClassName(key);
-        for (var j = 0, m = buttons.length; j < m; j++){
-            var e = buttons[j];
-            e.tibButton.acknowledgeTib();
-            // If QTY obtained from storage, and button has a counter, write to it
-            e.tibButton.writeCounter(QTY);
-        }
-    };
+}
 
-    this.sweepOldTibs = function(){
-        var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
+TibHandler.prototype.ackElementsInClass = function(key){
+    // Attempt to grab QTY from localStorage item matching passed key
+    var QTY = JSON.parse(localStorage.getItem(key)).QTY;
+    var buttons = document.getElementsByClassName(key);
+    for (var j = 0, m = buttons.length; j < m; j++){
+        var e = buttons[j];
+        e.tibButton.acknowledgeTib();
+        // If QTY obtained from storage, and button has a counter, write to it
+        e.tibButton.writeCounter(QTY);
+    }
+};
 
-        for(key in localStorage){
-            if ( key.substr(0,10) === "bd-subref-" ) {
-                var ISS = JSON.parse(localStorage.getItem(key)).ISS;
+TibHandler.prototype.sweepOldTibs = function(){
+    var expireLimit = this.calcExpireLimit( this.defaultTibParams.DUR);
 
-                if ( Date.parse(ISS) < expireLimit ) {
-                    // If sufficient time has passed, mark the localStorage item to be removed
-                    localStorage.removeItem(key);
-                }
+    for(key in localStorage){
+        if ( key.substr(0,10) === "bd-subref-" ) {
+            var ISS = JSON.parse(localStorage.getItem(key)).ISS;
+
+            if ( Date.parse(ISS) < expireLimit ) {
+                // If sufficient time has passed, mark the localStorage item to be removed
+                localStorage.removeItem(key);
             }
         }
+    }
+};
 
-    };
-
-    this.calcExpireLimit = function( DUR){
-        return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
-    };
-
-    return this;
-}
+TibHandler.prototype.calcExpireLimit = function( DUR){
+    return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
+};
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
@@ -108,8 +106,6 @@ function TibButton(defaultParams, e){
         // linkElement.href= 'css/tib.css';
         headElement.appendChild(linkElement);
     }
-
-    var that = this;
     this.tibInitiator = new TibInitiator(defaultParams, e);
     this.buttonParams = new ButtonParams(defaultParams, e);
 
