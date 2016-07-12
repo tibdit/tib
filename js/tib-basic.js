@@ -230,7 +230,7 @@ function TibInitiator( defaultParams, e){
     
     if ( !this.tibParams.TIB ) {
         // If no TIB specified, assume the current page URL
-        this.tibParams.TIB = window.location.hostname + window.location.pathname;
+        this.tibParams.TIB = window.location.hostname + window.location.pathname; // querystring
     }
 
     if ( !this.tibParams.SUB ) {
@@ -242,6 +242,7 @@ function TibInitiator( defaultParams, e){
 
 TibInitiator.prototype.getSub= function() {
     // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
+    // potential to overload with platform specific code, but that will require DOM element (as argument?)
     hash = this.tibParams.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
     hash = Crypto.SHA256(hash);   // possibly move to https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
     hash = hash.substr(0, 10);
@@ -264,7 +265,7 @@ TibInitiator.prototype.querystring= function() {
     for ( var param in this.tibParams ) {
         querystring += param;
         querystring += "=";
-        querystring += this.tibParams[param];
+        querystring += encodeURIComponent(this.tibParams[param]);
         querystring += "&";
     }
     return querystring.substr(0,querystring.length);  // truncate trailing ampersand
@@ -305,7 +306,7 @@ function TibInitiatorParams( copyFrom) {
     this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
 
     if (typeof copyFrom !== "undefined") {
-        for ( var param in this) this[param] = copyFrom[param] || this[param];
+        for ( var p in this) this[p] = copyFrom[p] || this[p];
     }
 }
 
@@ -319,6 +320,6 @@ function ButtonParams( copyFrom){
     // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
 
     if (typeof copyFrom !== "undefined") {
-        for (var param in this) this[param] = copyFrom[param] || this[param];
+        for (var p in this) this[p] = copyFrom[p] || this[p];
     }
 }
