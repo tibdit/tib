@@ -1,14 +1,12 @@
-TibCallback = function(){
-    this.token = this.processToken();
-    console.log(this.token);
+TibCallback= function(url){
+    this.token = this.extractUrlToken(url);
+    if(this.storageAvailable('localStorage')){
+        this.persistAck();
+    }
+    this.closeWindow();
 };
 
-TibCallback.prototype.processToken = function(){
-    var token = this.extractUrlToken(window.location.href);
-    return token;
-};
-
-TibCallback.prototype.extractUrlToken = function(url){
+TibCallback.prototype.extractUrlToken= function(url){
     // for clarity, steps are individually broken down, reusing a single variable
 
     var token= new URI(url);
@@ -20,4 +18,46 @@ TibCallback.prototype.extractUrlToken = function(url){
     token= JSON.parse(token); // convert the serialised json token string into js object
 
     return token;
+};
+
+TibCallback.prototype.persistAck= function(){
+    var tibDetails = {ISS: this.token.ISS, QTY: this.token.QTY};
+    localStorage.setItem("bd-subref-" + this.token.SUB, JSON.stringify(tibDetails));
+};
+
+TibCallback.prototype.storageAvailable= function(type) {
+
+    // test for available browser localStorage
+    // developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+
+    try {
+        var storage = window[type],
+            x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }
+    catch(e) {
+        return false;
+    }
+};
+
+TibCallback.prototype.closeWindow= function( ) {
+
+    //add noclose to querystring of tib initiator to prevent popup tib window from closing
+
+    if ( URI(window.location).query(true).noclose ) {
+        return false;
+    }
+
+    try {
+        var tibWindow= window.open('','_self');
+        tibWindow.close();
+    }
+    catch(ex) {
+        console.error( "bd: attempt to close callback window failed");
+    }
+
+    return false;
+    // function should never return, since window is gone
 };
