@@ -27,10 +27,9 @@ function tibInit(globalParams){
     });
 }
 
-/*
+/**********
 TIB HANDLER
-****************************************************************************************************
-*/
+**********/
 
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
@@ -47,9 +46,9 @@ function TibHandler(globalParams){
             var e = buttons[i];
 
             // Generate TibInitiator for button, feeding in global/default params + local params
-            e.tibButton = new TibButton(globalParams, e);
+            e.tib.button = new TibButton(globalParams, e);
             if ( localStorage["bd-subref-" + e.tibButton.tibInitiator.tibInitiatorParams.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.tibInitiator.tibInitiatorParams.SUB)).ISS ){
-                e.tibButton.acknowledgeTib();
+                e.tib.button.acknowledgeTib();
             }
         }
 
@@ -65,9 +64,9 @@ function TibHandler(globalParams){
 
 TibHandler.prototype.ackElementsInClass= function ( key ) {
     // Attempt to grab QTY from localStorage item matching passed key
-    var QTY = JSON.parse( localStorage.getItem( key ) ).QTY;
+    var QTY = JSON.parse( localStorage.getItem(key)).QTY;
     var buttons = document.getElementsByClassName(key);
-    for (var j = 0, m = buttons.length; j < m; j++){
+    for (var j = 0, m = buttons.length; j < m; j++) {
         var e = buttons[j];
         e.tibButton.acknowledgeTib();
         // If QTY obtained from storage, and button has a counter, write to it
@@ -78,7 +77,7 @@ TibHandler.prototype.ackElementsInClass= function ( key ) {
 TibHandler.prototype.sweepOldTibs= function( DUR ){
     var expireLimit = this.calcExpireLimit( DUR );
 
-    for(key in localStorage){
+    for(var key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
             var ISS = JSON.parse(localStorage.getItem(key)).ISS;
 
@@ -97,50 +96,37 @@ TibHandler.prototype.calcExpireLimit= function( DUR){
 
 
 
-/**********
- TIB BUTTON
-**********/
+/*********
+TIB BUTTON
+*********/
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(globalParams, e){
 
-    this.e = e;
+    this.domElement = e;
 
-
-    this.tibInitiator = new TibInitiator(defaultParams, e);
-    this.buttonParams = new ButtonParams(defaultParams, e);
+    this.tibInitiator = new TibInitiator(defaultParams, this.domElement);
+    this.params = new TibButtonParams(defaultParams, this.domElement);
 
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
         this.injectCss();
     }
-
     
-    if(!this.buttonParams.BTN){
-        // this was a cludge, should be move out to where it takes effect
-        this.buttonParams.BTN = 'default';
-
-    }
-
-    if(this.tibInitiator.isTestnet()){
-        this.e.classList.add("testnet");
-    }
-
-    this.loadElementParams(this.tibInitiator.tibParams);
-    this.loadElementParams(this.buttonParams);
+    this.loadElementParams(e);
 
     this.loadButton();
 
-    e.classList.add('bd-tib-btn-' + this.tibButtonParams.BTN);
+    e.classList.add('bd-tib-btn-' + this.params.BTN);
 
-    // move to tib button
-    e.addEventListener("click", this.tibClick());
-
+    if ( this.isTestnet() ) this.e.classList.add("testnet");
     // Add subref class for easier reference later
     e.classList.add("bd-subref-" + this.tibInitiator.tibInitiatorParams.SUB);
 
+    e.addEventListener("click", this.initateTib());
 }
+
 
 TibButton.prototype.injectCss = function(){
         var headElement= document.getElementsByTagName('head')[0];
@@ -153,26 +139,35 @@ TibButton.prototype.injectCss = function(){
         headElement.appendChild(linkElement);
 };
 
-TibButton.prototype.loadElementParams = function(params){
-    for ( param in params ){
-        if ( this.e.getAttribute('data-bd-' + param) ){
-            params[param] = this.e.getAttribute('data-bd-' + param) || params[param];
+
+TibButton.prototype.loadElementParams = function(){
+    for ( var paramName in this.params ){
+        if ( this.e.getAttribute('data-bd-' + paramName) ){
+            this.params[paramName] = this.e.getAttribute('data-bd-' + paramName) || this.params[paramName];
         }
     }
-    return params;
+    this.tibInitiator.loadElementParams(this.e);
 };
+
 
 TibButton.prototype.acknowledgeTib = function( ){
     this.e.classList.add('tibbed');
 };
 
-TibButton.prototype.tibClick = function(){
+
+TibButton.prototype.isTestnet= function() {
+    return this.tibInitiator.isTestnet();
+};
+
+
+TibButton.prototype.initateTib = function(){
     return function(){
-        // "this" context is the button element, since this occurs in the context of an
-        // onclick event
-        this.tibButton.tibInitiator.tib();
+        // "this" context is the button element, since this occurs in the context of an onclick event
+        this.tibButton.tibInitiator.tib();   
+        // if class 'tibbed' do something different maybe     
     };
 };
+
 
 TibButton.prototype.writeCounter= function( QTY){
     var c= this.e.getElementsByClassName('bd-btn-counter')[0];
@@ -183,11 +178,10 @@ TibButton.prototype.writeCounter= function( QTY){
     }
 };
 
+
 TibButton.prototype.loadButton= function(){
-    var BTN = this.tibButtonParams.BTN || "default";
-    var BTH = this.tibButtonParams.BTH || 20;
-    var BTC = this.tibButtonParams.BTC || "#f0f";
-    var BTS = this.tibButtonParams.BTS || "https://widget.tibit.com/buttons/";
+    var buttonFile = this.params.BTN || "default";
+    var buttonLocation = this.params.BTS || "https://widget.tibit.com/buttons/";
 
     var tibbtn = new XMLHttpRequest();
     tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -201,6 +195,7 @@ TibButton.prototype.loadButton= function(){
         }
     };
 };
+
 
 TibButton.prototype.writeButton= function( source, BTN){
 
@@ -221,12 +216,12 @@ TibButton.prototype.writeButton= function( source, BTN){
     }
 
     var bg = this.e.getElementsByClassName('bd-btn-backdrop')[0];
-    if(bg && this.tibButtonParams.BTC){
-        bg.style.fill = this.tibButtonParams.BTC;
+    if(bg && this.params.BTC) {
+        bg.style.fill = this.params.BTC;
     }
 
-    if(this.tibButtonParams.BTH){
-        this.e.style.height = this.tibButtonParams.BTH + "px";
+    if(this.params.BTH){
+        this.e.style.height = this.params.BTH + "px";
     }
 
     // Removing potential duplicate SVG ID's
@@ -241,6 +236,17 @@ TibButton.prototype.writeButton= function( source, BTN){
 
 };
 
+
+function TibButtonParams( copyFrom){
+
+    this.BTN = "default";  // Name of the button style to retreive/inject
+    this.BTC = "";  // Colour for the face of the button
+    this.BTH = "";  // Height in pixels
+
+    if (typeof copyFrom !== "undefined") {
+        for (var p in this) this[p] = copyFrom[p] || this[p];
+    }
+}
 
 
 /************
@@ -321,6 +327,16 @@ TibInitiator.prototype.isTestnet= function(){
     return this.tibInitiatorParams.PAD && ( "mn2".search(this.tibInitiatorParams.PAD.substr(0,1)) !== -1 );
 };
 
+
+TibInitiator.prototype.loadElementParams= function(e) {
+    for ( var paramName in this.params)
+        if ( e.getAttribute('data-bd-' + p) ){
+            this.params[paramName] = e.getAttribute('data-bd-' + paramName) || this.params[paramName];   
+        }
+    };
+};
+
+
 // Our parameters object - currently just recieves an object and returns a new object with
 // the relevant properties, but this gives us room to apply data validation etc inside of the
 // object as a later date.
@@ -339,14 +355,3 @@ function TibInitiatorParams( copyFrom) {
 
 
 
-function TibButtonParams( copyFrom){
-
-    this.BTN = "";  // Name of the button style to retreive/inject
-    this.BTC = "";  // Colour for the face of the button
-    this.BTH = "";  // Height in pixels
-    // this.DUR = "";  // Number of days (minutes for testmode) to remain 'tibbed'
-
-    if (typeof copyFrom !== "undefined") {
-        for (var p in this) this[p] = copyFrom[p] || this[p];
-    }
-}
