@@ -14,6 +14,7 @@ TibCallback= function(url){
         var msg=  document.createElement('p');
         msg.appendChild(document.createTextNode( e.message + "<br>" + e.stack ));
         msg.appendChild(document.createTextNode( "bd: tib callback - tib paid but cannot persist"));
+        throw(e);
         throw "bd: tib callback - tib paid but cannot persist";
     }
 };
@@ -22,7 +23,7 @@ TibCallback= function(url){
 TibCallback.prototype.extractUrlToken= function(url){
     // fetch the token from the callback querystring and decompile to JSON
     var re= "[^\?]*\?(.*&)?tibtok=([^&]*)"; 
-    var token= url.match(re)[2]; // extract the value of the tibtok= querystring parameter
+    var token= this.url.match(re)[2]; // extract the value of the tibtok= querystring parameter
     token= decodeURIComponent(token); // convert any percent-encoded characters
     token= atob(token); // base64 decode the token
     token= JSON.parse(token); // convert the serialised json token string into js object
@@ -32,11 +33,11 @@ TibCallback.prototype.extractUrlToken= function(url){
 
 TibCallback.prototype.generateDates= function() {
     // convert ISS to date object and set the EXP param to the expiry of the tib acknowledgement
-    this.ISS = new Date( token.ISS).getTime();
+    this.ISS = new Date( this.token.ISS).getTime();
     var duration= this.DUR * ( this.isTestnet() ? 300000 : 86400000 );
     // 300000   = 1000 * 60 * 5        (5 mins)
     // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
-    this.EXP= new Date( this.ISS + DUR);
+    this.EXP= new Date( this.ISS + this.DUR);
 };
 
 
@@ -50,7 +51,7 @@ TibCallback.prototype.persistAck= function() {
     // store the record of the tib in localStorage (trigger localStorage listener on tib initating page)
     var tibDetails = {
         ISS: this.ISS, 
-        QTY: this.token.QTY, 
+        QTY: this.token.QTY,
         EXP: this.EXP
     };
     localStorage.setItem("bd-subref-" + this.token.SUB, JSON.stringify(tibDetails));

@@ -5,26 +5,19 @@
 function tibInit(globalParams){
     var bd;
 
-    var scriptsToImport = [];
-    $script('https://widget.tibit.local/assets/platforms/tumblr/crypto-sha256.js', 'cryptojs');
-    scriptsToImport.push('cryptojs');
 
-    $script.ready(scriptsToImport, function () {
+    bd = new TibHandler(globalParams);
 
-        bd = new TibHandler(globalParams);
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', function(){
+           bd.initButtons();
+        });
+    }
+    else{
+        bd.initButtons();
+    }
 
-        if(document.readyState === 'loading'){
-            document.addEventListener('DOMContentLoaded', function(){
-               bd.initButtons();
-            });
-        }
-        else{
-            bd.initButtons();
-        }
-
-        return bd;
-
-    });
+    return bd;
 }
 
 /**********
@@ -78,8 +71,8 @@ TibHandler.prototype.sweepOldTibs= function( DUR ){
 
     for(var key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
-            var item = JSON.parse(localStorage.getItem(key))
-            var EXP = new Date(item.EXP)
+            var item = JSON.parse(localStorage.getItem(key));
+            var EXP = new Date(item.EXP);
             if ( Date.now() >  EXP.getTime()) {
                 // If sufficient time has passed, mark the localStorage item to be removed
                 localStorage.removeItem(key);
