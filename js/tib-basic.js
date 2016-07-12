@@ -76,8 +76,6 @@ TibHandler.prototype.ackElementsInClass= function ( key ) {
 };
 
 TibHandler.prototype.sweepOldTibs= function( DUR ){
-    var expireLimit = this.calcExpireLimit( DUR );
-
     for(key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
             var item = JSON.parse(localStorage.getItem(key))
@@ -89,12 +87,6 @@ TibHandler.prototype.sweepOldTibs= function( DUR ){
         }
     }
 };
-
-TibHandler.prototype.calcExpireLimit= function( DUR){
-    DUR = DUR || 1;
-    return Date.now() - DUR * 86400000;  // 1000 x 60 x 60 x 24 (days → ms)
-};
-
 
 
 /**********
