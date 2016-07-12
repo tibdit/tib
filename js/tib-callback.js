@@ -14,7 +14,6 @@ TibCallback= function(url){
         var msg=  document.createElement('p');
         msg.appendChild(document.createTextNode( e.message + "<br>" + e.stack ));
         msg.appendChild(document.createTextNode( "bd: tib callback - tib paid but cannot persist"));
-        throw(e);
         throw "bd: tib callback - tib paid but cannot persist";
     }
 };
