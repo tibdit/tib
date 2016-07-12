@@ -134,10 +134,6 @@ function TibButton(globalParams, e){
 
     e.classList.add('bd-tib-btn-' + this.tibButtonParams.BTN);
 
-    if(this.BTH){
-        e.style.height = this.BTH + "px";
-    }
-
     // move to tib button
     e.addEventListener("click", this.tibClick());
 
@@ -219,8 +215,27 @@ TibButton.prototype.writeButton= function( source, BTN){
         this.e.replaceChild(document.importNode(content, true), this.e.children[0]);
     }
 
+    // prevent default submit type/action if placed within a form
+    if (this.e.tagName === 'BUTTON' && !this.e.getAttribute('type') ) {
+        this.e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+    }
+
+    var bg = this.e.getElementsByClassName('bd-btn-backdrop')[0];
+    if(bg && this.tibButtonParams.BTC){
+        bg.style.fill = this.tibButtonParams.BTC;
+    }
+
+    if(this.tibButtonParams.BTH){
+        this.e.style.height = this.tibButtonParams.BTH + "px";
+    }
+
     // Removing potential duplicate SVG ID's
-    this.e.children[0].removeAttribute("id");
+    var s = this.e.children[0];
+    s.removeAttribute("id");
+
+    if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+        s.style.width=(s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+    }
 
     this.tibInitiator.getQty(this.writeCounter.bind(this));
 
