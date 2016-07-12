@@ -80,9 +80,9 @@ TibHandler.prototype.sweepOldTibs= function( DUR ){
 
     for(key in localStorage){
         if ( key.substr(0,10) === "bd-subref-" ) {
-            var ISS = JSON.parse(localStorage.getItem(key)).ISS;
-
-            if ( Date.parse(ISS) < expireLimit ) {
+            var item = JSON.parse(localStorage.getItem(key))
+            var EXP = new Date(item.EXP)
+            if ( Date.now() <  EXP) {
                 // If sufficient time has passed, mark the localStorage item to be removed
                 localStorage.removeItem(key);
             }
