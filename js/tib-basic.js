@@ -21,6 +21,8 @@ function tibInit(siteParams){
 
 var SUBREF_PREFIX= 'bd-subref-';
 
+
+
 /**********
 TIB HANDLER
 **********/
@@ -55,6 +57,8 @@ function TibHandler( siteParams){
         });
     };
 }
+
+
 
 TibHandler.prototype.ackElementsInClass= function ( key ) {
 
@@ -94,7 +98,6 @@ TIB BUTTON
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
-function TibButton(globalParams, domElement){
 
 function TibButton(siteParams, e){
 
@@ -117,10 +120,8 @@ function TibButton(siteParams, e){
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
-    // Add subref class for easier reference later
-    this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );
 
-
+    this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );  // Add subref class for easier reference later
     this.domElement.addEventListener("click", this.initateTib.bind(this));
 }
 
@@ -137,19 +138,33 @@ TibButton.prototype.loadParams = function(source){
 
 
 
-TibButton.prototype.injectCss = function(){
+TibButton.prototype.injectCss = function( source){
 
     // inject non-button-style dependant CSS
     // should be moved to writebutton, with anti-dupication
 
     var headElement= document.getElementsByTagName('head')[0];
-    var linkElement= document.createElement('link');
-    linkElement.id= 'bd-css-tib-btn';
-    linkElement.rel= 'stylesheet';
-    linkElement.type= 'text/css';
-    linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
-    // linkElement.href= 'css/tib.css';
-    headElement.appendChild(linkElement);
+    var genericCssElement= document.getElementById('bd-css-tib-btn');
+    
+    if (! genericCssElement) {
+        var linkElement= document.createElement('link');  
+        linkElement= {
+            id: 'bd-css-tib-btn',
+            rel: 'stylesheet',
+            type: 'text/css',
+            href: 'https://widget.tibit.com/assets/css/tib.css'
+        }
+        genericCssElement= headElement.appendChild(linkElement);
+    }
+
+    if (! document.getElementById("tib-btn-" + BTN + "-css")) { // buton-style-specific CSS not already injected
+        var styleElement= source.getElementById( "tib-btn-" + BTN + "-css");   // extract button specifc CSS from source
+        if ( styleElement ) {
+            headElement.insertBefore(genericCssElement, tibCssElement.nextSibling); // inject button specific CSS immediatly after
+    }
+
+
+
 };
 
 
@@ -233,12 +248,10 @@ TibButton.prototype.loadButton= function(){
 };
 
 
-TibButton.prototype.writeButton= function( source, BTN){
 
-    if (! document.getElementById('bd-css-tib-btn')) {
-        // needs to accomodate different CSS by button type.
-        this.injectCss();
-    }
+TibButton.prototype.writeButton= function( source, BTN) {
+
+
 
     if (! source) throw "bd: failed to load tib-btn-" + BTN;
     var content= source.getElementById("tib-btn-" + BTN);
@@ -259,32 +272,23 @@ TibButton.prototype.writeButton= function( source, BTN){
         this.domElement.setAttribute('type','button'); // prevents default submit type/action if placed withing form
     }
 
-    var bg = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];
-
-    if(bg && this.params.BTC) {
-
-        bg.style.fill = this.params.BTC;
+    var backdrop = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
+    if ( backdrop && this.params.BTC ) {
+        backdrop.style.fill = this.params.BTC; // fill will only work for svg, needs expansion to include CSS
     }
 
-    if(this.params.BTH){
+    if ( this.params.BTH ) {
         this.domElement.style.height = this.params.BTH + "px";
     }
 
-    // Removing potential duplicate SVG ID's
-    var s = this.domElement.children[0];
+    var s= this.domElement.children[0];  // Removing imported SVG ID to avoid potential duplicates
     s.removeAttribute("id");
 
     if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-        s.style.width=(s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+        s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
     }
 
-    var btnLinkCss= source.getElementById( "tib-btn-" + BTN + "-css");
-    if (btnLinkCss) {
-        var headElement= document.getElementsByTagName('head')[0];
-        var tibCssElement= document.getElementById('bd-css-tib-btn');
-        headElement.insertBefore(btnLinkCss, tibCssElement.nextSibling);
-    }
-
+    this.injectCss( source);
 
     this.initiator.getQty(this.writeCounter.bind(this));
 
