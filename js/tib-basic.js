@@ -140,36 +140,6 @@ TibButton.prototype.loadParams = function(source){
 
 
 
-TibButton.prototype.injectCss = function( source){
-
-    // inject non-button-style dependant CSS
-    // should be moved to writebutton, with anti-dupication
-
-    var headElement= document.getElementsByTagName('head')[0];
-    var genericCssElement= document.getElementById('bd-css-tib-btn');
-    
-    if (! genericCssElement) {
-        var linkElement= document.createElement('link');  
-        linkElement= {
-            id: 'bd-css-tib-btn',
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: 'https://widget.tibit.com/assets/css/tib.css'
-        }
-        genericCssElement= headElement.appendChild(linkElement);
-    }
-
-    if (! document.getElementById("tib-btn-" + BTN + "-css")) { // buton-style-specific CSS not already injected
-        var styleElement= source.getElementById( "tib-btn-" + BTN + "-css");   // extract button specifc CSS from source
-        if ( styleElement ) {
-            headElement.insertBefore(genericCssElement, tibCssElement.nextSibling); // inject button specific CSS immediatly after
-    }
-
-
-
-};
-
-
 
 TibButton.prototype.loadElementParams = function(){
 
@@ -206,11 +176,8 @@ TibButton.prototype.isTestnet= function() {
 
 
 TibButton.prototype.initateTib= function() {
-
-    // "this" context is the button element, since this occurs in the context of an onclick event
     this.initiator.tib();
     // if class 'tibbed' do something different maybe
-
 };
 
 
@@ -251,27 +218,23 @@ TibButton.prototype.loadButton= function(){
 
 
 
+
+
 TibButton.prototype.writeButton= function( source, BTN) {
 
+    var sourceElement= source.getElementById("tib-btn-" + BTN);
+    if (! sourceElement) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
 
+    var buttonElement= document.importNode(sourceElement, true);
 
-    if (! source) throw "bd: failed to load tib-btn-" + BTN;
-    var content= source.getElementById("tib-btn-" + BTN);
-
-    if (! content) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
-
-    // Inject the button, either as a new child of the container element or a replacement
-    // for the immediate child
     if (this.domElement.children.length === 0) {
-        this.domElement.appendChild(document.importNode(content, true));
+        this.domElement.appendChild(buttonElement);  // insert if no placeholder
     } else {
-        // target <button> element should have <object> as first or only child
-        this.domElement.replaceChild(document.importNode(content, true), this.domElement.children[0]);
+        this.domElement.replaceChild(buttonElement, this.domElement.children[0]);  // replace placeholder
     }
 
-    // prevent default submit type/action if placed within a form
     if (this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
-        this.domElement.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+        this.domElement.setAttribute('type','button'); // prevents default submit type/action if within <form>
     }
 
     var backdrop = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
@@ -295,6 +258,36 @@ TibButton.prototype.writeButton= function( source, BTN) {
     this.initiator.getQty(this.writeCounter.bind(this));
 
 };
+
+
+
+
+TibButton.prototype.injectCss = function( source) {
+
+    // inject non-button-style dependant CSS
+    // should be moved to writebutton, with anti-dupication
+
+    var headElement= document.getElementsByTagName('head')[0];
+    var genericCssElement= document.getElementById('bd-css-tib-btn');
+    
+    if (! genericCssElement) {
+        var linkElement= document.createElement('link');  
+        linkElement.id= 'bd-css-tib-btn';  
+        linkElement.rel= 'stylesheet';
+        linkElement.type= 'text/css';
+        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css'; 
+        genericCssElement= headElement.appendChild(linkElement);  
+    }
+
+    if (! document.getElementById("tib-btn-" + BTN + "-css")) { // button-style-specific CSS not already injected
+        var styleElement= source.getElementById( "tib-btn-" + BTN + "-css");   // extract button specifc CSS from source
+        if ( styleElement ) {
+            headElement.insertBefore(styleElement, genericCssElement.nextSibling); // inject button specific CSS immediatly after
+        }
+    }
+};
+
+
 
 
 /************
