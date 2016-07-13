@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="tib-basic.js"></script>
+<!-- Including our script for later usage -->
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Cool Site</title>
+</head>
+<body>
+    <h3>Deriving Parameters from tibInit()</h3>
+    <button class="bd-tib-btn">Tib</button>
+
+    <h3>Anchor Tag</h3>
+    <a href="https://tib.me/?PAD=myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz&TIB=bbc.co.uk">Tib Me!</a>
+
+    <h3>Inline Parameters</h3>
+    <button class="bd-tib-btn none-test" data-bd-BTC="#a5a" data-bd-BTH="330" data-bd-TIB="google.co.uk"
+            data-bd-SUB="testytestttt"></button>
+    <!-- The button we'll use to hook our tib functions to. -->
+
+    <h3>Directly Attached TibButton</h3>
+    <div id="direct-button"></div>
+
+    <h3>Directly Attached TibInitiator</h3>
+    <button id="direct-initiator" onclick="this.tibInitiator.tib()">Tib Me!</button>
+
+</body>
+</html>
+
+<script>
+    tibParamExample = {
+        'PAD': 'myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz', // Your bitcoin address
+        'TIB': 'http://www.website.com/', // Content you wish to be tibbed for (optional)
+        'BTN': 'bubble', // Button styles which can be set site-wide (optional)
+        'CBK' : 'https://widget.tibit.local/assets/js/example-callback.html'
+    };
+    bd = tibInit(tibParamExample);
+
+    x = document.getElementById('direct-initiator').tibInitiator = new TibInitiator(tibParamExample);
+    y = document.getElementById('direct-button');
+    y.tibButton = new TibButton(tibParamExample, y);
+</script>

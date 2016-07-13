@@ -85,16 +85,17 @@ TIB BUTTON
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
-function TibButton(globalParams, e){
+function TibButton(globalParams, domElement){
     console.log(globalParams);
-    this.domElement = e;
+    this.domElement = domElement;
 
     this.initiator = new TibInitiator(globalParams, this.domElement);
     this.params = {
 
         BTN : "",  // Name of the button style to retreive/inject
         BTC : "",  // Colour for the face of the button
-        BTH : ""  // Height in pixels
+        BTH : "",  // Height in pixels
+        BTS : ""
 
     };
 
@@ -105,24 +106,24 @@ function TibButton(globalParams, e){
         this.injectCss();
     }
 
-    this.loadElementParams(e);
+    this.loadElementParams(this.domElement);
 
     if (this.params.BTN){
         this.loadButton();
-        e.classList.add('bd-tib-btn-' + this.params.BTN);
+        this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
     // Add subref class for easier reference later
-    e.classList.add("bd-subref-" + this.initiator.params.SUB);
+    this.domElement.classList.add("bd-subref-" + this.initiator.params.SUB);
 
-    e.addEventListener("click", this.initateTib.bind(this));
+    this.domElement.addEventListener("click", this.initateTib.bind(this));
 }
 TibButton.prototype.setParams = function(source){
     if (typeof source !== "undefined") {
         for (var p in this.params) this.params[p] = source[p];
     }
-}
+};
 
 TibButton.prototype.injectCss = function(){
         var headElement= document.getElementsByTagName('head')[0];
@@ -159,17 +160,18 @@ TibButton.prototype.isTestnet= function() {
 
 
 TibButton.prototype.initateTib= function() {
-    return function() {
-        // "this" context is the button element, since this occurs in the context of an onclick event
-        this.tibButton.initiator.tib();   
-        // if class 'tibbed' do something different maybe     
-    };
+
+    // "this" context is the button element, since this occurs in the context of an onclick event
+    this.initiator.tib();
+    // if class 'tibbed' do something different maybe
+
 };
 
 
 TibButton.prototype.writeCounter= function( QTY){
     var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
-    if ( c && !isNaN(QTY) ) {
+    // isNaN('') will return false
+    if ( c && !isNaN(QTY) && QTY !== '') {
         c.textContent = parseInt(QTY);
     }
 };
@@ -182,7 +184,8 @@ TibButton.prototype.loadButton= function(){
 
 
     var tibbtn= new XMLHttpRequest();
-    tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".svg", true);
+    tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".html", true);
+    tibbtn.responseType= "document";
     tibbtn.send();
 
     var that= this;
@@ -197,7 +200,9 @@ TibButton.prototype.loadButton= function(){
 
 TibButton.prototype.writeButton= function( source, BTN){
 
+    if (! source) throw "bd: failed to load tib-btn-" + BTN;
     var content= source.getElementById("tib-btn-" + BTN);
+    if (! content) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
 
     // Inject the button, either as a new child of the container element or a replacement
     // for the immediate child
@@ -290,6 +295,10 @@ function TibInitiator( globalParams, domElement){
     if ( !this.params.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
+    }
+
+    if(domElement){
+        this.setParams(domElement);
     }
 }
 
