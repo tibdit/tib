@@ -116,13 +116,14 @@ function TibButton(siteParams, e){
     this.tibbed= false;
     this.hasCounter= false;
     this.initiator = new TibInitiator(siteParams, this.domElement);
+
+    this.loadParams(siteParams);
+    this.loadElementParams(this.domElement);
+
     if( this.domElement.getElementsByClassName('bd-btn-counter') ) {
         this.hasCounter = true;
         this.initiator.getQty(this.writeCounter.bind(this));
     }
-
-    this.loadParams(siteParams);
-    this.loadElementParams(this.domElement);
 
     if (this.params.BTN){
         this.buttonStyle = new TibButtonStyle(this.params, this.domElement);
@@ -327,7 +328,6 @@ function TibInitiator( siteParams, domElement){
 
 
     this.loadParams(siteParams);
-    this.loadElementParams(domElement);
 
     if ( !this.params.TIB ) {
         // If no TIB specified, assume the current page URL
@@ -335,14 +335,11 @@ function TibInitiator( siteParams, domElement){
         this.params.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
 
     }
-    console.log(this.params.SUB);
 
     if ( !this.params.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
     }
-
-    console.log(this.params.SUB);
 
 
 }
