@@ -93,6 +93,15 @@ function TibButton(globalParams, e){
     this.params = new TibButtonParams(globalParams, this.domElement);
 
 
+    this.params = {
+
+        BTN : "",  // Name of the button style to retreive/inject
+        BTC : "",  // Colour for the face of the button
+        BTH : ""  // Height in pixels
+
+    };
+
+
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
         this.injectCss();
@@ -112,7 +121,11 @@ function TibButton(globalParams, e){
 
     e.addEventListener("click", this.initateTib());
 }
-
+TibButton.prototype.setParams = function(source){
+    if (typeof source !== "undefined") {
+        for (var p in this.params) this[p] = this.params[p] || source[p];
+    }
+}
 
 TibButton.prototype.injectCss = function(){
         var headElement= document.getElementsByTagName('head')[0];
@@ -235,18 +248,6 @@ TibButton.prototype.writeButton= function( source, BTN){
 };
 
 
-function TibButtonParams( copyFrom){
-
-    this.BTN = "default";  // Name of the button style to retreive/inject
-    this.BTC = "";  // Colour for the face of the button
-    this.BTH = "";  // Height in pixels
-
-    if (typeof copyFrom !== "undefined") {
-        for (var p in this) this[p] = copyFrom[p] || this[p];
-    }
-}
-
-
 /************
 TIB INITIATOR
 ************/
@@ -255,7 +256,6 @@ TIB INITIATOR
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
 function TibInitiator( globalParams, domElement){
-
 
     this.params = {
 
