@@ -103,22 +103,29 @@ TIB BUTTON
 
 function TibButton(siteParams, e){
 
+    this.domElement = e;
+
     this.params = {
-        BTN : "",  // Name of the button style to retreive/inject
-        BTC : "",  // Colour for the face of the button
-        BTH : ""  // Height in pixels
+
+        BTN : "",  // Button Style to be injected, if any
+        BTS : "",  // Source to fetch injected button from
+        BTC : "",  // Button Colour
+        BTH : ""   // Button Height
     };
 
-    this.domElement = e;
     this.tibbed= false;
+    this.hasCounter= false;
     this.initiator = new TibInitiator(siteParams, this.domElement);
+    if( this.domElement.getElementsByClassName('bd-btn-counter') ) {
+        this.hasCounter = true;
+        this.initiator.getQty(this.writeCounter.bind(this));
+    }
 
     this.loadParams(siteParams);
     this.loadElementParams(this.domElement);
 
     if (this.params.BTN){
-        this.loadButton();
-        this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
+        this.buttonStyle = new TibButtonStyle(this.params, this.domElement);
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
@@ -136,37 +143,6 @@ TibButton.prototype.loadParams = function(source){
     if (typeof source === "object") {
         for (var p in this.params) this.params[p] = source[p];
     }
-};
-
-
-
-TibButton.prototype.injectCss = function( source){
-
-    // inject non-button-style dependant CSS
-    // should be moved to writebutton, with anti-dupication
-
-    var headElement= document.getElementsByTagName('head')[0];
-    var genericCssElement= document.getElementById('bd-css-tib-btn');
-    
-    if (! genericCssElement) {
-        var linkElement= document.createElement('link');  
-        linkElement= {
-            id: 'bd-css-tib-btn',
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: 'https://widget.tibit.com/assets/css/tib.css'
-        }
-        genericCssElement= headElement.appendChild(linkElement);
-    }
-
-    if (! document.getElementById("tib-btn-" + BTN + "-css")) { // buton-style-specific CSS not already injected
-        var styleElement= source.getElementById( "tib-btn-" + BTN + "-css");   // extract button specifc CSS from source
-        if ( styleElement ) {
-            headElement.insertBefore(genericCssElement, tibCssElement.nextSibling); // inject button specific CSS immediatly after
-    }
-
-
-
 };
 
 
@@ -228,8 +204,53 @@ TibButton.prototype.writeCounter= function( QTY){
 };
 
 
+/*****************
+ TIB BUTTON STYLE
+ *****************/
 
-TibButton.prototype.loadButton= function(){
+// TibButtonStyle object handles all functionality relating to the front end styling of tib buttons (loading in
+// SVG's, colours, etc)
+
+function TibButtonStyle(buttonParams, domElement){
+    // Duplicating params from TibButton - probably just a temp solution
+    this.params = buttonParams;
+    this.domElement = domElement;
+
+    this.loadButton();
+    this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
+}
+
+
+TibButtonStyle.prototype.injectCss = function( source){
+
+    // inject non-button-style dependant CSS
+    // should be moved to writebutton, with anti-dupication
+
+    var headElement= document.getElementsByTagName('head')[0];
+    var genericCssElement= document.getElementById('bd-css-tib-btn');
+
+    if (! genericCssElement) {
+        var linkElement= document.createElement('link');
+        linkElement.id = 'bd-css-tib-btn';
+        linkElement.rel= 'stylesheet';
+        linkElement.type = 'text/css';
+        linkElement.href = 'https://widget.tibit.com/assets/css/tib.css';
+        genericCssElement= headElement.appendChild(linkElement);
+    }
+
+    if (! document.getElementById("tib-btn-" + this.params.BTN + "-css")) { // buton-style-specific CSS not already
+    // injected
+        var styleElement = source.getElementById("tib-btn-" + this.params.BTN + "-css");   // extract button specifc CSS
+        // from source
+        if (styleElement) {
+            headElement.insertBefore(styleElement, styleElement.nextSibling); // inject button specific CSS immediatly
+            // after
+        }
+
+    }
+};
+
+TibButtonStyle.prototype.loadButton= function(){
 
     var buttonFile = this.params.BTN || "default";
     var buttonLocation = this.params.BTS || "https://widget.tibit.com/buttons/";
@@ -251,7 +272,7 @@ TibButton.prototype.loadButton= function(){
 
 
 
-TibButton.prototype.writeButton= function( source, BTN) {
+TibButtonStyle.prototype.writeButton= function( source, BTN) {
 
 
 
@@ -292,9 +313,8 @@ TibButton.prototype.writeButton= function( source, BTN) {
 
     this.injectCss( source);
 
-    this.initiator.getQty(this.writeCounter.bind(this));
-
 };
+
 
 
 /************
@@ -391,6 +411,14 @@ TibInitiator.prototype.querystring= function() {
 
 TibInitiator.prototype.getQty= function( callback){
 
+    // ls = localStorage
+    var lsKey = 'bd-subref-' + this.params.SUB + '-QTY', lsVal;
+    lsVal = localStorage.getItem(lsKey);
+    if( lsVal ){
+        lsVal = JSON.parse( localStorage.getItem( lsKey ) );
+        console.log(lsVal);
+        callback( lsVal.QTY );
+    }
     // retreive the current tib count for this initiator
 
     var qtyHttp= new XMLHttpRequest();
@@ -399,6 +427,13 @@ TibInitiator.prototype.getQty= function( callback){
     qtyHttp.open('GET', initiatorUrl, true);
     qtyHttp.onreadystatechange= function(){
         if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+            lsVal = {};
+            lsVal.EXP = Date.now() + 1200000;
+            lsVal.EXP = new Date(lsVal.EXP);
+            lsVal.QTY = JSON.parse(qtyHttp.response).QTY;
+            lsVal = JSON.stringify(lsVal);
+            localStorage.setItem(lsKey, lsVal);
+            console.log(lsVal);
             callback( JSON.parse(qtyHttp.response).QTY);
         }
     };
