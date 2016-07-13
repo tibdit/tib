@@ -5,13 +5,14 @@ function tibInit(globalParams){
 
     bd = new TibHandler(globalParams);
 
-    if(document.readyState === 'loading'){
-        document.addEventListener('DOMContentLoaded', function(){
-           bd.initButtons();
-        });
-    }
-    else{
-        bd.initButtons();
+    switch(document.readyState) {
+        case 'loading':
+            document.addEventListener('DOMContentLoaded', bd.initButtons);
+            break;
+        case 'loaded': // for older Android
+        case 'interactive':
+        case 'complete':
+            bd.initButtons();
     }
 
     return bd;
@@ -53,14 +54,14 @@ function TibHandler(globalParams){
 }
 
 TibHandler.prototype.ackElementsInClass= function ( key ) {
+
     // Attempt to grab QTY from localStorage item matching passed key
-    var QTY = JSON.parse( localStorage.getItem(key)).QTY;
-    var buttons = document.getElementsByClassName(key);
-    for (var j = 0, m = buttons.length; j < m; j++) {
-        var e = buttons[j];
-        e.tibButton.acknowledgeTib();
-        // If QTY obtained from storage, and button has a counter, write to it
-        e.tibButton.writeCounter(QTY);
+
+    var QTY= JSON.parse( localStorage.getItem(key)).QTY;
+    var buttons= document.getElementsByClassName(key);
+    for (var i= 0, n= buttons.length; i < n; i++) {
+        var e = buttons[i];
+        e.tibButton.acknowledgeTib( QTY);    // counter update included in acknowledgeTib
     }
 };
 
@@ -85,6 +86,7 @@ TIB BUTTON
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
+
 function TibButton(globalParams, e){
 
     this.domElement = e;
@@ -114,19 +116,26 @@ function TibButton(globalParams, e){
 
 
 TibButton.prototype.injectCss = function(){
-        var headElement= document.getElementsByTagName('head')[0];
-        var linkElement= document.createElement('link');
-        linkElement.id= 'bd-css-tib-btn';
-        linkElement.rel= 'stylesheet';
-        linkElement.type= 'text/css';
-        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
-        // linkElement.href= 'css/tib.css';
-        headElement.appendChild(linkElement);
+
+    // inject non-button-style dependant CSS
+    // should be moved to writebutton, with anti-dupication
+
+    var headElement= document.getElementsByTagName('head')[0];
+    var linkElement= document.createElement('link');
+    linkElement.id= 'bd-css-tib-btn';
+    linkElement.rel= 'stylesheet';
+    linkElement.type= 'text/css';
+    linkElement.href= 'https://widget.tibit.com/assets/css/tib.css';
+    // linkElement.href= 'css/tib.css';
+    headElement.appendChild(linkElement);
 };
 
 
+
 TibButton.prototype.loadElementParams = function(){
+
     // imports params set via element data-bd-* attributes
+
     for ( var paramName in this.params ){
         if ( this.domElement.getAttribute('data-bd-' + paramName) ){
             this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
@@ -136,15 +145,24 @@ TibButton.prototype.loadElementParams = function(){
 };
 
 
-TibButton.prototype.acknowledgeTib= function( ){
+
+TibButton.prototype.acknowledgeTib= function( QTY) {
+
+    // set the button to tibbed state, updates displayed count if value provided
+
     this.domElement.classList.add('tibbed');
+    if (QTY) this.writeCounter( QTY);
 };
+
 
 
 TibButton.prototype.isTestnet= function() {
+
     // ask the initiator if PAD is a bitcoin testnet address
+
     return this.initiator.isTestnet();
 };
+
 
 
 TibButton.prototype.initateTib= function() {
@@ -156,12 +174,18 @@ TibButton.prototype.initateTib= function() {
 };
 
 
+
 TibButton.prototype.writeCounter= function( QTY){
+
+    // write the provided QTY to the buttons bd-btn-counter sub-element
+    // used as the callback for TibInitiator, and when a tib is acknowledged
+
     var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
     if ( c && !isNaN(QTY) ) {
         c.textContent = parseInt(QTY);
     }
 };
+
 
 
 TibButton.prototype.loadButton= function(){
@@ -295,16 +319,24 @@ function TibInitiator( globalParams, domElement){
     }
 }
 
-// Given an object, populate the existing properties of this.params
+
+
 TibInitiator.prototype.setParams= function(source){
+
+    // Given an object, populate the existing properties of this.params
+
     if (typeof source !== "undefined") {
         for ( var p in this.params) this.params[p] = source[p] || this.params[p];
     }
 };
 
+
+
 TibInitiator.prototype.getSub= function() {
+
     // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
     // potential to overload with platform specific code, but that will require DOM element (as argument?)
+
     hash = this.params.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
     hash = murmurhash3_32_gc(hash, 0);   // possibly move to
     // https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
@@ -312,8 +344,11 @@ TibInitiator.prototype.getSub= function() {
 };
 
 
+
 TibInitiator.prototype.tib= function() {
+
     // initiate the tib by opening the tib.me popup window 
+
     var tibWindowName= "tibit";
     var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
     // Use initiator params to generate URL, and open in new window
@@ -321,8 +356,11 @@ TibInitiator.prototype.tib= function() {
 };
 
 
+
 TibInitiator.prototype.querystring= function() {
+
     // assembles tib initiator parameters into URL querystring 
+
     var querystring = "?";
     for ( var param in this.params ) {
         querystring += param;
@@ -334,8 +372,11 @@ TibInitiator.prototype.querystring= function() {
 };
 
 
+
 TibInitiator.prototype.getQty= function( callback){
+
     // retreive the current tib count for this initiator
+
     var qtyHttp= new XMLHttpRequest();
     var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
     console.log(initiatorUrl);
@@ -349,10 +390,14 @@ TibInitiator.prototype.getQty= function( callback){
 };
 
 
+
 TibInitiator.prototype.isTestnet= function(){
+
     // true if PAD set and first character not 'm', 'n', or '2'
+
     return this.params.PAD && ( "mn2".search(this.params.PAD.substr(0,1)) !== -1 );
 };
+
 
 
 TibInitiator.prototype.loadElementParams= function(e) {
