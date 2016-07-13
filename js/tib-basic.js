@@ -7,7 +7,9 @@ function tibInit(globalParams){
 
     switch(document.readyState) {
         case 'loading':
-            document.addEventListener('DOMContentLoaded', bd.initButtons);
+            // When used as callback for a document event listener, "this" context will be the document, so we
+            // override this using .bind(bd)
+            document.addEventListener('DOMContentLoaded', bd.initButtons.bind(bd));
             break;
         case 'loaded': // for older Android
         case 'interactive':
