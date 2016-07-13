@@ -1,9 +1,9 @@
 // Takes a JS object as a parameter
-function tibInit(globalParams){
+function tibInit(siteParams){
     var bd;
 
 
-    bd = new TibHandler(globalParams);
+    bd = new TibHandler(siteParams);
 
     switch(document.readyState) {
         case 'loading':
@@ -20,6 +20,9 @@ function tibInit(globalParams){
     return bd;
 }
 
+
+var SUBREF_PREFIX= 'bd-subref-';
+
 /**********
 TIB HANDLER
 **********/
@@ -27,32 +30,32 @@ TIB HANDLER
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
 // the tibInit function.
-function TibHandler(globalParams){
+function TibHandler( siteParams){
 
     this.initButtons = function(){
+
+
         var that = this;
-        this.sweepOldTibs(globalParams.DUR);
+        this.sweepOldTibs();
 
         var buttons = document.getElementsByClassName('bd-tib-btn');
         for(var i = 0, n = buttons.length; i < n; i++){
-            // Save current button to e for simpler reference
             var e = buttons[i];
+            
+            e.tibButton = new TibButton( siteParams, e);  // Construct TibInitiator for button, feeding in site default params + local params from element data-bd-*
 
-            // Generate TibInitiator for button, feeding in global/default params + local params
-            e.tibButton = new TibButton(globalParams, e);
-            if ( localStorage["bd-subref-" + e.tibButton.initiator.params.SUB] && JSON.parse(localStorage.getItem('bd-subref-' + e.tibButton.initiator.params.SUB)).ISS ){
+            if ( localStorage[SUBREF_PREFIX + e.tibButton.initiator.params.SUB] ) {
                 e.tibButton.acknowledgeTib();
             }
         }
 
         // Localstorage event listener - watches for changes to bd-subref-x items in localStorage
-        window.addEventListener('storage', function(e){
-           if(e.newValue && e.key.substr(0,10) === "bd-subref-"){
+        window.addEventListener('storage', function(e) {
+           if ( e.newValue && e.key.substr(0,10) === SUBREF_PREFIX ) {
                that.ackElementsInClass(e.key);
            }
         });
     };
-
 }
 
 TibHandler.prototype.ackElementsInClass= function ( key ) {
@@ -67,19 +70,24 @@ TibHandler.prototype.ackElementsInClass= function ( key ) {
     }
 };
 
-TibHandler.prototype.sweepOldTibs= function( DUR ){
+
+
+TibHandler.prototype.sweepOldTibs= function() {
+
+    // Remove expired tib acknowledgements from localStorage
 
     for(var key in localStorage){
-        if ( key.substr(0,10) === "bd-subref-" ) {
-            var item = JSON.parse(localStorage.getItem(key));
-            var EXP = new Date(item.EXP);
-            if ( Date.now() >  EXP.getTime()) {
-                // If sufficient time has passed, mark the localStorage item to be removed
+        if ( key.substr( 0, SUBREF_PREFIX.length) === SUBREF_PREFIX ) {
+            var item = JSON.parse( localStorage.getItem(key));
+            var expiry = new Date(item.EXP).getTime();
+            if ( Date.now() >  expiry) {
                 localStorage.removeItem(key);
             }
         }
     }
 };
+
+
 
 
 /*********
@@ -90,26 +98,19 @@ TIB BUTTON
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(globalParams, domElement){
 
-    console.log(globalParams);
-    this.domElement = domElement;
+function TibButton(siteParams, e){
 
-    this.initiator = new TibInitiator(globalParams, this.domElement);
     this.params = {
-
         BTN : "",  // Name of the button style to retreive/inject
         BTC : "",  // Colour for the face of the button
-        BTH : "",  // Height in pixels
-        BTS : ""
-
+        BTH : ""  // Height in pixels
     };
 
-    this.setParams(globalParams);
+    this.domElement = e;
+    this.tibbed= false;
+    this.initiator = new TibInitiator(siteParams, this.domElement);
 
-    if (! document.getElementById('bd-css-tib-btn')) {
-        // needs to accomodate different CSS by button type.
-        this.injectCss();
-    }
-
+    this.loadParams(siteParams);
     this.loadElementParams(this.domElement);
 
     if (this.params.BTN){
@@ -119,15 +120,24 @@ function TibButton(globalParams, domElement){
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
     // Add subref class for easier reference later
-    this.domElement.classList.add("bd-subref-" + this.initiator.params.SUB);
+    this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );
+
 
     this.domElement.addEventListener("click", this.initateTib.bind(this));
 }
-TibButton.prototype.setParams = function(source){
-    if (typeof source !== "undefined") {
+
+
+
+TibButton.prototype.loadParams = function(source){
+
+    // import matching params from source object
+
+    if (typeof source === "object") {
         for (var p in this.params) this.params[p] = source[p];
     }
 };
+
+
 
 TibButton.prototype.injectCss = function(){
 
@@ -164,6 +174,7 @@ TibButton.prototype.acknowledgeTib= function( QTY) {
 
     // set the button to tibbed state, updates displayed count if value provided
 
+    this.tibbed= true;
     this.domElement.classList.add('tibbed');
     if (QTY) this.writeCounter( QTY);
 };
@@ -226,8 +237,14 @@ TibButton.prototype.loadButton= function(){
 
 TibButton.prototype.writeButton= function( source, BTN){
 
+    if (! document.getElementById('bd-css-tib-btn')) {
+        // needs to accomodate different CSS by button type.
+        this.injectCss();
+    }
+
     if (! source) throw "bd: failed to load tib-btn-" + BTN;
     var content= source.getElementById("tib-btn-" + BTN);
+
     if (! content) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
 
     // Inject the button, either as a new child of the container element or a replacement
@@ -297,7 +314,7 @@ function TibInitiatorParams( copyFrom) {
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
 
-function TibInitiator( globalParams, domElement){
+function TibInitiator( siteParams, domElement){
 
     this.params = {
 
@@ -309,7 +326,7 @@ function TibInitiator( globalParams, domElement){
     };
 
 
-    this.setParams(globalParams);
+    this.loadParams(siteParams);
     
     if ( !this.params.TIB ) {
         // If no TIB specified, assume the current page URL
@@ -330,7 +347,7 @@ function TibInitiator( globalParams, domElement){
 
 
 
-TibInitiator.prototype.setParams= function(source){
+TibInitiator.prototype.loadParams= function(source){
 
     // Given an object, populate the existing properties of this.params
 
