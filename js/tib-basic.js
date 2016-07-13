@@ -207,7 +207,7 @@ TibButton.prototype.writeCounter= function( QTY){
     var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
     // isNaN('') will return false
     if ( c && !isNaN(QTY) && QTY !== '') {
-        c.textContent = parseInt(QTY);
+        c.textContent = parseInt(QTY, 10);
     }
 };
 
@@ -227,7 +227,7 @@ TibButton.prototype.loadButton= function(){
     var that= this;
 
     tibbtn.onreadystatechange= function(){
-        if (tibbtn.readyState === 4 && tibbtn.status == 200 && tibbtn.responseXML) {
+        if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
             that.writeButton(this.responseXML, that.params.BTN);
         }
     };
