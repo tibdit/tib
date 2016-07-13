@@ -25,9 +25,9 @@ var SUBREF_PREFIX= 'bd-subref-';
 
 
 
-/**********
-TIB HANDLER
-**********/
+/************
+ TIB HANDLER
+************/
 
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
@@ -94,14 +94,14 @@ TibHandler.prototype.sweepOldTibs= function() {
 
 
 
-/*********
-TIB BUTTON
-*********/
+/***********
+ TIB BUTTON
+***********/
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 
-function TibButton(siteParams, e){
+function TibButton( siteParams, domElement){
 
     this.domElement = e;
 
@@ -113,6 +113,7 @@ function TibButton(siteParams, e){
         BTH : ""   // Button Height
     };
 
+    this.domElement = domElement;
     this.tibbed= false;
     this.hasCounter= false;
     this.initiator = new TibInitiator(siteParams, this.domElement);
@@ -156,7 +157,6 @@ TibButton.prototype.loadElementParams = function(){
             this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
         }
     }
-    this.initiator.loadElementParams(this.domElement);  // load element data- attributes for the initiator params also.
 };
 
 
@@ -199,6 +199,8 @@ TibButton.prototype.writeCounter= function( QTY){
         c.textContent = parseInt(QTY, 10);
     }
 };
+
+
 
 
 /*****************
@@ -310,9 +312,41 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) {
 };
 
 
-/************
-TIB INITIATOR
-************/
+
+
+
+TibButton.prototype.injectCss = function( source) {
+
+    // inject non-button-style dependant CSS
+    // should be moved to writebutton, with anti-dupication
+
+    var headElement= document.getElementsByTagName('head')[0];
+    var genericCssElement= document.getElementById('bd-css-tib-btn');
+    
+    if (! genericCssElement) {
+        var linkElement= document.createElement('link');  
+        linkElement.id= 'bd-css-tib-btn';  
+        linkElement.rel= 'stylesheet';
+        linkElement.type= 'text/css';
+        linkElement.href= 'https://widget.tibit.com/assets/css/tib.css'; 
+        genericCssElement= headElement.appendChild(linkElement);  
+    }
+
+    if (! document.getElementById("tib-btn-" + BTN + "-css")) { // button-style-specific CSS not already injected
+        var styleElement= source.getElementById( "tib-btn-" + BTN + "-css");   // extract button specifc CSS from source
+        if ( styleElement ) {
+            headElement.insertBefore(styleElement, genericCssElement.nextSibling); // inject button specific CSS immediatly after
+        }
+    }
+};
+
+
+
+
+/**************
+ TIB INITIATOR
+**************/
+
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
@@ -330,16 +364,12 @@ function TibInitiator( siteParams, domElement){
 
 
     this.loadParams(siteParams);
-
-    if ( !this.params.TIB ) {
-        // If no TIB specified, assume the current page URL
-
+    
+    if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
         this.params.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
-
     }
 
-    if ( !this.params.SUB ) {
-        // If no SUB is provided, use a hash of the TIB url
+    if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
     }
 
