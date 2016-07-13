@@ -86,13 +86,10 @@ TIB BUTTON
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 function TibButton(globalParams, e){
-
+    console.log(globalParams);
     this.domElement = e;
 
     this.initiator = new TibInitiator(globalParams, this.domElement);
-    this.params = new TibButtonParams(globalParams, this.domElement);
-
-
     this.params = {
 
         BTN : "",  // Name of the button style to retreive/inject
@@ -101,18 +98,19 @@ function TibButton(globalParams, e){
 
     };
 
+    this.setParams(globalParams);
 
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
         this.injectCss();
     }
-    
 
     this.loadElementParams(e);
 
-    if (this.params.BTN) this.loadButton();
-
-    e.classList.add('bd-tib-btn-' + this.params.BTN);
+    if (this.params.BTN){
+        this.loadButton();
+        e.classList.add('bd-tib-btn-' + this.params.BTN);
+    }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
     // Add subref class for easier reference later
@@ -122,7 +120,7 @@ function TibButton(globalParams, e){
 }
 TibButton.prototype.setParams = function(source){
     if (typeof source !== "undefined") {
-        for (var p in this.params) this[p] = this.params[p] || source[p];
+        for (var p in this.params) this.params[p] = source[p];
     }
 }
 
