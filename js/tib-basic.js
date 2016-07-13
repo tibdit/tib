@@ -104,8 +104,7 @@ function TibButton(globalParams, e){
 
     this.loadElementParams(e);
 
-
-    this.loadButton();
+    if (this.params.BTN) this.loadButton();
 
     e.classList.add('bd-tib-btn-' + this.params.BTN);
 
@@ -113,7 +112,7 @@ function TibButton(globalParams, e){
     // Add subref class for easier reference later
     e.classList.add("bd-subref-" + this.initiator.params.SUB);
 
-    e.addEventListener("click", this.initateTib());
+    e.addEventListener("click", this.initateTib.bind(this));
 }
 
 
@@ -130,27 +129,29 @@ TibButton.prototype.injectCss = function(){
 
 
 TibButton.prototype.loadElementParams = function(){
+    // imports params set via element data-bd-* attributes
     for ( var paramName in this.params ){
         if ( this.domElement.getAttribute('data-bd-' + paramName) ){
             this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
         }
     }
-    this.initiator.loadElementParams(this.domElement);
+    this.initiator.loadElementParams(this.domElement);  // load element data- attributes for the initiator params also.
 };
 
 
-TibButton.prototype.acknowledgeTib = function( ){
+TibButton.prototype.acknowledgeTib= function( ){
     this.domElement.classList.add('tibbed');
 };
 
 
 TibButton.prototype.isTestnet= function() {
+    // ask the initiator if PAD is a bitcoin testnet address
     return this.initiator.isTestnet();
 };
 
 
-TibButton.prototype.initateTib = function(){
-    return function(){
+TibButton.prototype.initateTib= function() {
+    return function() {
         // "this" context is the button element, since this occurs in the context of an onclick event
         this.tibButton.initiator.tib();   
         // if class 'tibbed' do something different maybe     
@@ -160,10 +161,8 @@ TibButton.prototype.initateTib = function(){
 
 TibButton.prototype.writeCounter= function( QTY){
     var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
-    // If the button has a counter and the counter has been marked pending, replace
-    // the counter content with the retrieved QTY
-    if(c && QTY % 1 === 0){
-        c.textContent = QTY;
+    if ( c && !isNaN(QTY) ) {
+        c.textContent = parseInt(QTY);
     }
 };
 
@@ -174,13 +173,13 @@ TibButton.prototype.loadButton= function(){
     var buttonLocation = this.params.BTS || "https://widget.tibit.com/buttons/";
 
 
-    var tibbtn = new XMLHttpRequest();
+    var tibbtn= new XMLHttpRequest();
     tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".svg", true);
     tibbtn.send();
 
-    var that = this;
+    var that= this;
 
-    tibbtn.onreadystatechange = function(){
+    tibbtn.onreadystatechange= function(){
         if (tibbtn.readyState == 4 && tibbtn.status == 200 && tibbtn.responseXML) {
             that.writeButton(this.responseXML, that.params.BTN);
         }
@@ -255,10 +254,23 @@ TIB INITIATOR
 ************/
 
 
+function TibInitiatorParams( copyFrom) {
+    this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
+    this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
+    this.CBK = "";  // Callback - If specified, the users browser will be redirected here after the tib is confirmed
+    this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
+    this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
+
+    if (typeof copyFrom !== "undefined") {
+        for ( var p in this) this[p] = copyFrom[p] || this[p];
+    }
+}
+
+
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
 function TibInitiator( globalParams, e){
-
+    // Tib Initiator - manages TibInitiatorParams and 
 
     this.params = new TibInitiatorParams( globalParams);
     
@@ -338,84 +350,11 @@ TibInitiator.prototype.loadElementParams= function(e) {
 };
 
 
-// Our parameters object - currently just recieves an object and returns a new object with
-// the relevant properties, but this gives us room to apply data validation etc inside of the
-// object as a later date.
-function TibInitiatorParams( copyFrom) {
-
-    this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
-    this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
-    this.CBK = "";  // Callback - If specified, the users browser will be redirected here after the tib is confirmed
-    this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
-    this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
-
-    if (typeof copyFrom !== "undefined") {
-        for ( var p in this) this[p] = copyFrom[p] || this[p];
-    }
-}
 
 
-/**
- * JS Implementation of MurmurHash3 (r136) (as of May 20, 2011)
- *
- * @author <a href="mailto:gary.court@gmail.com">Gary Court</a>
- * @see http://github.com/garycourt/murmurhash-js
- * @author <a href="mailto:aappleby@gmail.com">Austin Appleby</a>
- * @see http://sites.google.com/site/murmurhash/
- *
- * @param {string} key ASCII only
- * @param {number} seed Positive integer only
- * @return {number} 32-bit positive integer hash
- */
+/*
+** MurmurHash3: Public Domain Austin Appleby http://sites.google.com/site/murmurhash/
+** JS Implementation: Copyright (c) 2011 Gary Court MIT Licence http://github.com/garycourt/murmurhash-js
+*/
 
-function murmurhash3_32_gc(key, seed) {
-    var remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
-
-    remainder = key.length & 3; // key.length % 4
-    bytes = key.length - remainder;
-    h1 = seed;
-    c1 = 0xcc9e2d51;
-    c2 = 0x1b873593;
-    i = 0;
-
-    while (i < bytes) {
-        k1 =
-            ((key.charCodeAt(i) & 0xff)) |
-            ((key.charCodeAt(++i) & 0xff) << 8) |
-            ((key.charCodeAt(++i) & 0xff) << 16) |
-            ((key.charCodeAt(++i) & 0xff) << 24);
-        ++i;
-
-        k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
-        k1 = (k1 << 15) | (k1 >>> 17);
-        k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
-
-        h1 ^= k1;
-        h1 = (h1 << 13) | (h1 >>> 19);
-        h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
-        h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
-    }
-
-    k1 = 0;
-
-    switch (remainder) {
-        case 3: k1 ^= (key.charCodeAt(i + 2) & 0xff) << 16;
-        case 2: k1 ^= (key.charCodeAt(i + 1) & 0xff) << 8;
-        case 1: k1 ^= (key.charCodeAt(i) & 0xff);
-
-            k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
-            k1 = (k1 << 15) | (k1 >>> 17);
-            k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
-            h1 ^= k1;
-    }
-
-    h1 ^= key.length;
-
-    h1 ^= h1 >>> 16;
-    h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
-    h1 ^= h1 >>> 13;
-    h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
-    h1 ^= h1 >>> 16;
-
-    return h1 >>> 0;
-}
+function murmurhash3_32_gc(e,c){var h,r,t,a,o,d,A,C;for(h=3&e.length,r=e.length-h,t=c,o=3432918353,d=461845907,C=0;r>C;)A=255&e.charCodeAt(C)|(255&e.charCodeAt(++C))<<8|(255&e.charCodeAt(++C))<<16|(255&e.charCodeAt(++C))<<24,++C,A=(65535&A)*o+(((A>>>16)*o&65535)<<16)&4294967295,A=A<<15|A>>>17,A=(65535&A)*d+(((A>>>16)*d&65535)<<16)&4294967295,t^=A,t=t<<13|t>>>19,a=5*(65535&t)+((5*(t>>>16)&65535)<<16)&4294967295,t=(65535&a)+27492+(((a>>>16)+58964&65535)<<16);switch(A=0,h){case 3:A^=(255&e.charCodeAt(C+2))<<16;case 2:A^=(255&e.charCodeAt(C+1))<<8;case 1:A^=255&e.charCodeAt(C),A=(65535&A)*o+(((A>>>16)*o&65535)<<16)&4294967295,A=A<<15|A>>>17,A=(65535&A)*d+(((A>>>16)*d&65535)<<16)&4294967295,t^=A}return t^=e.length,t^=t>>>16,t=2246822507*(65535&t)+((2246822507*(t>>>16)&65535)<<16)&4294967295,t^=t>>>13,t=3266489909*(65535&t)+((3266489909*(t>>>16)&65535)<<16)&4294967295,t^=t>>>16,t>>>0}
