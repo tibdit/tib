@@ -146,7 +146,6 @@ TibButton.prototype.loadParams = function(source){
 };
 
 
-
 TibButton.prototype.loadElementParams = function(){
 
     // imports params set via element data-bd-* attributes
@@ -182,11 +181,8 @@ TibButton.prototype.isTestnet= function() {
 
 
 TibButton.prototype.initateTib= function() {
-
-    // "this" context is the button element, since this occurs in the context of an onclick event
     this.initiator.tib();
     // if class 'tibbed' do something different maybe
-
 };
 
 
@@ -272,27 +268,22 @@ TibButtonStyle.prototype.loadButton= function(){
 
 
 
+
 TibButtonStyle.prototype.writeButton= function( source, BTN) {
 
+    var sourceElement= source.getElementById("tib-btn-" + BTN);
+    if (! sourceElement) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
 
+    var buttonElement= document.importNode(sourceElement, true);
 
-    if (! source) throw "bd: failed to load tib-btn-" + BTN;
-    var content= source.getElementById("tib-btn-" + BTN);
-
-    if (! content) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
-
-    // Inject the button, either as a new child of the container element or a replacement
-    // for the immediate child
     if (this.domElement.children.length === 0) {
-        this.domElement.appendChild(document.importNode(content, true));
+        this.domElement.appendChild(buttonElement);  // insert if no placeholder
     } else {
-        // target <button> element should have <object> as first or only child
-        this.domElement.replaceChild(document.importNode(content, true), this.domElement.children[0]);
+        this.domElement.replaceChild(buttonElement, this.domElement.children[0]);  // replace placeholder
     }
 
-    // prevent default submit type/action if placed within a form
     if (this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
-        this.domElement.setAttribute('type','button'); // prevents default submit type/action if placed withing form
+        this.domElement.setAttribute('type','button'); // prevents default submit type/action if within <form>
     }
 
     var backdrop = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
@@ -314,7 +305,6 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) {
     this.injectCss( source);
 
 };
-
 
 
 /************
