@@ -88,24 +88,31 @@ TIB BUTTON
 // assign our onclick events, write our counters, and interact with the DOM element
 
 function TibButton(globalParams, e){
-
+    console.log(globalParams);
     this.domElement = e;
 
     this.initiator = new TibInitiator(globalParams, this.domElement);
-    this.params = new TibButtonParams(globalParams, this.domElement);
+    this.params = {
 
+        BTN : "",  // Name of the button style to retreive/inject
+        BTC : "",  // Colour for the face of the button
+        BTH : ""  // Height in pixels
+
+    };
+
+    this.setParams(globalParams);
 
     if (! document.getElementById('bd-css-tib-btn')) {
         // needs to accomodate different CSS by button type.
         this.injectCss();
     }
-    
 
     this.loadElementParams(e);
 
-    if (this.params.BTN) this.loadButton();
-
-    e.classList.add('bd-tib-btn-' + this.params.BTN);
+    if (this.params.BTN){
+        this.loadButton();
+        e.classList.add('bd-tib-btn-' + this.params.BTN);
+    }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
     // Add subref class for easier reference later
@@ -113,7 +120,11 @@ function TibButton(globalParams, e){
 
     e.addEventListener("click", this.initateTib.bind(this));
 }
-
+TibButton.prototype.setParams = function(source){
+    if (typeof source !== "undefined") {
+        for (var p in this.params) this.params[p] = source[p];
+    }
+}
 
 TibButton.prototype.injectCss = function(){
 
@@ -258,18 +269,6 @@ TibButton.prototype.writeButton= function( source, BTN){
 };
 
 
-function TibButtonParams( copyFrom){
-
-    this.BTN = "default";  // Name of the button style to retreive/inject
-    this.BTC = "";  // Colour for the face of the button
-    this.BTH = "";  // Height in pixels
-
-    if (typeof copyFrom !== "undefined") {
-        for (var p in this) this[p] = copyFrom[p] || this[p];
-    }
-}
-
-
 /************
 TIB INITIATOR
 ************/
@@ -292,7 +291,6 @@ function TibInitiatorParams( copyFrom) {
 // to open our tibbing window, retrieve counters, and validate our tib params.
 
 function TibInitiator( globalParams, domElement){
-
 
     this.params = {
 
