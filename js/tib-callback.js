@@ -15,7 +15,7 @@ TibCallback= function(url){
             this.persistAck();
             this.updateQTY();
         }
-        this.closeWindow();
+        //this.closeWindow();
     }
 
     catch (e) {
@@ -50,7 +50,7 @@ TibCallback.prototype.generateDates= function() {
     var duration= this.DUR * ( this.isTestnet() ? 300000 : 86400000 );
     // 300000   = 1000 * 60 * 5        (5 mins)
     // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
-    this.tibExpire= new Date( this.ISS + this.DUR);
+    this.tibExpire= new Date( this.tibIssued + this.DUR);
 };
 
 

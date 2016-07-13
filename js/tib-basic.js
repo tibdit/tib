@@ -440,7 +440,6 @@ TibInitiator.prototype.getQty= function( callback){
     lsVal = localStorage.getItem(lsKey);
     if( lsVal ){
         lsVal = JSON.parse( localStorage.getItem( lsKey ) );
-        console.log(lsVal);
         callback( lsVal.QTY );
         return;
     }
