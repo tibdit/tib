@@ -59,8 +59,8 @@ TibCallback.prototype.persistAck= function() {
 
 TibCallback.prototype.closeWindow= function( ) {
     // close the popup window once the tib callback has been processed
-    var re= "[^\?]*\?(.*&)?noclose($|[=&])";  // add noclose  querystring parameter to initiator 
-    if ( this.url.search(re) === -1 ) return false;  // to prevent popup window from being automatically closed
+    var re= "[^\?]*\?(.*&)?noclose($|[=&])";  // add noclose  querystring parameter to initiator
+    if ( this.url.search(re) !== -1 ) return false;  // to prevent popup window from being automatically closed
 
     try {
         var tibWindow= window.open('','_self');
