@@ -94,6 +94,7 @@ TIB BUTTON
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
+function TibButton(globalParams, domElement){
 
 function TibButton(siteParams, e){
 
@@ -118,6 +119,7 @@ function TibButton(siteParams, e){
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
     // Add subref class for easier reference later
     this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );
+
 
     this.domElement.addEventListener("click", this.initateTib.bind(this));
 }
@@ -187,11 +189,11 @@ TibButton.prototype.isTestnet= function() {
 
 
 TibButton.prototype.initateTib= function() {
-    return function() {
-        // "this" context is the button element, since this occurs in the context of an onclick event
-        this.tibButton.initiator.tib();   
-        // if class 'tibbed' do something different maybe     
-    };
+
+    // "this" context is the button element, since this occurs in the context of an onclick event
+    this.initiator.tib();
+    // if class 'tibbed' do something different maybe
+
 };
 
 
@@ -202,7 +204,8 @@ TibButton.prototype.writeCounter= function( QTY){
     // used as the callback for TibInitiator, and when a tib is acknowledged
 
     var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
-    if ( c && !isNaN(QTY) ) {
+    // isNaN('') will return false
+    if ( c && !isNaN(QTY) && QTY !== '') {
         c.textContent = parseInt(QTY);
     }
 };
@@ -216,7 +219,8 @@ TibButton.prototype.loadButton= function(){
 
 
     var tibbtn= new XMLHttpRequest();
-    tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".svg", true);
+    tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".html", true);
+    tibbtn.responseType= "document";
     tibbtn.send();
 
     var that= this;
@@ -236,7 +240,10 @@ TibButton.prototype.writeButton= function( source, BTN){
         this.injectCss();
     }
 
+    if (! source) throw "bd: failed to load tib-btn-" + BTN;
     var content= source.getElementById("tib-btn-" + BTN);
+
+    if (! content) throw "bd: failed to find tib-btn-" + BTN + " in received XML";
 
     // Inject the button, either as a new child of the container element or a replacement
     // for the immediate child
@@ -329,6 +336,10 @@ function TibInitiator( siteParams, domElement){
     if ( !this.params.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
+    }
+
+    if(domElement){
+        this.setParams(domElement);
     }
 }
 
