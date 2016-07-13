@@ -50,7 +50,7 @@ TibCallback.prototype.generateDates= function() {
     var duration= this.DUR * ( this.isTestnet() ? 300000 : 86400000 );
     // 300000   = 1000 * 60 * 5        (5 mins)
     // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
-    this.tibExpire= new Date( this.ISS + this.DUR);
+    this.tibExpire= new Date( this.tibIssued + this.DUR);
 };
 
 
@@ -77,21 +77,21 @@ TibCallback.prototype.persistAck= function() {
 
 
 
-TibCallback.prototype.updateQTY= function()  {
+TibCallback.prototype.updateQTY= function() {
 
     // store the updated count for the subref in localStorage 
-    var lsKey= SUBREF_PREFIX + this.token.SUB + "-QTY";
 
+    var storageKey= SUBREF_PREFIX + this.token.SUB + "-QTY";
     var subrefQTY= {
         QTY: parseInt(this.token.QTY, 10),
         EXP: new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
     };
-    localStorage.setItem(lsKey, JSON.stringify(subrefQTY));
+    localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
 };
 
 
 
-TibCallback.prototype.closeWindow= function( ) {
+TibCallback.prototype.closeWindow= function() {
 
     // close the popup window once the tib callback has been processed
 

@@ -1,26 +1,23 @@
 // Takes a JS object as a parameter
 function tibInit(siteParams){
-    var bd;
-
-
-    bd = new TibHandler(siteParams);
 
     switch(document.readyState) {
         case 'loading':
             // When used as callback for a document event listener, "this" context will be the document, so we
             // override this using .bind(bd)
-            document.addEventListener('DOMContentLoaded', bd.initButtons.bind(bd));
+            document.addEventListener('DOMContentLoaded', afterLoad);  // do we need .bind()?
             break;
         case 'loaded': // for older Android
         case 'interactive':
         case 'complete':
-            bd.initButtons();
+            afterLoad();    
     }
 
-    return bd;
-
-
-};
+    function afterLoad() {
+        sweep();
+        initButtons( siteParams);
+    }
+}
 
 
 
@@ -28,16 +25,17 @@ var SUBREF_PREFIX= 'bd-subref-';
 var QTY_CACHE_DURATION= 20; // minutes
 
 
-/************
- TIB HANDLER
-************/
+
+/**********
+ PAGE LOAD
+**********/
 
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
 // the tibInit function.
 
 
-function initButtons(){
+function initButtons( siteParams) {
 
     var buttons = document.getElementsByClassName('bd-tib-btn');
     for ( var i = 0, n = buttons.length; i < n; i++ ) {
@@ -45,6 +43,7 @@ function initButtons(){
         // Construct TibInitiator for button, feeding in site default params + local params from element data-bd-*
     }
 }
+
 
 
 function sweep() {
@@ -74,12 +73,10 @@ function sweep() {
 
 function TibButton( siteParams, domElement) {
 
-    this.domElement = e;
-
     this.params = {  // Primarily for related TibButtonStyle class, setting BTN triggers TibButtonStyle features
         BTN : "",  // Button Style to be injected, if any
-        BTS : "",  // Source to fetch injected button from
-        BTC : "",  // Button Colour
+        BTS : "",  // Source to fetch injected BTN button from
+        BTC : "",  // Button Face (backdrop) Colour
         BTH : ""   // Button Height
     };
 
@@ -99,15 +96,13 @@ function TibButton( siteParams, domElement) {
         this.initiator.getQty(); //this.writeCounter.bind(this)
     }
 
-    if (this.params.BTN) {
-        this.buttonStyle = new TibButtonStyle(this.params, this.domElement);
+    if (this.params.BTN){
+        this.buttonStyle = new TibButtonStyle(this.params, this);   // TODO DON'T need .params argument since 'this' already passed
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
 
     this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );  // Add subref class for easier reference later
-
-
 }
 
 
@@ -194,11 +189,11 @@ TibButton.prototype.storageUpdate= function(e) {
 // TibButtonStyle object handles all functionality relating to the front end styling of tib buttons (loading in
 // SVG's, colours, etc)
 
-function TibButtonStyle(buttonParams, domElement){
+function TibButtonStyle(buttonParams, tibButton){
     // Duplicating params from TibButton - probably just a temp solution
     this.params = buttonParams;
-    this.domElement = domElement;
-
+    this.tibButton = tibButton;
+    this.domElement = tibButton.domElement;
     this.loadButton();
     this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 }
@@ -292,6 +287,8 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) {
     }
 
     this.injectCss( source);
+
+    this.tibButton.initiator.getQty( this.tibButton.writeCounter.bind(this.tibButton) );
 
 };
 
