@@ -96,7 +96,6 @@ TIB BUTTON
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
-function TibButton(globalParams, domElement){
 
 function TibButton(siteParams, e){
 
@@ -228,7 +227,7 @@ TibButton.prototype.loadButton= function(){
     var that= this;
 
     tibbtn.onreadystatechange= function(){
-        if (tibbtn.readyState == 4 && tibbtn.status == 200 && tibbtn.responseXML) {
+        if (tibbtn.readyState === 4 && tibbtn.status == 200 && tibbtn.responseXML) {
             that.writeButton(this.responseXML, that.params.BTN);
         }
     };
@@ -297,20 +296,6 @@ TibButton.prototype.writeButton= function( source, BTN){
 TIB INITIATOR
 ************/
 
-
-function TibInitiatorParams( copyFrom) {
-    this.PAD = "";  // Payment Address - Bitcoin address tib value will be sent to 
-    this.SUB = "";  // Subreference - Identifies the specific item being tibbed for any counter 
-    this.CBK = "";  // Callback - If specified, the users browser will be redirected here after the tib is confirmed
-    this.ASN = "";  // Assignee - 3rd party that tib value will be sent to.  Only valid if PAD not specified
-    this.TIB = "";  // URL used to retreive the snippet telling the user what they are tibbing
-
-    if (typeof copyFrom !== "undefined") {
-        for ( var p in this) this[p] = copyFrom[p] || this[p];
-    }
-}
-
-
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
 
@@ -341,7 +326,7 @@ function TibInitiator( siteParams, domElement){
     }
 
     if(domElement){
-        this.setParams(domElement);
+        this.loadParams(domElement);
     }
 }
 
