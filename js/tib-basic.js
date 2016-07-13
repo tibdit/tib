@@ -126,7 +126,7 @@ function TibButton(siteParams, e){
     }
 
     if (this.params.BTN){
-        this.buttonStyle = new TibButtonStyle(this.params, this.domElement);
+        this.buttonStyle = new TibButtonStyle(this.params, this);
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
@@ -208,11 +208,11 @@ TibButton.prototype.writeCounter= function( QTY){
 // TibButtonStyle object handles all functionality relating to the front end styling of tib buttons (loading in
 // SVG's, colours, etc)
 
-function TibButtonStyle(buttonParams, domElement){
+function TibButtonStyle(buttonParams, tibButton){
     // Duplicating params from TibButton - probably just a temp solution
     this.params = buttonParams;
-    this.domElement = domElement;
-
+    this.tibButton = tibButton;
+    this.domElement = tibButton.domElement;
     this.loadButton();
     this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 }
@@ -305,6 +305,8 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) {
 
     this.injectCss( source);
 
+    this.tibButton.initiator.getQty( this.tibButton.writeCounter.bind(this.tibButton) );
+
 };
 
 
@@ -341,6 +343,9 @@ function TibInitiator( siteParams, domElement){
         this.params.SUB=  this.getSub();
     }
 
+    if(domElement){
+        this.loadElementParams(domElement);
+    }
 
 }
 
@@ -407,6 +412,7 @@ TibInitiator.prototype.getQty= function( callback){
         lsVal = JSON.parse( localStorage.getItem( lsKey ) );
         console.log(lsVal);
         callback( lsVal.QTY );
+        return;
     }
     // retreive the current tib count for this initiator
 
