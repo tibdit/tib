@@ -25,9 +25,9 @@ var SUBREF_PREFIX= 'bd-subref-';
 
 
 
-/**********
-TIB HANDLER
-**********/
+/************
+ TIB HANDLER
+************/
 
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
@@ -94,14 +94,14 @@ TibHandler.prototype.sweepOldTibs= function() {
 
 
 
-/*********
-TIB BUTTON
-*********/
+/***********
+ TIB BUTTON
+***********/
 
 // Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
 // assign our onclick events, write our counters, and interact with the DOM element
 
-function TibButton(siteParams, e){
+function TibButton( siteParams, domElement){
 
     this.params = {
         BTN : "",  // Name of the button style to retreive/inject
@@ -109,9 +109,9 @@ function TibButton(siteParams, e){
         BTH : ""  // Height in pixels
     };
 
-    this.domElement = e;
+    this.domElement = domElement;
     this.tibbed= false;
-    this.initiator = new TibInitiator(siteParams, this.domElement);
+    this.initiator = new TibInitiator( siteParams, this.domElement);
 
     this.loadParams(siteParams);
     this.loadElementParams(this.domElement);
@@ -150,7 +150,6 @@ TibButton.prototype.loadElementParams = function(){
             this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
         }
     }
-    this.initiator.loadElementParams(this.domElement);  // load element data- attributes for the initiator params also.
 };
 
 
@@ -290,9 +289,9 @@ TibButton.prototype.injectCss = function( source) {
 
 
 
-/************
-TIB INITIATOR
-************/
+/**************
+ TIB INITIATOR
+**************/
 
 // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
 // to open our tibbing window, retrieve counters, and validate our tib params.
@@ -311,20 +310,16 @@ function TibInitiator( siteParams, domElement){
 
     this.loadParams(siteParams);
     
-    if ( !this.params.TIB ) {
-        // If no TIB specified, assume the current page URL
-
+    if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
         this.params.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
-
     }
 
-    if ( !this.params.SUB ) {
-        // If no SUB is provided, use a hash of the TIB url
+    if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
     }
 
     if(domElement){
-        this.loadParams(domElement);
+        this.loadElementParams(domElement);
     }
 }
 
