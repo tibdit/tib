@@ -54,6 +54,7 @@ function TibHandler( siteParams){
         // Localstorage event listener - watches for changes to bd-subref-x items in localStorage
         window.addEventListener('storage', function(e) {
            if ( e.newValue && e.key.substr(0,10) === SUBREF_PREFIX ) {
+               console.log(e.newValue);
                that.ackElementsInClass(e.key);
            }
         });
@@ -134,6 +135,7 @@ function TibButton( siteParams, domElement){
 
     this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );  // Add subref class for easier reference later
     this.domElement.addEventListener("click", this.initateTib.bind(this));
+
 }
 
 

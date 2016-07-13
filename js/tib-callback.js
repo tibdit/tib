@@ -15,7 +15,7 @@ TibCallback= function(url){
             this.persistAck();
             this.updateQTY();
         }
-        //this.closeWindow();
+        this.closeWindow();
     }
 
     catch (e) {
