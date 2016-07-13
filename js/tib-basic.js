@@ -18,11 +18,14 @@ function tibInit(siteParams){
     }
 
     return bd;
-}
+
+
+};
+
 
 
 var SUBREF_PREFIX= 'bd-subref-';
-
+var QTY_CACHE_DURATION= 20; // minutes
 
 
 /************
@@ -32,53 +35,21 @@ var SUBREF_PREFIX= 'bd-subref-';
 // Our TibHandler object, concerned with initialising our buttons and processing relevant local
 // storage entries. We also initialise our defaultTibParams object using the parameters fed to
 // the tibInit function.
-function TibHandler( siteParams){
-
-    this.initButtons = function(){
 
 
-        var that = this;
-        this.sweepOldTibs();
+function initButtons(){
 
-        var buttons = document.getElementsByClassName('bd-tib-btn');
-        for(var i = 0, n = buttons.length; i < n; i++){
-            var e = buttons[i];
-            
-            e.tibButton = new TibButton( siteParams, e);  // Construct TibInitiator for button, feeding in site default params + local params from element data-bd-*
-
-            if ( localStorage[SUBREF_PREFIX + e.tibButton.initiator.params.SUB] ) {
-                e.tibButton.acknowledgeTib();
-            }
-        }
-
-        // Localstorage event listener - watches for changes to bd-subref-x items in localStorage
-        window.addEventListener('storage', function(e) {
-           if ( e.newValue && e.key.substr(0,10) === SUBREF_PREFIX ) {
-               that.ackElementsInClass(e.key);
-           }
-        });
-    };
+    var buttons = document.getElementsByClassName('bd-tib-btn');
+    for ( var i = 0, n = buttons.length; i < n; i++ ) {
+        buttons[i].tibButton = new TibButton( siteParams, e);  
+        // Construct TibInitiator for button, feeding in site default params + local params from element data-bd-*
+    }
 }
 
 
+function sweep() {
 
-TibHandler.prototype.ackElementsInClass= function ( key ) {
-
-    // Attempt to grab QTY from localStorage item matching passed key
-
-    var QTY= JSON.parse( localStorage.getItem(key)).QTY;
-    var buttons= document.getElementsByClassName(key);
-    for (var i= 0, n= buttons.length; i < n; i++) {
-        var e = buttons[i];
-        e.tibButton.acknowledgeTib( QTY);    // counter update included in acknowledgeTib
-    }
-};
-
-
-
-TibHandler.prototype.sweepOldTibs= function() {
-
-    // Remove expired tib acknowledgements from localStorage
+    // Remove expired tib acknowledgements and subref counters from localStorage
 
     for(var key in localStorage){
         if ( key.substr( 0, SUBREF_PREFIX.length) === SUBREF_PREFIX ) {
@@ -89,7 +60,7 @@ TibHandler.prototype.sweepOldTibs= function() {
             }
         }
     }
-};
+}
 
 
 
@@ -98,15 +69,14 @@ TibHandler.prototype.sweepOldTibs= function() {
  TIB BUTTON
 ***********/
 
-// Our TibButton object, concerned with the behaviour of our tibbing buttons - here we
-// assign our onclick events, write our counters, and interact with the DOM element
+// manages the behaviour of tibbing buttons, attached 
+// handles click event, counter retreival and display, adds core button classes
 
-function TibButton( siteParams, domElement){
+function TibButton( siteParams, domElement) {
 
     this.domElement = e;
 
-    this.params = {
-
+    this.params = {  // Primarily for related TibButtonStyle class, setting BTN triggers TibButtonStyle features
         BTN : "",  // Button Style to be injected, if any
         BTS : "",  // Source to fetch injected button from
         BTC : "",  // Button Colour
@@ -115,25 +85,29 @@ function TibButton( siteParams, domElement){
 
     this.domElement = domElement;
     this.tibbed= false;
-    this.hasCounter= false;
+    this.counterElement= null;
     this.initiator = new TibInitiator(siteParams, this.domElement);
 
     this.loadParams(siteParams);
     this.loadElementParams(this.domElement);
 
-    if( this.domElement.getElementsByClassName('bd-btn-counter') ) {
-        this.hasCounter = true;
-        this.initiator.getQty(this.writeCounter.bind(this));
+    window.addEventListener('storage', this.storageUpdate.bind(this));
+    this.domElement.addEventListener("click", this.initateTib.bind(this));
+
+    this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
+    if (this.counterElement) {
+        this.initiator.getQty(); //this.writeCounter.bind(this)
     }
 
-    if (this.params.BTN){
+    if (this.params.BTN) {
         this.buttonStyle = new TibButtonStyle(this.params, this.domElement);
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
 
     this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );  // Add subref class for easier reference later
-    this.domElement.addEventListener("click", this.initateTib.bind(this));
+
+
 }
 
 
@@ -148,11 +122,12 @@ TibButton.prototype.loadParams = function(source){
 };
 
 
+
 TibButton.prototype.loadElementParams = function(){
 
     // imports params set via element data-bd-* attributes
 
-    for ( var paramName in this.params ){
+    for ( var paramName in this.params ) {
         if ( this.domElement.getAttribute('data-bd-' + paramName) ){
             this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
         }
@@ -161,13 +136,12 @@ TibButton.prototype.loadElementParams = function(){
 
 
 
-TibButton.prototype.acknowledgeTib= function( QTY) {
+TibButton.prototype.acknowledgeTib= function() {
 
     // set the button to tibbed state, updates displayed count if value provided
 
     this.tibbed= true;
     this.domElement.classList.add('tibbed');
-    if (QTY) this.writeCounter( QTY);
 };
 
 
@@ -183,20 +157,30 @@ TibButton.prototype.isTestnet= function() {
 
 TibButton.prototype.initateTib= function() {
     this.initiator.tib();
-    // if class 'tibbed' do something different maybe
+    // TODO if class 'tibbed' do something different maybe
 };
 
 
 
-TibButton.prototype.writeCounter= function( QTY){
+TibButton.prototype.writeCounter= function( QTY) {
+    if ( this.counterElement && !isNaN(QTY) && QTY !== '') { // isNaN('') will return false
+        this.counterElement.textContent = parseInt(QTY, 10);
+    }
+};
 
-    // write the provided QTY to the buttons bd-btn-counter sub-element
+
+
+TibButton.prototype.storageUpdate= function(e) {
+
+    // localStorage listener to update the buttons counter
     // used as the callback for TibInitiator, and when a tib is acknowledged
 
-    var c= this.domElement.getElementsByClassName('bd-btn-counter')[0];
-    // isNaN('') will return false
-    if ( c && !isNaN(QTY) && QTY !== '') {
-        c.textContent = parseInt(QTY, 10);
+    if ( e.newValue && e.key === SUBREF_PREFIX + this.token.SUB + "-QTY" ) {
+        this.writeCounter( e.newValue);
+        }
+
+    if ( e.newValue && e.key === SUBREF_PREFIX + this.token.SUB + "-TIBBED" ) {
+        this.acknowledgeTib();
     }
 };
 
@@ -205,7 +189,7 @@ TibButton.prototype.writeCounter= function( QTY){
 
 /*****************
  TIB BUTTON STYLE
- *****************/
+*****************/
 
 // TibButtonStyle object handles all functionality relating to the front end styling of tib buttons (loading in
 // SVG's, colours, etc)
@@ -218,6 +202,7 @@ function TibButtonStyle(buttonParams, domElement){
     this.loadButton();
     this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 }
+
 
 
 TibButtonStyle.prototype.injectCss = function( source){
@@ -245,9 +230,10 @@ TibButtonStyle.prototype.injectCss = function( source){
             headElement.insertBefore(styleElement, styleElement.nextSibling); // inject button specific CSS immediatly
             // after
         }
-
     }
 };
+
+
 
 TibButtonStyle.prototype.loadButton= function(){
 
@@ -431,35 +417,30 @@ TibInitiator.prototype.querystring= function() {
 
 
 
-TibInitiator.prototype.getQty= function( callback){
+TibInitiator.prototype.getQty= function(){
 
-    // ls = localStorage
-    var lsKey = 'bd-subref-' + this.params.SUB + '-QTY', lsVal;
-    lsVal = localStorage.getItem(lsKey);
-    if( lsVal ){
-        lsVal = JSON.parse( localStorage.getItem( lsKey ) );
-        console.log(lsVal);
-        callback( lsVal.QTY );
+    var storageKey = SUBREF_PREFIX + this.params.SUB + '-QTY', lsVal;
+    
+    subrefQTY = localStorage.getItem(storageKey);
+    if( !subrefQTY ) {
+        // retreive the current tib count for this initiator
+
+        var qtyHttp= new XMLHttpRequest();
+        var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
+        qtyHttp.open('GET', initiatorUrl, true);
+        qtyHttp.send();
+
+        qtyHttp.onreadystatechange= function(){
+            if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+                
+                subrefQTY = {
+                    QTY : JSON.parse(qtyHttp.response).QTY,
+                    EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
+                };
+                localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
+            }
+        };
     }
-    // retreive the current tib count for this initiator
-
-    var qtyHttp= new XMLHttpRequest();
-    var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
-    console.log(initiatorUrl);
-    qtyHttp.open('GET', initiatorUrl, true);
-    qtyHttp.onreadystatechange= function(){
-        if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
-            lsVal = {};
-            lsVal.EXP = Date.now() + 1200000;
-            lsVal.EXP = new Date(lsVal.EXP);
-            lsVal.QTY = JSON.parse(qtyHttp.response).QTY;
-            lsVal = JSON.stringify(lsVal);
-            localStorage.setItem(lsKey, lsVal);
-            console.log(lsVal);
-            callback( JSON.parse(qtyHttp.response).QTY);
-        }
-    };
-    qtyHttp.send();
 };
 
 

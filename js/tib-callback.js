@@ -80,12 +80,13 @@ TibCallback.prototype.persistAck= function() {
 TibCallback.prototype.updateQTY= function()  {
 
     // store the updated count for the subref in localStorage 
+    var lsKey= SUBREF_PREFIX + this.token.SUB + "-QTY";
 
     var subrefQTY= {
         QTY: parseInt(this.token.QTY, 10),
         EXP: new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
     };
-    localStorage.setItem(SUBREF_PREFIX + this.token.SUB + "-QTY", JSON.stringify(subrefQTY));
+    localStorage.setItem(lsKey, JSON.stringify(subrefQTY));
 };
 
 
