@@ -1,5 +1,6 @@
 
 var SUBREF_PREFIX= 'bd-subref-';
+var QTY_CACHE_DURATION= 20; // minutes
 
 
 TibCallback= function(url){
@@ -10,7 +11,10 @@ TibCallback= function(url){
     try {
         this.extractUrlToken();
         this.generateDates();
-        if ( localStorageAvailable() ) this.persistAck();
+        if ( localStorageAvailable() ) {
+            this.persistAck();
+            this.updateQTY();
+        }
         this.closeWindow();
     }
 
@@ -69,10 +73,17 @@ TibCallback.prototype.persistAck= function() {
         EXP: this.tibExpire
     };
     localStorage.setItem(SUBREF_PREFIX + this.token.SUB + "-TIBBED", JSON.stringify(tibDetails));
+};
+
+
+
+TibCallback.prototype.updateQTY= function()  {
+
+    // store the updated count for the subref in localStorage 
 
     var subrefQTY= {
         QTY: parseInt(this.token.QTY, 10),
-        EXP: new Date(new Date().getTime() + (1000 * 60 * 20)) // 20 minutes from now
+        EXP: new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
     };
     localStorage.setItem(SUBREF_PREFIX + this.token.SUB + "-QTY", JSON.stringify(subrefQTY));
 };
