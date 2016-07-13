@@ -327,22 +327,24 @@ function TibInitiator( siteParams, domElement){
 
 
     this.loadParams(siteParams);
-    
+    this.loadElementParams(domElement);
+
     if ( !this.params.TIB ) {
         // If no TIB specified, assume the current page URL
 
         this.params.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
 
     }
+    console.log(this.params.SUB);
 
     if ( !this.params.SUB ) {
         // If no SUB is provided, use a hash of the TIB url
         this.params.SUB=  this.getSub();
     }
 
-    if(domElement){
-        this.loadParams(domElement);
-    }
+    console.log(this.params.SUB);
+
+
 }
 
 
