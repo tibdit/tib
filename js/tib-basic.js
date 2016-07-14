@@ -66,7 +66,6 @@ function sweepStorage() {
             var item = JSON.parse( localStorage.getItem(key));
             var expiry = new Date(item.EXP).getTime();
             if ( Date.now() >  expiry) {
-                console.log(new Date(expiry));
                 console.log('removing ' + key);
                 localStorage.removeItem(key);
             }
@@ -88,9 +87,6 @@ function TibButton( siteParams, domElement) {
 
     this.params = {  // Primarily for related TibButtonStyle class, setting BTN triggers TibButtonStyle features
         BTN : "",  // Button Style to be injected, if any
-        BTS : "",  // Source to fetch injected BTN button from
-        BTC : "",  // Button Face (backdrop) Colour
-        BTH : "",  // Button Height,
         QTY : ""
         // TODO move BTS, BTC, BTH to TibButtonStyling (add to existing params object)
         // TODO support for QTY initialisation by backend as param
@@ -102,7 +98,7 @@ function TibButton( siteParams, domElement) {
     this.initiator = new TibInitiator(siteParams, this.domElement);
 
     this.loadObjectParams(siteParams);
-    this.loadElementParams(this.domElement);
+    loadElementParams(this.params, this.domElement);
 
     window.addEventListener('storage', this.storageUpdate.bind(this)); // handles tibbed events and counter updates
     this.domElement.addEventListener("click", this.initateTib.bind(this));
@@ -135,20 +131,6 @@ TibButton.prototype.loadObjectParams = function(source){
         for (var p in this.params) this.params[p] = source[p];
     }
 };
-
-
-
-TibButton.prototype.loadElementParams = function(){
-
-    // imports params set via element data-bd-* attributes
-
-    for ( var paramName in this.params ) {
-        if ( this.domElement.getAttribute('data-bd-' + paramName) ){
-            this.params[paramName] = this.domElement.getAttribute('data-bd-' + paramName) || this.params[paramName];
-        }
-    }
-};
-
 
 
 TibButton.prototype.acknowledgeTib= function() {
@@ -208,7 +190,7 @@ TibButton.prototype.getQty= function(){
                 localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
                 // localStorage change event only fires if modified by a different window, so we must manually call
                 // writeCounter TODO: find localStorage event workaround
-                that.writeCounter(JSON.stringify(subrefQTY));
+                that.writeCounter(subrefQTY.QTY);
             }
         };
     }
@@ -218,8 +200,8 @@ TibButton.prototype.getQty= function(){
 TibButton.prototype.writeCounter= function( QTY) {
 
     // if the button 
-
-    if ( this.counterElement && !isNaN(QTY) && QTY !== '') { // isNaN('') will return false
+    console.log('QTY:'+ QTY + ' isNaN(QTY): ' + isNaN(QTY));
+    if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) { // isNaN('') will return false
         this.counterElement.textContent = parseInt(QTY, 10);
     }
 };
@@ -251,9 +233,16 @@ TibButton.prototype.storageUpdate= function(e) {
 
 function TibButtonStyle(tibButton){
     // Duplicating params from TibButton - probably just a temp solution
-    this.params = tibButton.params;
+
+    this.params = {
+        BTS : "",  // Source to fetch injected BTN button from
+        BTC : "",  // Button Face (backdrop) Colour
+        BTH : ""  // Button Height,
+    };
+    this.params.BTN = tibButton.params.BTN;
     this.tibButton = tibButton;
     this.domElement = tibButton.domElement;
+    loadElementParams(this.params, this.domElement);
     this.loadButton();
     this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 }
@@ -268,8 +257,6 @@ TibButtonStyle.prototype.loadButton= function(){
     tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".html", true);
     tibbtn.responseType= "document";
     tibbtn.send();
-
-    var that= this; // TODO replace with .bind(this)?
 
     tibbtn.onreadystatechange= function(){
         if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
@@ -302,21 +289,8 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) { // TODO remove BT
 
     this.injectCss( source);
 
-    // TODO move below to a 'styleButton' function
-
-    var backdrop = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
-    if ( backdrop && this.params.BTC ) {
-        backdrop.style.fill = this.params.BTC; // fill will only work for svg, needs expansion to include CSS
-    }
-
-    if ( this.params.BTH ) {
-        this.domElement.style.height = this.params.BTH + "px";
-    }
-
-    var s= this.domElement.children[0];
-    if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-        s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-    }
+    this.setColour();
+    this.setHeight();
 
     // Rewrite reference to counterElement to match imported button
     this.tibButton.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
@@ -325,6 +299,24 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) { // TODO remove BT
 
 };
 
+TibButtonStyle.prototype.setColour= function(){
+    var backdrop = this.domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
+    if ( backdrop && this.params.BTC ) {
+        backdrop.style.fill = this.params.BTC; // fill will only work for svg, needs expansion to include CSS
+    }
+};
+
+TibButtonStyle.prototype.setHeight = function(){
+    if ( this.params.BTH ) {
+        this.domElement.style.height = this.params.BTH + "px";
+    }
+
+    // TODO: Re-implement this browser fix
+    //var s= this.domElement.children[0];
+    //if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+    //    s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+    //}
+};
 
 
 TibButtonStyle.prototype.injectCss = function( source){
@@ -385,7 +377,7 @@ function TibInitiator( siteParams, domElement){
     }
 
     if(domElement){
-        this.loadElementParams(domElement);
+        loadElementParams(this.params, domElement);
     }
 
 }
@@ -452,14 +444,21 @@ TibInitiator.prototype.isTestnet= function(){
 
 
 
-TibInitiator.prototype.loadElementParams= function(e) {
-    for ( var p in this.params){
-        if ( e.getAttribute('data-bd-' + p) ){
-            this.params[p] = e.getAttribute('data-bd-' + p) || this.params[p];
+/* HELPER FUNCTION(S)
+*************************************************************
+* */
+
+// For each property in params, populate with data-bd-X attribute from e if present
+loadElementParams = function(params, e){
+
+    for ( var paramName in params ) {
+        if ( e.getAttribute('data-bd-' + paramName) ){
+            params[paramName] = e.getAttribute('data-bd-' + paramName);
         }
     }
-};
 
+    return params;
+};
 
 
 /*
