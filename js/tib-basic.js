@@ -106,6 +106,7 @@ tibHandler = {};
 
         window.addEventListener('storage', this.storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.initiateTib.bind(this));
+        window.addEventListener('tibstate', this.storageUpdate.bind(this));
 
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
         if (this.counterElement) {
@@ -179,6 +180,10 @@ tibHandler = {};
 
         // localStorage listener to update the buttons counter
         // used as the callback for tibHandler.Initiator, and when a Tib is acknowledged
+        if(e.type === 'tibstate'){
+            e.key= e.detail;
+            e.newValue= localStorage[e.key];
+        }
 
         if ( e.newValue && e.key === SUBREF_PREFIX + this.initiator.params.SUB + "-QTY" ) {
             // TODO: if a value is set from params, do we overwrite it after a Tib?
@@ -275,10 +280,12 @@ tibHandler = {};
         }
 
         // TODO: Re-implement this browser fix
-        //var s= this.domElement.children[0];
-        //if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-        //    s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-        //}
+        var s= this.domElement.children[0];
+        console.log('xx', s);
+        if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+            s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+            console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
+        }
     };
 
 
@@ -427,9 +434,10 @@ tibHandler = {};
                         EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
                     };
                     localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
-                    // localStorage change event only fires if modified by a different window, so we must manually call
-                    // writeCounter TODO: find localStorage event workaround
-                    //that.writeCounter(subrefQTY.QTY);
+                    var tibEvent = document.createEvent('customEvent');
+                    tibEvent.initCustomEvent('tibstate', true, false, storageKey);
+                    window.dispatchEvent(tibEvent);
+
                 }
             };
         }
