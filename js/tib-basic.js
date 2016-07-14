@@ -66,6 +66,8 @@ function sweepStorage() {
             var item = JSON.parse( localStorage.getItem(key));
             var expiry = new Date(item.EXP).getTime();
             if ( Date.now() >  expiry) {
+                console.log(new Date(expiry));
+                console.log('removing ' + key);
                 localStorage.removeItem(key);
             }
         }
@@ -88,7 +90,8 @@ function TibButton( siteParams, domElement) {
         BTN : "",  // Button Style to be injected, if any
         BTS : "",  // Source to fetch injected BTN button from
         BTC : "",  // Button Face (backdrop) Colour
-        BTH : ""   // Button Height
+        BTH : "",  // Button Height,
+        QTY : ""
         // TODO move BTS, BTC, BTH to TibButtonStyling (add to existing params object)
         // TODO support for QTY initialisation by backend as param
     };
@@ -106,16 +109,20 @@ function TibButton( siteParams, domElement) {
 
     this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
     if (this.counterElement) {
-        this.initiator.getQty(); 
+        this.writeCounter(this.getQty());
     }
 
     if (this.params.BTN) {
-        this.buttonStyle = new TibButtonStyle(this.params, this);   // TODO DON'T need .params argument since 'this' already passed
+        this.buttonStyle = new TibButtonStyle(this);   // TODO DON'T need .params argument since 'this' already passed
     }
 
     if ( this.isTestnet() ) this.domElement.classList.add("testnet");
 
     this.domElement.classList.add( SUBREF_PREFIX + this.initiator.params.SUB );  // Add subref class for easier reference later
+
+    if(localStorage.getItem(SUBREF_PREFIX + this.initiator.params.SUB + '-TIBBED')){
+        this.acknowledgeTib();
+    }
 }
 
 
@@ -169,6 +176,44 @@ TibButton.prototype.initateTib= function() {
 };
 
 
+TibButton.prototype.getQty= function(){
+
+    var storageKey = SUBREF_PREFIX + this.initiator.params.SUB + '-QTY', subrefQTY;
+
+    // Value from params takes precedence
+    subrefQTY = this.params.QTY;
+
+    // No value from params set, attempt to fetch + parse QTY from localstorage
+    if(!subrefQTY){
+        subrefQTY = localStorage.getItem(storageKey);
+        if(subrefQTY) subrefQTY = JSON.parse(localStorage.getItem(storageKey)).QTY;
+    }
+
+    // No value from params or localStorage, initiate getQTY request
+    if( !subrefQTY ) {
+        // retreive the current tib count for this initiator
+
+        var qtyHttp= new XMLHttpRequest();
+        var initiatorUrl= "https://tib.me/getqty/" + this.initiator.querystring();
+        qtyHttp.open('GET', initiatorUrl, true);
+        qtyHttp.send();
+
+        var that = this;
+        qtyHttp.onreadystatechange= function(){
+            if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+                subrefQTY = {
+                    QTY : JSON.parse(qtyHttp.response).QTY,
+                    EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
+                };
+                localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
+                // localStorage change event only fires if modified by a different window, so we must manually call
+                // writeCounter TODO: find localStorage event workaround
+                that.writeCounter(JSON.stringify(subrefQTY));
+            }
+        };
+    }
+    return subrefQTY;
+};
 
 TibButton.prototype.writeCounter= function( QTY) {
 
@@ -186,11 +231,11 @@ TibButton.prototype.storageUpdate= function(e) {
     // localStorage listener to update the buttons counter
     // used as the callback for TibInitiator, and when a tib is acknowledged
 
-    if ( e.newValue && e.key === SUBREF_PREFIX + this.token.SUB + "-QTY" ) {
-        this.writeCounter( e.newValue);
+    if ( e.newValue && e.key === SUBREF_PREFIX + this.initiator.params.SUB + "-QTY" ) {
+        // TODO: if a value is set from params, do we overwrite it after a tib?
+        this.writeCounter( JSON.parse(e.newValue).QTY);
         }
-
-    if ( e.newValue && e.key === SUBREF_PREFIX + this.token.SUB + "-TIBBED" ) {
+    if ( e.newValue && e.key === SUBREF_PREFIX + this.initiator.params.SUB + "-TIBBED" ) {
         this.acknowledgeTib();
     }
 };
@@ -204,15 +249,14 @@ TibButton.prototype.storageUpdate= function(e) {
 
 // TibButtonStyle object handles all functionality relating to the front end styling of tib buttons (loading in SVG's, colours, etc)
 
-function TibButtonStyle(buttonParams, tibButton){
+function TibButtonStyle(tibButton){
     // Duplicating params from TibButton - probably just a temp solution
-    this.params = buttonParams;
+    this.params = tibButton.params;
     this.tibButton = tibButton;
     this.domElement = tibButton.domElement;
     this.loadButton();
     this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 }
-
 
 
 TibButtonStyle.prototype.loadButton= function(){
@@ -229,9 +273,9 @@ TibButtonStyle.prototype.loadButton= function(){
 
     tibbtn.onreadystatechange= function(){
         if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
-            that.writeButton(this.responseXML, that.params.BTN);  // TODO remove BTN as argument ?
+            this.writeButton(tibbtn.responseXML, this.params.BTN);
         }
-    };
+    }.bind(this);
 };
 
 
@@ -274,7 +318,10 @@ TibButtonStyle.prototype.writeButton= function( source, BTN) { // TODO remove BT
         s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
     }
 
-    this.tibButton.initiator.getQty( this.tibButton.writeCounter.bind(this.tibButton) );  // TODO move functionality to TibButton parent object (incl does the button have a counter?)
+    // Rewrite reference to counterElement to match imported button
+    this.tibButton.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
+
+    this.tibButton.writeCounter(this.tibButton.getQty());
 
 };
 
@@ -394,35 +441,6 @@ TibInitiator.prototype.querystring= function() {
     }
     return querystring.substr(0,querystring.length);  // truncate trailing ampersand
 };
-
-
-
-TibInitiator.prototype.getQty= function(){
-
-    var storageKey = SUBREF_PREFIX + this.params.SUB + '-QTY', lsVal;
-        
-    subrefQTY = localStorage.getItem(storageKey);
-    if( !subrefQTY ) {
-        // retreive the current tib count for this initiator
-
-        var qtyHttp= new XMLHttpRequest();
-        var initiatorUrl= "https://tib.me/getqty/" + this.querystring();
-        qtyHttp.open('GET', initiatorUrl, true);
-        qtyHttp.send();
-
-        qtyHttp.onreadystatechange= function(){
-            if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
-                
-                subrefQTY = {
-                    QTY : JSON.parse(qtyHttp.response).QTY,
-                    EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
-                };
-                localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
-            }
-        };
-    }
-};
-
 
 
 TibInitiator.prototype.isTestnet= function(){
