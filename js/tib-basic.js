@@ -89,6 +89,8 @@ function TibButton( siteParams, domElement) {
         BTS : "",  // Source to fetch injected BTN button from
         BTC : "",  // Button Face (backdrop) Colour
         BTH : ""   // Button Height
+        // TODO move BTS, BTC, BTH to TibButtonStyling (add to existing params object)
+        // TODO support for QTY initialisation by backend as param
     };
 
     this.domElement = domElement;
@@ -398,7 +400,7 @@ TibInitiator.prototype.querystring= function() {
 TibInitiator.prototype.getQty= function(){
 
     var storageKey = SUBREF_PREFIX + this.params.SUB + '-QTY', lsVal;
-    
+        
     subrefQTY = localStorage.getItem(storageKey);
     if( !subrefQTY ) {
         // retreive the current tib count for this initiator
