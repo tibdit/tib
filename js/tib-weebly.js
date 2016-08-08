@@ -229,7 +229,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			e.classList.add( tibButtonsClass + "-" + BTN);
 
 			TIB= e.getAttribute("data-bd-TIB");
-			TIB= TIB || window.location.hostname + window.location.pathname;
+			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 
 
 
@@ -290,7 +290,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				hasCounter= true;
 
 				TIB= e.getAttribute("data-bd-TIB");
-				TIB= TIB || window.location.hostname + window.location.pathname;
+				TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 
 				break;
 			}

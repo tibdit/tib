@@ -221,7 +221,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			e.classList.add( tibButtonsClass + "-" + BTN);
 
 			TIB= e.getAttribute("data-bd-TIB");
-			TIB= TIB || window.location.hostname + window.location.pathname;
+			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 
 			if ( localStorage["bd-subref-" + SUB] ) { 
 				e.classList.add("tibbed");  // add the tibbed class 
@@ -282,7 +282,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				hasCounter= true;
 
 				TIB= e.getAttribute("data-bd-TIB");
-				TIB= TIB || window.location.hostname + window.location.pathname;
+				TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 
 				break;
 			}
