@@ -227,6 +227,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+			TIB= encodeURIComponent(TIB);
 
 			if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ) {
 					e.classList.add("tibbed");  // add the tibbed class
@@ -278,6 +279,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var e= buttons[i];
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+			TIB= encodeURIComponent(TIB);
 		}
 
 		var that= this;

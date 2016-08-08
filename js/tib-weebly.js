@@ -230,6 +230,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+			TIB= encodeURIComponent(TIB);
 
 
 
@@ -291,6 +292,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 				TIB= e.getAttribute("data-bd-TIB");
 				TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+				TIB= encodeURIComponent(TIB);
 
 				break;
 			}

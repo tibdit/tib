@@ -228,6 +228,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+			TIB= encodeURIComponent(TIB);
 
 			data_ASN = e.getAttribute("data-bd-ASN");
 			ASN = data_ASN || ASN;
@@ -282,6 +283,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var e= buttons[i];
 			TIB= e.getAttribute("data-bd-TIB");
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+			TIB= encodeURIComponent(TIB);
 		}
 
 		/* Set QTY from localstorage if present */
