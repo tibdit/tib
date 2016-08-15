@@ -2,6 +2,10 @@
 <html lang="en">
 
 <script src="tib-basic.js"></script>
+<script src="tib-basic-initiator.js"></script>
+<script src="tib-basic-button-style.js"></script>
+<script src="tib-basic-button.js"></script>
+<script src="tib-basic-callback.js"></script>
 <!-- Including our script for later usage -->
 
 <head>
@@ -29,12 +33,13 @@
 
     <h3>Directly Attached TibButton</h3>
     <p>Graphical button created by directly instantiating a TibButton object on the button itself.</p>
-    <div id="direct-button"></div>
+    <div style="min-height: 50px; width: 50px; background: red;" id="direct-button"><div
+            class="bd-btn-counter"></div></div>
 
     <h3>Directly Attached TibInitiator</h3>
     <p>Button with a TibInitiator instantiated upon it, and onClick functionality handled by the tibInitiator.tib()
         function.</p>
-    <button id="direct-initiator" onclick="this.tibInitiator.tib()">Tib Me!</button>
+    <button id="direct-initiator" data-bd-PAD='myisWNp7MH4dHtSSy9Wk6JK9QP3YkiGZVz' onclick="this.tibInitiator.dispatch()">Tib Me!</button>
 
 </body>
 </html>
@@ -46,10 +51,10 @@
         'BTN': 'bubble', // Button styles which can be set site-wide (optional)
         'CBK' : 'https://widget.tibit.local/assets/js/example-callback.html'
     };
-    tibHandler.init(tibParamExample);
+    Tibit.init(tibParamExample);
 //
     x = document.getElementById('direct-initiator')
-    x.tibInitiator = new tibHandler.Initiator(tibParamExample);
+    x.tibInitiator = new TibInitiator(tibParamExample, x);
     y = document.getElementById('direct-button');
-    y.tibButton = new tibHandler.Button(tibParamExample, y);
+    y.tibButton = new TibButton(tibParamExample, y);
 </script>
