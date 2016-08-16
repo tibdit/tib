@@ -1,13 +1,12 @@
 TibInitiator = (function(){
-    /**************
-     TIB INITIATOR
-     **************/
+    // Our Tib Initiator module, concerned with the interactions with the tibbing app. Exposes our TibInitiator
+    // constructor, which can be instantiated and used to dispatch a tibbing window, retrieve counters, and validate Tib
+    // params
 
-
-        // Our Tib Initiator object, concerned with the interactions with the tibbing app. We can use this
-        // to open our tibbing window, retrieve counters, and validate our Tib params.
+    // Our pseudoconstants, available anywhere within our TibInitiator closure (but not from outside of it)
     var SUBREF_PREFIX= 'bd-subref-';
     var QTY_CACHE_DURATION= 20; // minutes
+
     TibInitiator = function( siteParams, domElement){
         this.params = {
 
@@ -18,19 +17,24 @@ TibInitiator = (function(){
             TIB : ""  // URL used to retreive the snippet telling the user what they are tibbing
         };
 
+        loadObjectParams(siteParams, this.params); // Import siteParams passed to constructor to this.params
 
-        loadObjectParams(siteParams, this.params);
+        if(domElement){
+            loadElementParams(this.params, domElement);
+        }
 
         if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
-            this.params.TIB = window.location.hostname + window.location.pathname; // + window.location.search??
+            this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
         }
+
+
 
         if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
             this.params.SUB=  generateSub(this.params.TIB);
         }
 
-        if(domElement){
-            loadElementParams(this.params, domElement);
+        if(!this.params.CBK){
+            this.params.CBK |= window.location.origin;
         }
 
         this.dispatch= function() {
@@ -49,9 +53,9 @@ TibInitiator = (function(){
             console.log(tibUrl);
 
             tibWindow = window.open( tibUrl.href, tibWindowName, tibWindowOptions);
-            tibWindow.initialHref = tibWindow.location.href;
 
-            TibCallback.initialize(tibWindow);
+
+            Tibit.Callback.initialize(tibWindow);
         };
 
         this.isTestnet= function(){

@@ -4,7 +4,7 @@ var QTY_CACHE_DURATION= 20; // minutes
 
 
 TibCallback= function(url){
-    
+
     this.url= url;
     this.DUR= 1;  // multiplier to persist tib acknowedgement (1= 1-day or 5-mins for testnet)
 
@@ -32,7 +32,7 @@ TibCallback.prototype.extractUrlToken= function(url){
 
     // fetch the token from the callback querystring and decompile to JSON
 
-    var re= "[^\?]*\?(.*&)?tibtok=([^&]*)"; 
+    var re= "[^\?]*\?(.*&)?tibtok=([^&]*)";
     var token= this.url.match(re)[2]; // extract the value of the tibtok= querystring parameter
     token= decodeURIComponent(token); // convert any percent-encoded characters
     token= atob(token); // base64 decode the token
@@ -69,7 +69,7 @@ TibCallback.prototype.persistAck= function() {
     // store the record of the tib in localStorage (trigger localStorage listener on tib initating page)
 
     var tibDetails = {
-        ISS: this.tibIssued, 
+        ISS: this.tibIssued,
         EXP: this.tibExpire
     };
     localStorage.setItem(SUBREF_PREFIX + this.token.SUB + "-TIBBED", JSON.stringify(tibDetails));
@@ -79,7 +79,7 @@ TibCallback.prototype.persistAck= function() {
 
 TibCallback.prototype.updateQTY= function() {
 
-    // store the updated count for the subref in localStorage 
+    // store the updated count for the subref in localStorage
 
     var storageKey= SUBREF_PREFIX + this.token.SUB + "-QTY";
     var subrefQTY= {
@@ -109,7 +109,7 @@ TibCallback.prototype.closeWindow= function() {
 
 
 function localStorageAvailable() {
-    try {   
+    try {
         x = '__storage_test__';
         window.localStorage.setItem(x, x);
         window.localStorage.removeItem(x);

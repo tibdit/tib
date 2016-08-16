@@ -1,9 +1,6 @@
-
-Tibit = (function(){
+var Tibit = (function(Tibit){
 
     // Takes a JS object as a parameter
-
-    var Tibit = {};
 
     init = function(siteParams){  // TODO namespace closure
 
@@ -87,7 +84,7 @@ Tibit = (function(){
     Tibit.init = init;
     return Tibit;
 
-})();
+})(Tibit || {});
 
 /*
 ** MurmurHash3: Public Domain Austin Appleby http://sites.google.com/site/murmurhash/
