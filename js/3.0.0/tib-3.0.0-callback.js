@@ -21,11 +21,11 @@ var Tibit = (function(Tibit){
     };
 
     function persistAck(){
-        var duration = DUR * (isTestNet() ? 300000 : 86400000 );
+        var duration = DUR * (Tibit.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
         var storageKey = SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
-        var issueDate = new Date( token.obj.ISS ).getTime();
+        var issueDate = new Date( token.obj.ISS );
         var expireDate = new Date( issueDate + duration );
 
         localStorage.setItem(storageKey, JSON.stringify({ ISS: issueDate, EXP: expireDate }));
@@ -41,11 +41,6 @@ var Tibit = (function(Tibit){
             closeWindow(tibWindow);
             if( validateTibToken(token) )   persistAck();
         }
-    }
-
-    function isTestNet(){
-        console.log(token);
-        return token.obj.PAD && ( "mn2".search(token.obj.PAD.substr(0,1)) !== -1 );
     }
 
     function callbackDone(){

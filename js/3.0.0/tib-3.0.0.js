@@ -100,8 +100,15 @@ var Tibit = (function(Tibit){
         }
     }
 
+    function isTestnet(PAD){
+
+        // true if PAD set and first character not 'm', 'n', or '2'
+        return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
+    };
+
 
     Tibit.init = init;
+    Tibit.isTestnet = isTestnet;
     Tibit.loadElementParams = loadElementParams;
     return Tibit;
 

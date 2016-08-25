@@ -47,7 +47,7 @@ var Tibit = (function(Tibit){
             this.buttonStyle = new Tibit.ButtonStyle(this);
         }
 
-        if ( this.domElement.tibInitiator.isTestnet(this.domElement) ) this.domElement.classList.add("testnet");
+        if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
 
         this.domElement.classList.add( SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for
         // easier reference later
@@ -71,16 +71,6 @@ var Tibit = (function(Tibit){
         e.tibbed= true;
         e.classList.add('tibbed');
     };
-
-
-
-    isTestnet= function(e) {
-
-        // ask the initiator if PAD is a bitcoin testnet address
-
-        return e.tibInitiator.isTestnet();
-    };
-
 
     storageUpdate= function(e) {
         // localStorage listener to update the buttons counter

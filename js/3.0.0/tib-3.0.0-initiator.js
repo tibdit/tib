@@ -58,12 +58,6 @@ var Tibit = (function(Tibit){
             Tibit.Callback.initialize(tibWindow);
         };
 
-        this.isTestnet= function(){
-
-            // true if PAD set and first character not 'm', 'n', or '2'
-            return this.params.PAD && ( "mn2".search(this.params.PAD.substr(0,1)) !== -1 );
-        };
-
         this.getQty= function(){
 
             var storageKey = SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
