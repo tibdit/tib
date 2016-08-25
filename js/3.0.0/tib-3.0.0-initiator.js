@@ -7,7 +7,7 @@ var Tibit = (function(Tibit){
     var SUBREF_PREFIX= 'bd-subref-';
     var QTY_CACHE_DURATION= 20; // minutes
 
-    Tibit.Initiator = function( siteParams, domElement){
+    Tibit.Initiator = function( domElement){
         this.params = {
 
             PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
@@ -17,7 +17,7 @@ var Tibit = (function(Tibit){
             TIB : ""  // URL used to retreive the snippet telling the user what they are tibbing
         };
 
-        loadObjectParams(siteParams, this.params); // Import siteParams passed to constructor to this.params
+        loadObjectParams(Tibit.params, this.params); // Import siteParams passed to constructor to this.params
 
         if(domElement){
             loadElementParams(this.params, domElement);

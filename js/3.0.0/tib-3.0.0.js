@@ -4,11 +4,30 @@ var Tibit = (function(Tibit){
 
     init = function(siteParams){  // TODO namespace closure
 
+        // Initialising our params object as a property of our global Tibit object
+        Tibit.params = {
+            PAD : "",
+            SUB : "",
+            CBK : "",
+            ASN : "",
+            TIB : "",
+            BTN : "",
+            BTS : "",
+            BTC : "",
+            BTH : ""
+        };
 
         // perform after-page-loaded actions
         // a siteParams objects gives default parameters for buttons.  Available params are:
         //   styled button injection: BTN, BTS, BTC, BTH  see TibButton constructor
         //   Tib initiator: PAD, ASN, SUB, TIB, CBK  see TibIniator Constructor
+        for( param in Tibit.params ){
+            if(siteParams[param]){
+                Tibit.params[param] = siteParams[param];
+            }
+        }
+
+
 
         switch(document.readyState) {
             case 'loading':
@@ -24,7 +43,7 @@ var Tibit = (function(Tibit){
 
         function afterLoad() {
             sweepStorage();
-            initButtons(siteParams);
+            initButtons();
         }
     }
 
@@ -42,19 +61,29 @@ var Tibit = (function(Tibit){
      PAGE LOAD
     **********/
 
-    initButtons = function(siteParams) {
+    initButtons = function() {
 
         // adds and instantiates a TibButton object for all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
         var buttons = document.getElementsByClassName('bd-tib-btn');
         for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new Tibit.Button( siteParams, buttons[i]);
+            buttons[i].tibButton = new Tibit.Button( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     }
 
 
+    loadElementParams = function(params, e){
+        // For each property in params, populate with data-bd-X attribute from e if present
+
+        for ( var paramName in params ) {
+            if ( e.getAttribute('data-bd-' + paramName) ){
+                params[paramName] = e.getAttribute('data-bd-' + paramName);
+            }
+        }
+        return params;
+    };
 
     function sweepStorage() {
 
@@ -65,7 +94,6 @@ var Tibit = (function(Tibit){
                 var item = JSON.parse( localStorage.getItem(key));
                 var expiry = new Date(item.EXP).getTime();
                 if ( Date.now() >  expiry) {
-                    console.log('removing ' + key);
                     localStorage.removeItem(key);
                 }
             }
@@ -73,14 +101,8 @@ var Tibit = (function(Tibit){
     }
 
 
-
-
-    /* HELPER FUNCTION(S)
-    *************************************************************
-    * */
-
-    // For each property in params, populate with data-bd-X attribute from e if present
     Tibit.init = init;
+    Tibit.loadElementParams = loadElementParams;
     return Tibit;
 
 })(Tibit || {});

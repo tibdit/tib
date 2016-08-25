@@ -5,7 +5,7 @@ var Tibit = (function(Tibit){
      // manages the behaviour of tibbing buttons, attached
      // handles click event, counter retreival and display, adds core button classes
 
-    Tibit.Button = function( siteParams, domElement) {
+    Tibit.Button = function( domElement) {
 
         /* PUBLIC METHODS */
 
@@ -21,7 +21,6 @@ var Tibit = (function(Tibit){
         this.params = {  // Primarily for related TibButtonStyle class, setting BTN triggers TibButtonStyle features
             BTN : "",  // Button Style to be injected, if any
             QTY : ""
-
         };
 
         this.domElement = domElement;
@@ -30,10 +29,10 @@ var Tibit = (function(Tibit){
         this.counterElement= null;
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
 
-        this.domElement.tibInitiator = new Tibit.Initiator(siteParams, this.domElement);
+        this.domElement.tibInitiator = new Tibit.Initiator(this.domElement);
 
-        loadObjectParams(siteParams, this.params);
-        loadElementParams(this.params, this.domElement);
+        loadObjectParams(Tibit.params, this.params);
+        Tibit.loadElementParams(this.params, this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
@@ -99,17 +98,6 @@ var Tibit = (function(Tibit){
         if ( e.newValue && e.key === SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
             acknowledgeTib(this.domElement);
         }
-    };
-
-    loadElementParams = function(params, e){
-
-        for ( var paramName in params ) {
-            if ( e.getAttribute('data-bd-' + paramName) ){
-                params[paramName] = e.getAttribute('data-bd-' + paramName);
-            }
-        }
-
-        return params;
     };
 
     loadObjectParams= function(source, params){

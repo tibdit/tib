@@ -3,7 +3,6 @@ var Tibit = (function(Tibit){
     /*****************
      TIB BUTTON STYLE
     *****************/
-
     // tibHandler.ButtonStyle object handles all functionality relating to the front end styling of Tib buttons (loading in SVG's, colours, etc)
 
     Tibit.ButtonStyle = function(tibButton){
@@ -12,12 +11,14 @@ var Tibit = (function(Tibit){
         this.params = {
             BTS : "",  // Source to fetch injected BTN button from
             BTC : "",  // Button Face (backdrop) Colour
-            BTH : ""  // Button Height,
+            BTH : "",  // Button Height,
+            BTN: ""
         };
         this.params.BTN = tibButton.params.BTN;
+
         this.tibButton = tibButton;
         this.domElement = tibButton.domElement;
-        loadElementParams(this.params, this.domElement);
+        Tibit.loadElementParams(this.params, this.domElement);
         loadButton(this.params, this.domElement);
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
     }
@@ -42,8 +43,6 @@ var Tibit = (function(Tibit){
             }
         };
     };
-
-
 
 
     writeButton= function( source, params, domElement) {
@@ -78,6 +77,7 @@ var Tibit = (function(Tibit){
     };
 
     setColour= function(params, domElement){
+
         var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
         if ( backdrop && params.BTC ) {
             backdrop.style.fill = params.BTC; // fill will only work for svg, needs expansion to include CSS
@@ -91,10 +91,10 @@ var Tibit = (function(Tibit){
 
         // TODO: Re-implement this browser fix
         var s= domElement.children[0];
-        console.log('xx', s);
+        //console.log('xx', s);
         if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
             s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-            console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
+            //console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
         }
     };
 
@@ -125,16 +125,16 @@ var Tibit = (function(Tibit){
         }
     };
 
-    loadElementParams = function(params, e){
-
-        for ( var paramName in params ) {
-            if ( e.getAttribute('data-bd-' + paramName) ){
-                params[paramName] = e.getAttribute('data-bd-' + paramName);
-            }
-        }
-
-        return params;
-    };
+    //loadElementParams = function(params, e){
+    //
+    //    for ( var paramName in params ) {
+    //        if ( e.getAttribute('data-bd-' + paramName) ){
+    //            params[paramName] = e.getAttribute('data-bd-' + paramName);
+    //        }
+    //    }
+    //
+    //    return params;
+    //};
 
     return Tibit;
 

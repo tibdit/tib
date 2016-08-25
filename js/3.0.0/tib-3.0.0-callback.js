@@ -1,12 +1,15 @@
 
 var Tibit = (function(Tibit){
 
-    var SUBREF_PREFIX= 'bd-subref-';
     Tibit.Callback = {};
+
+    // Variables declared here to make available throughout the callback module's closure
+    var SUBREF_PREFIX= 'bd-subref-';
     var callbackIntervalID;
     var tibWindow;
     var token;
     var DUR = 1;
+
     initialize = function(window){
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
@@ -19,8 +22,9 @@ var Tibit = (function(Tibit){
 
     function persistAck(){
         var duration = DUR * (isTestNet() ? 300000 : 86400000 );
+        // 300000   = 1000 * 60 * 5        (5 mins)
+        // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
         var storageKey = SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
-        console.log(token);
         var issueDate = new Date( token.obj.ISS ).getTime();
         var expireDate = new Date( issueDate + duration );
 
@@ -35,12 +39,13 @@ var Tibit = (function(Tibit){
         if(callbackDone()){
             token = extractTibToken();
             closeWindow(tibWindow);
-            if(validateTibToken(token)) persistAck();
+            if( validateTibToken(token) )   persistAck();
         }
     }
 
     function isTestNet(){
-        return token.PAD && ( "mn2".search(this.token.PAD.substr(0,1)) !== -1 );
+        console.log(token);
+        return token.obj.PAD && ( "mn2".search(token.obj.PAD.substr(0,1)) !== -1 );
     }
 
     function callbackDone(){
