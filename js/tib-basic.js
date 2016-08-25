@@ -5,7 +5,6 @@ var Tibit = (function(Tibit){
     init = function(siteParams){  // TODO namespace closure
 
 
-
         // perform after-page-loaded actions
         // a siteParams objects gives default parameters for buttons.  Available params are:
         //   styled button injection: BTN, BTS, BTC, BTH  see TibButton constructor
@@ -50,7 +49,7 @@ var Tibit = (function(Tibit){
 
         var buttons = document.getElementsByClassName('bd-tib-btn');
         for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new TibButton( siteParams, buttons[i]);
+            buttons[i].tibButton = new Tibit.Button( siteParams, buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     }

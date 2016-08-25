@@ -1,4 +1,4 @@
-TibInitiator = (function(){
+var Tibit = (function(Tibit){
     // Our Tib Initiator module, concerned with the interactions with the tibbing app. Exposes our TibInitiator
     // constructor, which can be instantiated and used to dispatch a tibbing window, retrieve counters, and validate Tib
     // params
@@ -7,7 +7,7 @@ TibInitiator = (function(){
     var SUBREF_PREFIX= 'bd-subref-';
     var QTY_CACHE_DURATION= 20; // minutes
 
-    TibInitiator = function( siteParams, domElement){
+    Tibit.Initiator = function( siteParams, domElement){
         this.params = {
 
             PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
@@ -34,7 +34,7 @@ TibInitiator = (function(){
         }
 
         if(!this.params.CBK){
-            this.params.CBK |= window.location.origin;
+            this.params.CBK = window.location.origin;
         }
 
         this.dispatch= function() {
@@ -156,6 +156,6 @@ TibInitiator = (function(){
         return params;
     };
 
-    return TibInitiator;
+    return Tibit;
 
-})();
+})(Tibit || {});

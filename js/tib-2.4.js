@@ -17,6 +17,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj.ENP = 'tibit.local'
     }
     obj.ENP = obj.ENP || 'tibdit.com';
+    obj.VER = obj.VER || "2.4";
 
     tibCss(obj.ENP);
 

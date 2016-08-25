@@ -1,11 +1,11 @@
-TibButton = (function(){
+var Tibit = (function(Tibit){
 
     var SUBREF_PREFIX= 'bd-subref-';
     var QTY_CACHE_DURATION= 20; // minutes
      // manages the behaviour of tibbing buttons, attached
      // handles click event, counter retreival and display, adds core button classes
 
-    TibButton = function( siteParams, domElement) {
+    Tibit.Button = function( siteParams, domElement) {
 
         /* PUBLIC METHODS */
 
@@ -30,12 +30,12 @@ TibButton = (function(){
         this.counterElement= null;
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
 
-        this.domElement.tibInitiator = new TibInitiator(siteParams, this.domElement);
+        this.domElement.tibInitiator = new Tibit.Initiator(siteParams, this.domElement);
 
         loadObjectParams(siteParams, this.params);
         loadElementParams(this.params, this.domElement);
 
-        window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
+        //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
@@ -45,7 +45,7 @@ TibButton = (function(){
         }
 
         if (this.params.BTN) {
-            this.buttonStyle = new TibButtonStyle(this);
+            this.buttonStyle = new Tibit.ButtonStyle(this);
         }
 
         if ( this.domElement.tibInitiator.isTestnet(this.domElement) ) this.domElement.classList.add("testnet");
@@ -84,9 +84,9 @@ TibButton = (function(){
 
 
     storageUpdate= function(e) {
-
         // localStorage listener to update the buttons counter
         // used as the callback for tibHandler.tibInitiator, and when a Tib is acknowledged
+
         if(e.type === 'tibstate'){
             e.key= e.detail;
             e.newValue= localStorage[e.key];
@@ -121,7 +121,7 @@ TibButton = (function(){
         }
     };
 
-    return TibButton;
+    return Tibit;
 
 
-})();
+})(Tibit || {});

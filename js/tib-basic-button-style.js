@@ -1,4 +1,4 @@
-TibButtonStyle = (function(){
+var Tibit = (function(Tibit){
 
     /*****************
      TIB BUTTON STYLE
@@ -6,7 +6,7 @@ TibButtonStyle = (function(){
 
     // tibHandler.ButtonStyle object handles all functionality relating to the front end styling of Tib buttons (loading in SVG's, colours, etc)
 
-    TibButtonStyle = function(tibButton){
+    Tibit.ButtonStyle = function(tibButton){
         // Duplicating params from TibButton - probably just a temp solution
 
         this.params = {
@@ -136,6 +136,6 @@ TibButtonStyle = (function(){
         return params;
     };
 
-    return TibButtonStyle;
+    return Tibit;
 
-})();
+})(Tibit || {});
