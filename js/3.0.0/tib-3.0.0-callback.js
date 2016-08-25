@@ -36,10 +36,18 @@ var Tibit = (function(Tibit){
 
 
     function callbackHandler(){
+        // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
+        // persists the tib via localstorage and closes
+
         if(callbackDone()){
+
             token = extractTibToken();
             closeWindow(tibWindow);
-            if( validateTibToken(token) )   persistAck();
+
+            if( validateTibToken(token) ){
+                persistAck();
+            }
+
         }
     }
 

@@ -39,13 +39,9 @@ var Tibit = (function(Tibit){
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
 
-        if (this.counterElement) {
-            this.writeCounter(this.domElement.tibInitiator.getQty());
-        }
+        if (this.counterElement) this.writeCounter(this.domElement.tibInitiator.getQty());
 
-        if (this.params.BTN) {
-            this.buttonStyle = new Tibit.ButtonStyle(this);
-        }
+        if (this.params.BTN) this.buttonStyle = new Tibit.ButtonStyle(this);
 
         if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
 

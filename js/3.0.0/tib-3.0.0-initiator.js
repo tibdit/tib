@@ -4,6 +4,8 @@ var Tibit = (function(Tibit){
     // params
 
     // Our pseudoconstants, available anywhere within our TibInitiator closure (but not from outside of it)
+    // TODO: would it make more sense to expose these as properties of the Tibit object? Defining the same constants
+    // in multiple modules seems redundant.
     var SUBREF_PREFIX= 'bd-subref-';
     var QTY_CACHE_DURATION= 20; // minutes
 
@@ -19,6 +21,7 @@ var Tibit = (function(Tibit){
 
         loadObjectParams(Tibit.params, this.params); // Import siteParams passed to constructor to this.params
 
+        // tibInitiator is independent of any particular domElement, so retreiving and data-params is optional
         if(domElement){
             loadElementParams(this.params, domElement);
         }
@@ -28,21 +31,24 @@ var Tibit = (function(Tibit){
         }
 
 
-
         if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
             this.params.SUB=  generateSub(this.params.TIB);
         }
 
+        // If not CBK is specified, we just set to window.location.origin - this will never be seen as our callback
+        // handler methods will extract the token, process/persist the tib, and close the window before being seen
+        // by the user.
         if(!this.params.CBK){
             this.params.CBK = window.location.origin;
         }
 
         this.dispatch= function() {
-
-            // initiate the Tib by opening the tib.me popup window
+            // initiate the Tib by opening the tib.me popup window - this is primarily used as an onClick handler,
+            // but can alternatively be used as
 
             var tibWindowName= "tibit";
             var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
+
             // Use initiator params to generate URL, and open in new window
             var tibUrl = document.createElement('a');
             tibUrl.href = "///";
@@ -50,12 +56,13 @@ var Tibit = (function(Tibit){
             tibUrl.protocol = "https";
             tibUrl.search = querystring(this.params);
             tibUrl.search= tibUrl.search.substr(0,tibUrl.search.length-1);  // remove trailing ampersand
-            console.log(tibUrl);
 
             tibWindow = window.open( tibUrl.href, tibWindowName, tibWindowOptions);
 
-
-            Tibit.Callback.initialize(tibWindow);
+            // If using default (inline) CBK, we initialize the callback handlers on dispatch
+            if(this.params.CBK === window.location.origin){
+                Tibit.Callback.initialize(tibWindow);
+            }
         };
 
         this.getQty= function(){
