@@ -39,13 +39,13 @@ var Tibit = (function(Tibit){
         // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
         // persists the tib via localstorage and closes
 
-        if(callbackDone()){
+        if(callbackDone()){ // Polls tibWindow for tib completion
 
-            token = extractTibToken();
+            token = extractTibToken(); // Save querystring token as json string AND js object to token variable
             closeWindow(tibWindow);
 
             if( validateTibToken(token) ){
-                persistAck();
+                persistAck(); // Save to local storage and fire 'tibstate' custom event
             }
 
         }
