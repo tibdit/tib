@@ -1,37 +1,44 @@
-
 var Tibit = (function(Tibit){
+
+
 
     Tibit.Callback = {};
 
-    // Variables declared here to make available throughout the callback module's closure
-    var SUBREF_PREFIX= 'bd-subref-';
-    var callbackIntervalID;
-    var tibWindow;
-    var token;
-    var DUR = 1;
+    // Initializing closure variables for later setting/usage
+    var callbackIntervalID, tibWindow, token;
+
+    var DUR = 1; // TODO: pass from an initiator variable?
 
     initialize = function(window){
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
         tibWindow.initialHref = tibWindow.location.href;
 
+        // setInterval returns an interval ID - saved to closure variable callbackIntervalID to later clear interval
         callbackIntervalID = setInterval( function() {
             callbackHandler();
         }, 100);
+
     };
 
     function persistAck(){
+
+
+        var storageKey = Tibit.constants.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
+
         var duration = DUR * (Tibit.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
-        var storageKey = SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
-        var issueDate = new Date( token.obj.ISS );
-        var expireDate = new Date( issueDate + duration );
 
-        localStorage.setItem(storageKey, JSON.stringify({ ISS: issueDate, EXP: expireDate }));
+        var storageObj = { ISS: new Date( token.obj.ISS ), // Issue Time
+                            EXP: new Date( issueDate + duration )}; // Expiry Time
+        localStorage.setItem(storageKey, JSON.stringify(storageObj));
+
+        // Fire custom 'tibstate' event for any post-tib functions to hook into
         var tibEvent = document.createEvent('customEvent');
         tibEvent.initCustomEvent('tibstate', true, false, storageKey);
         window.dispatchEvent(tibEvent);
+
     }
 
 

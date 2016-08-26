@@ -1,13 +1,15 @@
-var Tibit = (function(Tibit){
-    // Our Tib Initiator module, concerned with the interactions with the tibbing app. Exposes our TibInitiator
-    // constructor, which can be instantiated and used to dispatch a tibbing window, retrieve counters, and validate Tib
-    // params
+/*************************************/
+// TIB INITIATOR MODULE
+/*************************************/
+/*
+*
+* Module concerned with the interactions with the tibbing app.
+* Exposes our Tibit.Initiator constructor, which can be instantiated and used to dispatch a tibbing window, retrieve
+* counters, and validate Tib params.
+*
+* */
 
-    // Our pseudoconstants, available anywhere within our TibInitiator closure (but not from outside of it)
-    // TODO: would it make more sense to expose these as properties of the Tibit object? Defining the same constants
-    // in multiple modules seems redundant.
-    var SUBREF_PREFIX= 'bd-subref-';
-    var QTY_CACHE_DURATION= 20; // minutes
+var Tibit = (function(Tibit){
 
     Tibit.Initiator = function( domElement){
         this.params = {
@@ -67,7 +69,7 @@ var Tibit = (function(Tibit){
 
         this.getQty= function(){
 
-            var storageKey = SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
+            var storageKey = Tibit.constants.SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
 
             // Value from params takes precedence
             subrefQTY = this.params.QTY;
@@ -92,7 +94,7 @@ var Tibit = (function(Tibit){
                     if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
                         subrefQTY = {
                             QTY : JSON.parse(qtyHttp.response).QTY,
-                            EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
+                            EXP : new Date(new Date().getTime() + (1000 * 60 * Tibit.constants.QTY_CACHE_DURATION)) // 20 minutes from now
                         };
                         localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
                         var tibEvent = document.createEvent('customEvent');

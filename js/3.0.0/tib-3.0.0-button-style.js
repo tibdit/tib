@@ -1,12 +1,21 @@
+/*************************************/
+// TIB BUTTON STYLE MODULE
+/*************************************/
+
+/*
+*
+* Module concerned with styling and DOM representation of a Tib Button. This module will attempt to fetch a HTML/SVG
+* button and insert it into the DOM. It will also take height/colour parameters. If the inserted button has a
+* counter element, it will also initiate fetching and setting of tib QTY using initiator and button methods.
+*
+* */
+
 var Tibit = (function(Tibit){
 
-    /*****************
-     TIB BUTTON STYLE
-    *****************/
-    // tibHandler.ButtonStyle object handles all functionality relating to the front end styling of Tib buttons (loading in SVG's, colours, etc)
+    Tibit.ButtonStyle = function(tibButton){ // Constructor function
 
-    Tibit.ButtonStyle = function(tibButton){
-        // Duplicating params from TibButton - probably just a temp solution
+        this.tibButton = tibButton;
+        this.domElement = this.tibButton.domElement;
 
         this.params = {
             BTS : "",  // Source to fetch injected BTN button from
@@ -14,14 +23,16 @@ var Tibit = (function(Tibit){
             BTH : "",  // Button Height,
             BTN: ""
         };
-        this.params.BTN = tibButton.params.BTN;
+        this.params.BTN = this.tibButton.params.BTN; // Duplicate BTN param from parent tibButton
+        Tibit.loadElementParams(this.params, this.domElement); // Overwrite params with any params specified as
+        // data-bd attributes
 
-        this.tibButton = tibButton;
-        this.domElement = tibButton.domElement;
-        Tibit.loadElementParams(this.params, this.domElement);
-        loadButton(this.params, this.domElement);
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
+
+        loadButton(this.params, this.domElement);
+
     }
+
 
 
     loadButton= function(params, domElement){
@@ -43,6 +54,7 @@ var Tibit = (function(Tibit){
             }
         };
     };
+
 
 
     writeButton= function( source, params, domElement) {
@@ -76,6 +88,8 @@ var Tibit = (function(Tibit){
 
     };
 
+
+
     setColour= function(params, domElement){
 
         var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
@@ -83,6 +97,8 @@ var Tibit = (function(Tibit){
             backdrop.style.fill = params.BTC; // fill will only work for svg, needs expansion to include CSS
         }
     };
+
+
 
     setHeight = function(params, domElement){
         if ( params.BTH ) {
@@ -97,6 +113,7 @@ var Tibit = (function(Tibit){
             //console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
         }
     };
+
 
 
     injectCss = function( source, params){

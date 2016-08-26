@@ -2,6 +2,8 @@ var Tibit = (function(Tibit){
 
     // Takes a JS object as a parameter
 
+     var x = '';
+
     init = function(siteParams){  // TODO namespace closure
 
         // Initialising our params object as a property of our global Tibit object
@@ -47,13 +49,6 @@ var Tibit = (function(Tibit){
         }
     }
 
-    // TODO siteParams could be a namespace level object, accessible through the closure.
-    // This would make more sense of passing in instance specific objects as a parameter to the constructors.
-    // It would resolve the button-styling-specifc stuff being in the TibButton constructor.
-
-
-    var SUBREF_PREFIX= 'bd-subref-';
-    var QTY_CACHE_DURATION= 20; // minutes
 
 
 
@@ -90,7 +85,7 @@ var Tibit = (function(Tibit){
         // Remove expired Tib acknowledgements and subref counters from localStorage
 
         for(var key in localStorage){
-            if ( key.substr( 0, SUBREF_PREFIX.length) === SUBREF_PREFIX ) {
+            if ( key.substr( 0, Tibit.constants.SUBREF_PREFIX.length) === Tibit.constants.SUBREF_PREFIX ) {
                 var item = JSON.parse( localStorage.getItem(key));
                 var expiry = new Date(item.EXP).getTime();
                 if ( Date.now() >  expiry) {
@@ -105,6 +100,12 @@ var Tibit = (function(Tibit){
         // true if PAD set and first character not 'm', 'n', or '2'
         return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
     };
+
+
+    Tibit.constants = {};
+    Tibit.constants.SUBREF_PREFIX= 'bd-subref-';
+    Tibit.constants.QTY_CACHE_DURATION= 20; // minutes
+
 
 
     Tibit.init = init;

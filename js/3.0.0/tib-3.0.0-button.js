@@ -1,7 +1,7 @@
+
+
 var Tibit = (function(Tibit){
 
-    var SUBREF_PREFIX= 'bd-subref-';
-    var QTY_CACHE_DURATION= 20; // minutes
      // manages the behaviour of tibbing buttons, attached
      // handles click event, counter retreival and display, adds core button classes
 
@@ -45,10 +45,10 @@ var Tibit = (function(Tibit){
 
         if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
 
-        this.domElement.classList.add( SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for
+        this.domElement.classList.add( Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for
         // easier reference later
 
-        if(localStorage.getItem(SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED')){
+        if(localStorage.getItem(Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED')){
             acknowledgeTib(this.domElement);
         }
 
@@ -77,11 +77,11 @@ var Tibit = (function(Tibit){
             e.newValue= localStorage[e.key];
         }
 
-        if ( e.newValue && e.key === SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
+        if ( e.newValue && e.key === Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
             // TODO: if a value is set from params, do we overwrite it after a Tib?
             this.writeCounter( JSON.parse(e.newValue).QTY);
             }
-        if ( e.newValue && e.key === SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
+        if ( e.newValue && e.key === Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
             acknowledgeTib(this.domElement);
         }
     };
