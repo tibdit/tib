@@ -1,3 +1,13 @@
+/*************************************/
+// TIB CALLBACK MODULE
+/*************************************/
+/*
+ *
+ * Module concerned with polling Tib window, keeping track of tib completion, extracting tib token, and persisting
+ * tib through local storage, and firing custom event to be handled by other modules.
+ *
+ * */
+
 var Tibit = (function(Tibit){
 
 
@@ -8,6 +18,8 @@ var Tibit = (function(Tibit){
     var callbackIntervalID, tibWindow, token;
 
     var DUR = 1; // TODO: pass from an initiator variable?
+
+
 
     initialize = function(window){
 
@@ -21,7 +33,11 @@ var Tibit = (function(Tibit){
 
     };
 
+
+
     function persistAck(){
+    // Pulls the ISS (tib issue time) from retrieved token.obj, generates an EXP (tib expiry time) and saves both of
+    // these as JSON to a localStorage
 
 
         var storageKey = Tibit.constants.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
@@ -42,9 +58,10 @@ var Tibit = (function(Tibit){
     }
 
 
+
     function callbackHandler(){
-        // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
-        // persists the tib via localstorage and closes
+    // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
+    // persists the tib via localstorage and closes
 
         if(callbackDone()){ // Polls tibWindow for tib completion
 
@@ -56,41 +73,58 @@ var Tibit = (function(Tibit){
             }
 
         }
+
     }
 
+
+
     function callbackDone(){
+    // Assesses current tibWindow state to determine tib completion state - if all checks pass, clear the current
+    // poller interval and return true.
+
         var domain;
 
         try {
+
             if( tibWindow.closed){
                 clearInterval(callbackIntervalID); // window closed externally, no callback with token
                 return false;
             }
+
             domain = tibWindow.location.hostname; // should throw e.SECURITY_ERR if on different origin
+
         }
         catch(ex){
+
             if(ex.code === ex.SECURITY_ERR) return false; // tib window is still on another domain (i.e. //tib.me) - keep waiting
+
             else{
                 clearInterval(callbackIntervalID); // some unexpected error - abort polling - leave tib window open
                 throw ex;
             }
+
         }
 
         if(tibWindow.initialHref === tibWindow.location.href || domain.length === 0) return false; // window is accessible, but probably still initialising - keep waiting
+
         if (domain.substr(domain.length-6) === "tib.me") return false; // insecure browser lets us see cross domain - keep waiting
 
         clearInterval(callbackIntervalID);
         return true;
     }
 
+
+
     function extractTibToken(){
-        var queryString = tibWindow.location.search;
+
         var tokenObj, signature;
+        var queryString = tibWindow.location.search;
 
         var reTok = "[^\?]*\?(.*&)?tibtok=([^&]*)";
         token = queryString.match(reTok)[2]; // extract value of tibok=x querystring param
         token = decodeURIComponent(token); // convert any percent-encoded characters
         token = atob(token); // base64 decode the token string
+
         tokenObj = JSON.parse(token); // convert JSON serialised token string into a JS object
 
         return {
@@ -99,6 +133,8 @@ var Tibit = (function(Tibit){
         };
 
     }
+
+
 
     function validateTibToken(){
 
@@ -116,7 +152,10 @@ var Tibit = (function(Tibit){
 
     }
 
+
+
     function closeWindow(){
+
         var re= "[^\?]*\?(.*&)?noclose($|[=&])";  // add noclose querystring parameter to initiator (buggy - not always included in callback)
         if(tibWindow.location.search.search(re) !== -1) return false; // to prevent popup window from being automatically closed
 
@@ -126,9 +165,13 @@ var Tibit = (function(Tibit){
         catch(ex){ console.error( "attempt to automatically close callback window failed"); }
 
         return false; // function should never return, since window is gone
+
     }
 
+
+
     function localStorageAvailable() {
+
         try {
             x = '__storage_test__';
             window.localStorage.setItem(x, x);
@@ -138,8 +181,12 @@ var Tibit = (function(Tibit){
         catch(e) {
             return false;
         }
+
     }
 
     Tibit.Callback.initialize = initialize;
     return Tibit;
+
+
+
 })(Tibit || {});
