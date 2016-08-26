@@ -46,8 +46,11 @@ var Tibit = (function(Tibit){
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
 
-        var storageObj = { ISS: new Date( token.obj.ISS ), // Issue Time
-                            EXP: new Date( issueDate + duration )}; // Expiry Time
+        var issueDate = new Date( token.obj.ISS );
+        var expireDate = new Date( issueDate + duration );
+
+        var storageObj = { ISS: issueDate, // Issue Time
+                            EXP: expireDate}; // Expiry Time
         localStorage.setItem(storageKey, JSON.stringify(storageObj));
 
         // Fire custom 'tibstate' event for any post-tib functions to hook into
