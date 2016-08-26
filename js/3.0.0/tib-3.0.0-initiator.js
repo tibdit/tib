@@ -11,7 +11,7 @@
 
 var Tibit = (function(Tibit){
 
-    
+
 
     Tibit.Initiator = function( domElement){
         this.params = {
