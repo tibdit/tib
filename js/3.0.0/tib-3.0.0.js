@@ -1,41 +1,45 @@
+/*************************************/
+// TIBIT BASE MODULE
+/*************************************/
+/*
+*
+* Base tib.js module - contains functionality for initializing a page and hooking buttons onto each bd-tib-btn
+* element, as well as helper functions used by other modules, and constant declarations
+*
+* */
+
+
+
 var Tibit = (function(Tibit){
 
     // Takes a JS object as a parameter
-
-     var x = '';
-
-    init = function(siteParams){  // TODO namespace closure
+    init = function(siteParams){
 
         // Initialising our params object as a property of our global Tibit object
         Tibit.params = {
+            // Initiator Params
             PAD : "",
             SUB : "",
             CBK : "",
             ASN : "",
             TIB : "",
+            // Button Type
             BTN : "",
+            // Button Style Params
             BTS : "",
             BTC : "",
             BTH : ""
         };
 
-        // perform after-page-loaded actions
-        // a siteParams objects gives default parameters for buttons.  Available params are:
-        //   styled button injection: BTN, BTS, BTC, BTH  see TibButton constructor
-        //   Tib initiator: PAD, ASN, SUB, TIB, CBK  see TibIniator Constructor
         for( param in Tibit.params ){
             if(siteParams[param]){
                 Tibit.params[param] = siteParams[param];
             }
         }
 
-
-
         switch(document.readyState) {
             case 'loading':
-                // When used as callback for a document event listener, "this" context will be the document, so we
-                // override this using .bind(bd)
-                document.addEventListener('DOMContentLoaded', afterLoad);  // do we need .bind()?
+                document.addEventListener('DOMContentLoaded', afterLoad);
                 break;
             case 'loaded': // for older Android
             case 'interactive':
@@ -50,16 +54,13 @@ var Tibit = (function(Tibit){
     }
 
 
-
-
     /**********
-     PAGE LOAD
+     PAGE LOAD FUNCTIONS
     **********/
 
     initButtons = function() {
-
-        // adds and instantiates a TibButton object for all DOM elements with the 'bd-tib-btn' class
-        // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
+    // adds and instantiates a TibButton object for all DOM elements with the 'bd-tib-btn' class
+    // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
         var buttons = document.getElementsByClassName('bd-tib-btn');
         for ( var i = 0, n = buttons.length; i < n; i++ ) {
@@ -67,6 +68,7 @@ var Tibit = (function(Tibit){
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     }
+
 
 
     loadElementParams = function(params, e){
@@ -80,20 +82,30 @@ var Tibit = (function(Tibit){
         return params;
     };
 
-    function sweepStorage() {
 
-        // Remove expired Tib acknowledgements and subref counters from localStorage
+
+    function sweepStorage() {
+    // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
+    // through each item and delete them if this time has passed.
 
         for(var key in localStorage){
+
             if ( key.substr( 0, Tibit.constants.SUBREF_PREFIX.length) === Tibit.constants.SUBREF_PREFIX ) {
+
                 var item = JSON.parse( localStorage.getItem(key));
                 var expiry = new Date(item.EXP).getTime();
+
                 if ( Date.now() >  expiry) {
                     localStorage.removeItem(key);
                 }
+
             }
+
         }
+
     }
+
+
 
     function isTestnet(PAD){
 
@@ -102,15 +114,15 @@ var Tibit = (function(Tibit){
     };
 
 
+
     Tibit.constants = {};
     Tibit.constants.SUBREF_PREFIX= 'bd-subref-';
     Tibit.constants.QTY_CACHE_DURATION= 20; // minutes
 
-
-
     Tibit.init = init;
     Tibit.isTestnet = isTestnet;
     Tibit.loadElementParams = loadElementParams;
+
     return Tibit;
 
 })(Tibit || {});

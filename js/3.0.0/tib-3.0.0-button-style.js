@@ -1,7 +1,6 @@
 /*************************************/
 // TIB BUTTON STYLE MODULE
 /*************************************/
-
 /*
 *
 * Module concerned with styling and DOM representation of a Tib Button. This module will attempt to fetch a HTML/SVG
@@ -58,6 +57,7 @@ var Tibit = (function(Tibit){
 
 
     writeButton= function( source, params, domElement) {
+    // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
 
         var sourceElement= source.getElementById("tib-btn-" + params.BTN);
         if (! sourceElement) throw "bd: failed to find tib-btn-" + params.BTN + " in received XML";
@@ -65,9 +65,9 @@ var Tibit = (function(Tibit){
         var buttonElement= document.importNode(sourceElement, true);
 
         if (domElement.children.length === 0) {
-            domElement.appendChild(buttonElement);  // insert if no placeholder
+            domElement.appendChild(buttonElement);  // append/insert if no placeholder
         } else {
-            domElement.replaceChild(buttonElement, domElement.children[0]);  // replace placeholder
+            domElement.replaceChild(buttonElement, domElement.children[0]);  // replace placeholder if present
         }
 
         domElement.children[0].removeAttribute("id");  // Removing imported SVG ID to avoid potential duplicates
@@ -101,6 +101,7 @@ var Tibit = (function(Tibit){
 
 
     setHeight = function(params, domElement){
+
         if ( params.BTH ) {
             domElement.style.height = params.BTH + "px";
         }
@@ -108,6 +109,7 @@ var Tibit = (function(Tibit){
         // TODO: Re-implement this browser fix
         var s= domElement.children[0];
         //console.log('xx', s);
+
         if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
             s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
             //console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
