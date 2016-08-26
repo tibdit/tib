@@ -13,7 +13,7 @@
 var Tibit = (function(Tibit){
 
     // Takes a JS object as a parameter
-    init = function(siteParams){
+    var init = function(siteParams){
 
         // Initialising our params object as a property of our global Tibit object
         Tibit.params = {
@@ -58,7 +58,7 @@ var Tibit = (function(Tibit){
      PAGE LOAD FUNCTIONS
     **********/
 
-    initButtons = function() {
+    var initButtons = function() {
     // adds and instantiates a TibButton object for all DOM elements with the 'bd-tib-btn' class
     // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
@@ -71,7 +71,7 @@ var Tibit = (function(Tibit){
 
 
 
-    loadElementParams = function(params, e){
+    var loadElementParams = function(params, e){
         // For each property in params, populate with data-bd-X attribute from e if present
 
         for ( var paramName in params ) {
@@ -84,7 +84,7 @@ var Tibit = (function(Tibit){
 
 
 
-    function sweepStorage() {
+    var sweepStorage = function() {
     // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
     // through each item and delete them if this time has passed.
 
@@ -107,10 +107,11 @@ var Tibit = (function(Tibit){
 
 
 
-    function isTestnet(PAD){
+    var isTestnet = function(PAD){
 
         // true if PAD set and first character not 'm', 'n', or '2'
         return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
+
     };
 
 

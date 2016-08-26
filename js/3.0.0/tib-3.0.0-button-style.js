@@ -34,7 +34,7 @@ var Tibit = (function(Tibit){
 
 
 
-    loadButton= function(params, domElement){
+    var loadButton= function(params, domElement){
 
         var buttonFile = params.BTN || "default";
         var buttonLocation = params.BTS || "https://widget.tibit.com/buttons/";
@@ -56,7 +56,7 @@ var Tibit = (function(Tibit){
 
 
 
-    writeButton= function( source, params, domElement) {
+    var writeButton= function( source, params, domElement) {
     // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
 
         var sourceElement= source.getElementById("tib-btn-" + params.BTN);
@@ -90,7 +90,7 @@ var Tibit = (function(Tibit){
 
 
 
-    setColour= function(params, domElement){
+    var setColour= function(params, domElement){
 
         var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
         if ( backdrop && params.BTC ) {
@@ -100,7 +100,7 @@ var Tibit = (function(Tibit){
 
 
 
-    setHeight = function(params, domElement){
+    var setHeight = function(params, domElement){
 
         if ( params.BTH ) {
             domElement.style.height = params.BTH + "px";
@@ -118,7 +118,7 @@ var Tibit = (function(Tibit){
 
 
 
-    injectCss = function( source, params){
+    var injectCss = function( source, params){
 
         // inject non-button-style dependant CSS
         // should be moved to writebutton, with anti-dupication

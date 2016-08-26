@@ -11,6 +11,8 @@
 
 var Tibit = (function(Tibit){
 
+    
+
     Tibit.Initiator = function( domElement){
         this.params = {
 
@@ -108,9 +110,11 @@ var Tibit = (function(Tibit){
         };
 
 
-    }
+    };
 
-    generateSub = function(TIB) {
+
+
+    var generateSub = function(TIB) {
 
         // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
         // potential to overload with platform specific code, but that will require DOM element (as argument?)
@@ -121,7 +125,9 @@ var Tibit = (function(Tibit){
         return "TIB-SHA256-" + hash;
     };
 
-    loadObjectParams= function(source, params){
+
+
+    var loadObjectParams= function(source, params){
 
         // Given an object, populate the existing properties of this.params
 
@@ -132,7 +138,7 @@ var Tibit = (function(Tibit){
 
 
 
-    querystring= function(params) {
+    var querystring= function(params) {
 
         // assembles Tib initiator parameters into URL querystring
 
@@ -148,7 +154,9 @@ var Tibit = (function(Tibit){
         return querystring.substr(0,querystring.length);  // truncate trailing ampersand
     };
 
-    loadElementParams = function(params, e){
+
+
+    var loadElementParams = function(params, e){
 
         for ( var paramName in params ) {
             if ( e.getAttribute('data-bd-' + paramName) ){
@@ -158,6 +166,8 @@ var Tibit = (function(Tibit){
 
         return params;
     };
+
+
 
     return Tibit;
 

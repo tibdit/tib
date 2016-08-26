@@ -1,13 +1,21 @@
-
+/*************************************/
+// TIB BUTTON MODULE
+/*************************************/
+/*
+*
+* Module containing the Tibit.Button constructor, which instantiates a Tibit.Initiator and optionally a
+* Tibit.ButtonStyle on a given DOM element, which the Button can then use to dispatch tibs on click, fetch and set
+* counters, and import/style a button. Also manages some classes/ID's attached to the DOM element.
+*
+* */
 
 var Tibit = (function(Tibit){
 
-     // manages the behaviour of tibbing buttons, attached
-     // handles click event, counter retreival and display, adds core button classes
+
 
     Tibit.Button = function( domElement) {
 
-        /* PUBLIC METHODS */
+
 
         this.writeCounter= function( QTY) {
 
@@ -16,38 +24,38 @@ var Tibit = (function(Tibit){
             }
         };
 
-        /* PUBLIC VARIABLES */
 
-        this.params = {  // Primarily for related TibButtonStyle class, setting BTN triggers TibButtonStyle features
-            BTN : "",  // Button Style to be injected, if any
-            QTY : ""
+
+        this.params = {
+            BTN : "",  // Will instantiate a ButtonStyle object if specified
+            QTY : "" // Will directly set the value of a counter element, if present (e.g. if QTY persisted through backend)
         };
 
-        this.domElement = domElement;
         this.tibbed= false;
 
-        this.counterElement= null;
-        this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
-
-        this.domElement.tibInitiator = new Tibit.Initiator(this.domElement);
+        this.domElement = domElement;
 
         loadObjectParams(Tibit.params, this.params);
         Tibit.loadElementParams(this.params, this.domElement);
+
+        this.domElement.tibInitiator = new Tibit.Initiator(this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
-
+        this.counterElement= null;
+        this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
         if (this.counterElement) this.writeCounter(this.domElement.tibInitiator.getQty());
 
         if (this.params.BTN) this.buttonStyle = new Tibit.ButtonStyle(this);
 
+        // CSS/HTML Class Assignments
         if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
-
         this.domElement.classList.add( Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for
         // easier reference later
 
+        // Acknowledge tibbed state if persisted through localStorage
         if(localStorage.getItem(Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED')){
             acknowledgeTib(this.domElement);
         }
@@ -57,10 +65,11 @@ var Tibit = (function(Tibit){
             this.domElement.setAttribute('type','button'); // prevents default submit type/action if within <form>
         }
 
+    };
 
-    }
 
-    acknowledgeTib= function(e) {
+
+    var acknowledgeTib= function(e) {
 
         // set the button to tibbed state
 
@@ -68,7 +77,7 @@ var Tibit = (function(Tibit){
         e.classList.add('tibbed');
     };
 
-    storageUpdate= function(e) {
+    var storageUpdate= function(e) {
         // localStorage listener to update the buttons counter
         // used as the callback for tibHandler.tibInitiator, and when a Tib is acknowledged
 
@@ -86,7 +95,7 @@ var Tibit = (function(Tibit){
         }
     };
 
-    loadObjectParams= function(source, params){
+    var loadObjectParams= function(source, params){
 
         // Given an object, populate the existing properties of this.params
 

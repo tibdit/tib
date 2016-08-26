@@ -178,6 +178,7 @@ var Tibit = (function(Tibit){
             window.localStorage.removeItem(x);
             return true;
         }
+
         catch(e) {
             return false;
         }
