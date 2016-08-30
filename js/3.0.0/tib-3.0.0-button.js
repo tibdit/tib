@@ -9,26 +9,29 @@
 *
 * */
 
-var TIBIT = (function(tibit){
+var TIBIT= (function(tibit){
 
     // Create our buttons object which will contain our buttons sub-namespace
-    var buttons = {};
+    var buttons= {};
 
-    var initButtons = function() {
+    var initButtons= function() {
 
         // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        var buttons = document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
-        for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new TibButton( buttons[i]);
+        var buttons= document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
+        for ( var i= 0, n= buttons.length; i < n; i++ ) {
+            buttons[i].tibButton= new TibButton( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     };
 
+
+
     var TibButton= function( domElement) {
 
         // constructor for Button class, invoked by initButtons, 
+
 
         this.params = {};
         tibit.copyParams(buttons.params, this.params);
@@ -76,9 +79,10 @@ var TIBIT = (function(tibit){
 
 
 
+
     var writeCounter= function( QTY) {
         if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) { // isNaN('') will return false
-            this.counterElement.textContent = parseInt(QTY, 10);
+            this.counterElement.textContent= parseInt(QTY, 10);
         }
     };
 
@@ -117,16 +121,20 @@ var TIBIT = (function(tibit){
 
 
 
+
+
+
+
     TibButton.prototype.writeCounter= writeCounter;
 
-    var params = {};
+    var params= {};
 
     // Expose public buttons methods/variables
-    buttons.TibButton = TibButton;
-    buttons.initButtons = initButtons;
-    buttons.params = params;
+    buttons.TibButton= TibButton;
+    buttons.initButtons= initButtons;
+    buttons.params= params;
 
-    tibit.buttons = buttons;
+    tibit.buttons= buttons;
 
 
     console.log( 'TIBIT: successfully loaded button module');
