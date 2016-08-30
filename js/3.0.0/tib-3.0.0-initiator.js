@@ -15,32 +15,6 @@ var TIBIT = (function(tibit){
 
     var Initiator = function( domElement){
 
-        this.params = tibit.initiators.params;
-
-        // TODO: is this still necessary?
-        //loadObjectParams(tibit.initiators.params, this.params); // Import siteParams passed to constructor to this.params
-
-        // tibInitiator is independent of any particular domElement, so retreiving and data-params is optional
-        if(domElement){
-            loadElementParams(this.params, domElement);
-        }
-
-        if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
-            this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
-        }
-
-
-        if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
-            this.params.SUB=  generateSub(this.params.TIB);
-        }
-
-        // If not CBK is specified, we just set to window.location.origin - this will never be seen as our callback
-        // handler methods will extract the token, process/persist the tib, and close the window before being seen
-        // by the user.
-        if(!this.params.CBK){
-            this.params.CBK = window.location.origin;
-        }
-
         this.dispatch= function() {
             // initiate the Tib by opening the tib.me popup window - this is primarily used as an onClick handler,
             // but can alternatively be used as
@@ -64,12 +38,12 @@ var TIBIT = (function(tibit){
             }
         };
 
-        this.getQty= function(){
+        this.qty= function(){
 
-            var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
+            var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + this.params.SUB + '-QTY';
 
             // Value from params takes precedence
-            subrefQTY = this.params.QTY;
+            var subrefQTY = this.params.QTY;
 
             // No value from params set, attempt to fetch + parse QTY from localstorage
             if(!subrefQTY){
@@ -77,37 +51,54 @@ var TIBIT = (function(tibit){
                 if(subrefQTY) subrefQTY = JSON.parse(localStorage.getItem(storageKey)).QTY;
             }
 
-            // No value from params or localStorage, initiate getQTY request
-            if( !subrefQTY ) {
-                // retreive the current Tib count for this initiator
-
-                var qtyHttp= new XMLHttpRequest();
-                var initiatorUrl= "https://tib.me/getqty/" + querystring(this.params);
-                qtyHttp.open('GET', initiatorUrl, true);
-                qtyHttp.send();
-
-                var that = this;
-                qtyHttp.onreadystatechange= function(){
-                    if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
-                        subrefQTY = {
-                            QTY : JSON.parse(qtyHttp.response).QTY,
-                            EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
-                        };
-                        localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
-                        var tibEvent = document.createEvent('customEvent');
-                        tibEvent.initCustomEvent('tibstate', true, false, storageKey);
-                        window.dispatchEvent(tibEvent);
-
-                    }
-                };
-            }
             return subrefQTY;
         };
 
+        this.params = {};
+        tibit.copyParams(initiators.params, this.params);
+
+        if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
+            this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
+        }
+
+
+        if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
+            this.params.SUB=  generateSub(this.params.TIB);
+        }
+
+        // If not CBK is specified, we just set to window.location.origin - this will never be seen as our callback
+        // handler methods will extract the token, process/persist the tib, and close the window before being seen
+        // by the user.
+        if(!this.params.CBK){
+            this.params.CBK = window.location.origin;
+        }
 
     };
 
 
+    var getQty = function(initiator){
+
+        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + initiator.params.SUB + '-QTY';
+
+        var qtyHttp= new XMLHttpRequest();
+        var initiatorUrl= "https://tib.me/getqty/" + querystring(initiator.params);
+        qtyHttp.open('GET', initiatorUrl, true);
+        qtyHttp.send();
+
+        qtyHttp.onreadystatechange= function(){
+            if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+                var obj = {
+                    QTY : JSON.parse(qtyHttp.response).QTY,
+                    EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
+                };
+                localStorage.setItem(storageKey, JSON.stringify(obj));
+                var tibEvent = document.createEvent('customEvent');
+                tibEvent.initCustomEvent('tibstate', true, false, storageKey);
+                window.dispatchEvent(tibEvent);
+
+            }
+        };
+    };
 
     var generateSub = function(TIB) {
 
@@ -119,19 +110,6 @@ var TIBIT = (function(tibit){
         // https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
         return "TIB-SHA256-" + hash;
     };
-
-
-
-    var loadObjectParams= function(source, params){
-
-        // Given an object, populate the existing properties of this.params
-
-        if (typeof source !== "undefined") {
-            for ( var p in params) params[p] = source[p] || params[p];
-        }
-    };
-
-
 
     var querystring= function(params) {
 
@@ -171,10 +149,14 @@ var TIBIT = (function(tibit){
         TIB : ""  // URL used to retreive the snippet telling the user what they are tibbing
     };
 
+
+
     // Exposing our sub-namespace level variables/methods/constants
+    initiators.getQty = getQty;
     initiators.params = params;
     initiators.Initiator = Initiator;
 
+    // Exposing our sub-namespace as part of our working tibit object
     tibit.initiators = initiators;
 
     console.log('TIBIT: successfully loaded initiator module');

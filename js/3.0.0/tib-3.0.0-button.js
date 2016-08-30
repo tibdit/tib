@@ -26,20 +26,19 @@ var TIBIT= (function(tibit){
         }
     };
 
+
+
     var TibButton= function( domElement) {
 
         // constructor for Button class, invoked by initButtons, 
 
-        this.params= {
-            BTN : "",  // Will instantiate a ButtonStyle object if specified
-            QTY : "" // Will directly set the value of a counter element, if present (e.g. if QTY persisted through backend)
-        };
+
+        this.params = {};
+        tibit.copyParams(buttons.params, this.params);
 
         this.tibbed= false;
 
-        this.domElement= domElement;
-
-        loadObjectParams(tibit.params, this.params);
+        this.domElement = domElement;
         tibit.loadElementParams(this.params, this.domElement);
 
         this.domElement.tibInitiator= new tibit.initiators.Initiator(this.domElement);
@@ -49,7 +48,14 @@ var TIBIT= (function(tibit){
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
-        if (this.counterElement) this.writeCounter(this.domElement.tibInitiator.getQty());
+        if (this.counterElement) {
+            if(!this.domElement.tibInitiator.qty()){
+                tibit.initiators.getQty(this.domElement.tibInitiator);
+            }
+            else{
+                this.writeCounter(this.domElement.tibInitiator.qty());
+            }
+        }
 
         // CSS/HTML Class Assignments
         if ( tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
@@ -61,6 +67,7 @@ var TIBIT= (function(tibit){
         }
 
         if( this.domElement.classList.contains('bd-dynamic')){
+            console.log(this.domElement);
             this.style();
         }
 
@@ -114,14 +121,9 @@ var TIBIT= (function(tibit){
 
 
 
-    var loadObjectParams= function(source, params){
 
-        // Given an object, populate the existing properties of this.params
 
-        if (typeof source !== "undefined") {
-            for ( var p in params) params[p]= source[p] || params[p];
-        }
-    };
+
 
     TibButton.prototype.writeCounter= writeCounter;
 
@@ -133,20 +135,6 @@ var TIBIT= (function(tibit){
     buttons.params= params;
 
     tibit.buttons= buttons;
-
-
-
-    switch(document.readyState) {
-        case 'loading':
-            document.addEventListener('DOMContentLoaded', initButtons);
-            break;
-        case 'loaded': // for older Android
-        case 'interactive':
-        case 'complete':
-            if(document.getElementsByClassName('bd-tib-btn')){
-                initButtons();
-            }
-    }
 
 
     console.log( 'TIBIT: successfully loaded button module');
