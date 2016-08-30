@@ -12,26 +12,6 @@
 
 var TIBIT = (function(tibit){
 
-    // Takes a JS object as a parameter
-
-    params = {
-            // Initiator Params
-            PAD : "",
-            SUB : "",
-            CBK : "",
-            ASN : "",
-            TIB : "",
-            // Button Type
-            BTN : "",
-            // Button Style Params
-            BTS : "",
-            BTC : "",
-            BTH : ""
-        };
-
-    sweepStorage();
-
-
 
     var setDefaults = function(siteParams){
 
@@ -49,20 +29,6 @@ var TIBIT = (function(tibit){
     /********************
      PAGE LOAD FUNCTIONS
     ********************/
-
-    var initButtons = function() {
-
-        // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
-        // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
-
-        var buttons = document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
-        for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new tibit.Button( buttons[i]);
-            // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
-        }
-    };
-
-
 
     var loadElementParams = function(params, e){
 
@@ -106,23 +72,44 @@ var TIBIT = (function(tibit){
         return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
     };
 
+    // Takes a JS object as a parameter
 
+    var params = {
+        // Initiator Params
+        PAD : "",
+        SUB : "",
+        CBK : "",
+        ASN : "",
+        TIB : "",
+        // Button Type
+        BTN : "",
+        // Button Style Params
+        BTS : "",
+        BTC : "",
+        BTH : ""
+    };
 
     //  MODULE EXPORTS //
 
-    CONSTANTS = {
+    var CONSTANTS = {
         SUBREF_PREFIX: 'bd-subref-',
         QTY_CACHE_DURATION: 20, // minutes
         BUTTON_CLASS: 'bd-tib-btn'
     };
 
-    tibit= {
-        CONSTANTS: CONSTANTS,
-        init: init,
-        isTestnet: isTestnet,
-        loadElementParams: loadElementParams,
-        params: params
-    };
+    // Exposing our top level variables/methods/constants
+    tibit.CONSTANTS = CONSTANTS;
+    tibit.isTestnet = isTestnet;
+    tibit.loadElementParams = loadElementParams;
+    tibit.params = params;
+
+    // Can't set tibit as an object literal, since we would overwrite the current tibit object (????)
+
+    // Initialization Functions - must be run after all module functions/constants/variables declared
+
+    sweepStorage();
+
+    // Return our working tibit object to be set to the global TIBIT object
 
     return tibit;
 

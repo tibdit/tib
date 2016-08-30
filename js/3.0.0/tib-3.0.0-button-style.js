@@ -32,8 +32,8 @@ var TIBIT = (function(tibit){
 
     };
 
-
-    tibit.TibButton.prototype.style= styleButton;
+    console.log(tibit.buttons);
+    tibit.buttons.TibButton.prototype.style= styleButton;
 
 
 

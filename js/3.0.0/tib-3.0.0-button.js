@@ -11,15 +11,17 @@
 
 var TIBIT = (function(tibit){
 
-    switch(document.readyState) {
-        case 'loading':
-            document.addEventListener('DOMContentLoaded', afterLoad);
-            break;
-        case 'loaded': // for older Android
-        case 'interactive':
-        case 'complete':
-            initButtons();
-    }
+    var initButtons = function() {
+
+        // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
+        // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
+
+        var buttons = document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
+        for ( var i = 0, n = buttons.length; i < n; i++ ) {
+            buttons[i].tibButton = new TibButton( buttons[i]);
+            // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
+        }
+    };
 
     var TibButton= function( domElement) {
 
@@ -115,13 +117,36 @@ var TIBIT = (function(tibit){
         }
     };
 
-
     TibButton.prototype.writeCounter= writeCounter;
 
-    tibit.buttons= {
-        TibButton: TibButton,
-        initButtons: initButtons
+    var params = {
+        BTN : ""
     };
+
+    // Create our buttons object which will contain our buttons sub-namespace
+    var buttons = {};
+
+    // Expose public buttons methods/variables
+    buttons.TibButton = TibButton;
+    buttons.initButtons = initButtons;
+    buttons.params = params;
+
+    tibit.buttons = buttons;
+
+
+
+    switch(document.readyState) {
+        case 'loading':
+            document.addEventListener('DOMContentLoaded', initButtons);
+            break;
+        case 'loaded': // for older Android
+        case 'interactive':
+        case 'complete':
+            if(document.getElementsByClassName('bd-tib-btn')){
+                initButtons();
+            }
+    }
+
 
 
     return tibit;
