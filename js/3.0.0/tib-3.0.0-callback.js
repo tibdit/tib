@@ -55,7 +55,7 @@ var Tibit = (function(Tibit){
 
         // Fire custom 'tibstate' event for any post-tib functions to hook into
         var tibEvent = document.createEvent('customEvent');
-        tibEvent.initCustomEvent('tibstate', true, false, storageKey);
+        tibEvent.initCustomEvent('tibstate', true, false, storageKey); // Event specifies the key of localstorage element containing relevant data
         window.dispatchEvent(tibEvent);
 
     }
