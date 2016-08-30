@@ -9,19 +9,19 @@
 *
 * */
 
-var TIBIT = (function(tibit){
+var TIBIT= (function(tibit){
 
     // Create our buttons object which will contain our buttons sub-namespace
-    var buttons = {};
+    var buttons= {};
 
-    var initButtons = function() {
+    var initButtons= function() {
 
         // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        var buttons = document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
-        for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new TibButton( buttons[i]);
+        var buttons= document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
+        for ( var i= 0, n= buttons.length; i < n; i++ ) {
+            buttons[i].tibButton= new TibButton( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     };
@@ -30,19 +30,19 @@ var TIBIT = (function(tibit){
 
         // constructor for Button class, invoked by initButtons, 
 
-        this.params = {
+        this.params= {
             BTN : "",  // Will instantiate a ButtonStyle object if specified
             QTY : "" // Will directly set the value of a counter element, if present (e.g. if QTY persisted through backend)
         };
 
         this.tibbed= false;
 
-        this.domElement = domElement;
+        this.domElement= domElement;
 
         loadObjectParams(tibit.params, this.params);
         tibit.loadElementParams(this.params, this.domElement);
 
-        this.domElement.tibInitiator = new tibit.initiators.Initiator(this.domElement);
+        this.domElement.tibInitiator= new tibit.initiators.Initiator(this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
@@ -72,9 +72,10 @@ var TIBIT = (function(tibit){
 
 
 
+
     var writeCounter= function( QTY) {
         if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) { // isNaN('') will return false
-            this.counterElement.textContent = parseInt(QTY, 10);
+            this.counterElement.textContent= parseInt(QTY, 10);
         }
     };
 
@@ -118,20 +119,20 @@ var TIBIT = (function(tibit){
         // Given an object, populate the existing properties of this.params
 
         if (typeof source !== "undefined") {
-            for ( var p in params) params[p] = source[p] || params[p];
+            for ( var p in params) params[p]= source[p] || params[p];
         }
     };
 
     TibButton.prototype.writeCounter= writeCounter;
 
-    var params = {};
+    var params= {};
 
     // Expose public buttons methods/variables
-    buttons.TibButton = TibButton;
-    buttons.initButtons = initButtons;
-    buttons.params = params;
+    buttons.TibButton= TibButton;
+    buttons.initButtons= initButtons;
+    buttons.params= params;
 
-    tibit.buttons = buttons;
+    tibit.buttons= buttons;
 
 
 

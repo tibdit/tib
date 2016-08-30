@@ -10,16 +10,16 @@
 
 
 
-var TIBIT = (function(tibit){
+var TIBIT= (function(tibit){
 
 
-    var setDefaults = function(siteParams){
+    var setDefaults= function(siteParams){
 
         // Initialising our params object as a property of our global tibit object
 
         for( var param in tibit.params ){
             if(siteParams[param]){
-                tibit.params[param] = siteParams[param];
+                tibit.params[param]= siteParams[param];
             }
         }
     };
@@ -30,13 +30,13 @@ var TIBIT = (function(tibit){
      PAGE LOAD FUNCTIONS
     ********************/
 
-    var loadElementParams = function(params, e){
+    var loadElementParams= function(params, e){
 
         // For each property in params, populate with data-bd-X attribute from e if present
 
         for ( var paramName in params ) {
             if ( e.getAttribute('data-bd-' + paramName) ){
-                params[paramName] = e.getAttribute('data-bd-' + paramName);
+                params[paramName]= e.getAttribute('data-bd-' + paramName);
             }
         }
         return params;
@@ -44,7 +44,7 @@ var TIBIT = (function(tibit){
 
 
 
-    var sweepStorage = function() {
+    var sweepStorage= function() {
 
         // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
         // through each item and delete them if this time has passed.
@@ -53,8 +53,8 @@ var TIBIT = (function(tibit){
 
             if ( key.substr( 0, tibit.CONSTANTS.SUBREF_PREFIX.length) === tibit.CONSTANTS.SUBREF_PREFIX ) {
 
-                var item = JSON.parse( localStorage.getItem(key));
-                var expiry = new Date(item.EXP).getTime();
+                var item= JSON.parse( localStorage.getItem(key));
+                var expiry= new Date(item.EXP).getTime();
 
                 if ( Date.now() >  expiry) {
                     localStorage.removeItem(key);
@@ -65,7 +65,7 @@ var TIBIT = (function(tibit){
 
 
 
-    var isTestnet = function(PAD){
+    var isTestnet= function(PAD){
 
         // true if PAD set and first character not 'm', 'n', or '2'
 
@@ -74,7 +74,7 @@ var TIBIT = (function(tibit){
 
     // Takes a JS object as a parameter
 
-    var params = {
+    var params= {
         // Initiator Params
         PAD : "",
         SUB : "",
@@ -91,7 +91,7 @@ var TIBIT = (function(tibit){
 
     //  MODULE EXPORTS //
 
-    var CONSTANTS = {
+    var CONSTANTS= {
         SUBREF_PREFIX: 'bd-subref-',
         QTY_CACHE_DURATION: 20, // minutes
         BUTTON_CLASS: 'bd-tib-btn',
@@ -99,10 +99,10 @@ var TIBIT = (function(tibit){
     };
 
     // Exposing our top level variables/methods/constants
-    tibit.CONSTANTS = CONSTANTS;
-    tibit.isTestnet = isTestnet;
-    tibit.loadElementParams = loadElementParams;
-    tibit.params = params;
+    tibit.CONSTANTS= CONSTANTS;
+    tibit.isTestnet= isTestnet;
+    tibit.loadElementParams= loadElementParams;
+    tibit.params= params;
 
     // Can't set tibit as an object literal, since we would overwrite the current tibit object (????)
 
