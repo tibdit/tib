@@ -38,7 +38,7 @@ var TIBIT = (function(tibit){
         this.domElement = domElement;
         tibit.loadElementParams(this.params, this.domElement);
 
-        this.domElement.tibInitiator = new tibit.initiators.Initiator(this.domElement);
+        this.domElement.tibInitiator = new tibit.Initiator(this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));

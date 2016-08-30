@@ -52,6 +52,7 @@ var TIBIT = (function(tibit){
             }
 
             return subrefQTY;
+
         };
 
         this.params = {};
@@ -60,7 +61,6 @@ var TIBIT = (function(tibit){
         if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
             this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
         }
-
 
         if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
             this.params.SUB=  generateSub(this.params.TIB);
@@ -87,11 +87,14 @@ var TIBIT = (function(tibit){
 
         qtyHttp.onreadystatechange= function(){
             if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+
                 var obj = {
                     QTY : JSON.parse(qtyHttp.response).QTY,
                     EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
                 };
+
                 localStorage.setItem(storageKey, JSON.stringify(obj));
+
                 var tibEvent = document.createEvent('customEvent');
                 tibEvent.initCustomEvent('tibstate', true, false, storageKey);
                 window.dispatchEvent(tibEvent);
@@ -154,10 +157,10 @@ var TIBIT = (function(tibit){
     // Exposing our sub-namespace level variables/methods/constants
     initiators.getQty = getQty;
     initiators.params = params;
-    initiators.Initiator = Initiator;
 
-    // Exposing our sub-namespace as part of our working tibit object
+    // Exposing our top-level namespace variables/methods/constants as part of our working tibit object
     tibit.initiators = initiators;
+    tibit.Initiator = Initiator;
 
     console.log('TIBIT: successfully loaded initiator module');
 
