@@ -17,6 +17,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj.ENP = 'tibit.local'
     }
     obj.ENP = obj.ENP || 'tibdit.com';
+    obj.VER = obj.VER || "2.4";
 
     tibCss(obj.ENP);
 
@@ -260,7 +261,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
             buttonSources[BTN] = BTS;
 
             TIB= e.getAttribute("data-bd-TIB");
-            TIB= TIB || window.location.hostname + window.location.pathname;
+            TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+            TIB= encodeURIComponent(TIB);
 
             dataASN = e.getAttribute("data-bd-ASN");
             lASN = dataASN || ASN;
@@ -325,7 +327,8 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
             TIB= e.getAttribute("data-bd-TIB");
-            TIB= TIB || window.location.hostname + window.location.pathname;
+            TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
+            TIB = encodeURIComponent(TIB);
         }
 
         /* Set QTY from localstorage if present */
