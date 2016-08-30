@@ -94,7 +94,8 @@ var TIBIT = (function(tibit){
     var CONSTANTS = {
         SUBREF_PREFIX: 'bd-subref-',
         QTY_CACHE_DURATION: 20, // minutes
-        BUTTON_CLASS: 'bd-tib-btn'
+        BUTTON_CLASS: 'bd-tib-btn',
+        BUTTON_STYLE_CLASS: 'bd-dynamic'
     };
 
     // Exposing our top level variables/methods/constants
@@ -108,6 +109,8 @@ var TIBIT = (function(tibit){
     // Initialization Functions - must be run after all module functions/constants/variables declared
 
     sweepStorage();
+
+    console.log('TIBIT: successfully loaded base module');
 
     // Return our working tibit object to be set to the global TIBIT object
 

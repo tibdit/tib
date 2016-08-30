@@ -9,21 +9,16 @@
 *
 * */
 
-var Tibit = (function(Tibit){
+var TIBIT = (function(tibit){
 
+    var initiators = {};
 
+    var Initiator = function( domElement){
 
-    Tibit.Initiator = function( domElement){
-        this.params = {
+        this.params = tibit.initiators.params;
 
-            PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
-            SUB : "",  // Subreference - Identifies the specific item being tibbed for any counter
-            CBK : "",  // Callback - If specified, the users browser will be redirected here after the Tib is confirmed
-            ASN : "",  // Assignee - 3rd party that Tib value will be sent to.  Only valid if PAD not specified
-            TIB : ""  // URL used to retreive the snippet telling the user what they are tibbing
-        };
-
-        loadObjectParams(Tibit.params, this.params); // Import siteParams passed to constructor to this.params
+        // TODO: is this still necessary?
+        //loadObjectParams(tibit.initiators.params, this.params); // Import siteParams passed to constructor to this.params
 
         // tibInitiator is independent of any particular domElement, so retreiving and data-params is optional
         if(domElement){
@@ -65,13 +60,13 @@ var Tibit = (function(Tibit){
 
             // If using default (inline) CBK, we initialize the callback handlers on dispatch
             if(this.params.CBK === window.location.origin){
-                Tibit.Callback.initialize(tibWindow);
+                tibit.callbacks.initialize(tibWindow);
             }
         };
 
         this.getQty= function(){
 
-            var storageKey = Tibit.constants.SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
+            var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + this.params.SUB + '-QTY', subrefQTY;
 
             // Value from params takes precedence
             subrefQTY = this.params.QTY;
@@ -96,7 +91,7 @@ var Tibit = (function(Tibit){
                     if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
                         subrefQTY = {
                             QTY : JSON.parse(qtyHttp.response).QTY,
-                            EXP : new Date(new Date().getTime() + (1000 * 60 * Tibit.constants.QTY_CACHE_DURATION)) // 20 minutes from now
+                            EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
                         };
                         localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
                         var tibEvent = document.createEvent('customEvent');
@@ -167,8 +162,24 @@ var Tibit = (function(Tibit){
         return params;
     };
 
+    var params = {
 
+        PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
+        SUB : "",  // Subreference - Identifies the specific item being tibbed for any counter
+        CBK : "",  // Callback - If specified, the users browser will be redirected here after the Tib is confirmed
+        ASN : "",  // Assignee - 3rd party that Tib value will be sent to.  Only valid if PAD not specified
+        TIB : ""  // URL used to retreive the snippet telling the user what they are tibbing
+    };
 
-    return Tibit;
+    // Exposing our sub-namespace level variables/methods/constants
+    initiators.params = params;
+    initiators.Initiator = Initiator;
 
-})(Tibit || {});
+    tibit.initiators = initiators;
+
+    console.log('TIBIT: successfully loaded initiator module');
+
+    // Return our working tibit object to be set to the global TIBIT object
+    return tibit;
+
+})(TIBIT || {});

@@ -11,6 +11,9 @@
 
 var TIBIT = (function(tibit){
 
+    // Create our buttons object which will contain our buttons sub-namespace
+    var buttons = {};
+
     var initButtons = function() {
 
         // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
@@ -39,7 +42,7 @@ var TIBIT = (function(tibit){
         loadObjectParams(tibit.params, this.params);
         tibit.loadElementParams(this.params, this.domElement);
 
-        this.domElement.tibInitiator = new tibit.Initiator(this.domElement);
+        this.domElement.tibInitiator = new tibit.initiators.Initiator(this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
@@ -48,8 +51,6 @@ var TIBIT = (function(tibit){
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
         if (this.counterElement) this.writeCounter(this.domElement.tibInitiator.getQty());
 
-        if (this.params.BTN) this.styleButton(); // buttonStyle = new tibit.ButtonStyle(this);
-
         // CSS/HTML Class Assignments
         if ( tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
         this.domElement.classList.add( tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for easier reference later
@@ -57,6 +58,10 @@ var TIBIT = (function(tibit){
         // Acknowledge tibbed state if persisted through localStorage
         if ( localStorage.getItem(tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED') ) {
             acknowledgeTib(this.domElement);
+        }
+
+        if( this.domElement.classList.contains('bd-dynamic')){
+            this.style();
         }
 
         if ( this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
@@ -119,12 +124,7 @@ var TIBIT = (function(tibit){
 
     TibButton.prototype.writeCounter= writeCounter;
 
-    var params = {
-        BTN : ""
-    };
-
-    // Create our buttons object which will contain our buttons sub-namespace
-    var buttons = {};
+    var params = {};
 
     // Expose public buttons methods/variables
     buttons.TibButton = TibButton;
@@ -148,6 +148,7 @@ var TIBIT = (function(tibit){
     }
 
 
+    console.log( 'TIBIT: successfully loaded button module');
 
     return tibit;
 

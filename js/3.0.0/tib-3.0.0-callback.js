@@ -40,7 +40,7 @@ var Tibit = (function(Tibit){
     // these as JSON to a localStorage
 
 
-        var storageKey = Tibit.constants.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
+        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
 
         var duration = DUR * (Tibit.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
         // 300000   = 1000 * 60 * 5        (5 mins)

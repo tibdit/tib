@@ -11,20 +11,15 @@
 
 var TIBIT = (function(tibit){
 
-    styleButton = function(tibButton){ // Constructor function
+    var buttons = tibit.buttons;
 
-        this.tibButton = tibButton;
-        this.domElement = this.tibButton.domElement;
+    var styleButton = function(){ // Constructor function
 
-        this.params = {
-            BTS : "",  // Source to fetch injected BTN button from
-            BTC : "",  // Button Face (backdrop) Colour
-            BTH : "",  // Button Height,
-            BTN: ""
-        };
-        this.params.BTN = this.tibButton.params.BTN; // Duplicate BTN param from parent tibButton
+        this.params = tibit.buttons.params;
+
         tibit.loadElementParams(this.params, this.domElement); // Overwrite params with any params specified as
         // data-bd attributes
+        console.log(this.domElement);
 
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
 
@@ -147,6 +142,14 @@ var TIBIT = (function(tibit){
         }
     };
 
+
+    buttons.params.BTH = '';
+    buttons.params.BTC = '';
+    buttons.params.BTS = '';
+    buttons.params.BTN = 'default';
+
+    tibit.buttons = buttons;
+
     //loadElementParams = function(params, e){
     //
     //    for ( var paramName in params ) {
@@ -157,6 +160,8 @@ var TIBIT = (function(tibit){
     //
     //    return params;
     //};
+
+    console.log('TIBIT: successfully loaded button-style module');
 
     return tibit;
 
