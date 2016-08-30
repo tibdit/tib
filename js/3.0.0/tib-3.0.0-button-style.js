@@ -82,7 +82,7 @@ var TIBIT = (function(tibit){
         // Rewrite reference to counterElement to match imported button
         domElement.tibButton.counterElement= domElement.getElementsByClassName('bd-btn-counter')[0] || null;
 
-        if(domElement.tibButton.counterElement) tibit.initiators.getQty(params);
+        if(domElement.tibButton.counterElement) tibit.initiators.getQty(domElement.tibInitiator);
 
     };
 

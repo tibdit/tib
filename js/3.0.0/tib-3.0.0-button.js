@@ -45,7 +45,14 @@ var TIBIT = (function(tibit){
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
-        if (this.counterElement) tibit.initiators.getQty(this.params);
+        if (this.counterElement) {
+            if(!this.domElement.tibInitiator.qty()){
+                tibit.initiators.getQty(this.domElement.tibInitiator);
+            }
+            else{
+                this.writeCounter(this.domElement.tibInitiator.qty());
+            }
+        }
 
         // CSS/HTML Class Assignments
         if ( tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");

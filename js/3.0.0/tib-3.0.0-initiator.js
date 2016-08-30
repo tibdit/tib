@@ -54,15 +54,8 @@ var TIBIT = (function(tibit){
             return subrefQTY;
         };
 
-        this.params = tibit.initiators.params;
-
-        // TODO: is this still necessary?
-        //loadObjectParams(tibit.initiators.params, this.params); // Import siteParams passed to constructor to this.params
-
-        // tibInitiator is independent of any particular domElement, so retreiving and data-params is optional
-        if(domElement){
-            loadElementParams(this.params, domElement);
-        }
+        this.params = {};
+        tibit.copyParams(initiators.params, this.params);
 
         if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
             this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
@@ -80,20 +73,15 @@ var TIBIT = (function(tibit){
             this.params.CBK = window.location.origin;
         }
 
-        if(!this.qty()){
-            getQty(this.params);
-        }
-
-
     };
 
 
-    var getQty = function(params){
+    var getQty = function(initiator){
 
-        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + params.SUB + '-QTY';
+        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + initiator.params.SUB + '-QTY';
 
         var qtyHttp= new XMLHttpRequest();
-        var initiatorUrl= "https://tib.me/getqty/" + querystring(params);
+        var initiatorUrl= "https://tib.me/getqty/" + querystring(initiator.params);
         qtyHttp.open('GET', initiatorUrl, true);
         qtyHttp.send();
 
