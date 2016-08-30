@@ -51,7 +51,7 @@ var Tibit = (function(Tibit){
             sweepStorage();
             initButtons();
         }
-    }
+    };
 
 
     /**********
@@ -67,7 +67,7 @@ var Tibit = (function(Tibit){
             buttons[i].tibButton = new Tibit.Button( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
-    }
+    };
 
 
 
@@ -103,7 +103,7 @@ var Tibit = (function(Tibit){
 
         }
 
-    }
+    };
 
 
 

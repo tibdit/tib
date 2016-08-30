@@ -21,7 +21,7 @@ var Tibit = (function(Tibit){
 
 
 
-    initialize = function(window){
+    var initialize = function(window){
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
         tibWindow.initialHref = tibWindow.location.href;
@@ -35,7 +35,7 @@ var Tibit = (function(Tibit){
 
 
 
-    function persistAck(){
+    var persistAck = function(){
     // Pulls the ISS (tib issue time) from retrieved token.obj, generates an EXP (tib expiry time) and saves both of
     // these as JSON to a localStorage
 
@@ -58,11 +58,11 @@ var Tibit = (function(Tibit){
         tibEvent.initCustomEvent('tibstate', true, false, storageKey); // Event specifies the key of localstorage element containing relevant data
         window.dispatchEvent(tibEvent);
 
-    }
+    };
 
 
 
-    function callbackHandler(){
+    var callbackHandler = function(){
     // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
     // persists the tib via localstorage and closes
 
@@ -77,11 +77,11 @@ var Tibit = (function(Tibit){
 
         }
 
-    }
+    };
 
 
 
-    function callbackDone(){
+    var callbackDone = function(){
     // Assesses current tibWindow state to determine tib completion state - if all checks pass, clear the current
     // poller interval and return true.
 
@@ -114,11 +114,11 @@ var Tibit = (function(Tibit){
 
         clearInterval(callbackIntervalID);
         return true;
-    }
+    };
 
 
 
-    function extractTibToken(){
+    var extractTibToken = function(){
 
         var tokenObj, signature;
         var queryString = tibWindow.location.search;
@@ -135,11 +135,11 @@ var Tibit = (function(Tibit){
             obj : tokenObj
         };
 
-    }
+    };
 
 
 
-    function validateTibToken(){
+    var validateTibToken = function(){
 
         token.timestamp = new Date(token.obj.SEN || token.obj.ISS);
         token.offset = Date.now() - token.timestamp.getTime();
@@ -153,11 +153,11 @@ var Tibit = (function(Tibit){
 
         return true;
 
-    }
+    };
 
 
 
-    function closeWindow(){
+    var closeWindow = function(){
 
         var re= "[^\?]*\?(.*&)?noclose($|[=&])";  // add noclose querystring parameter to initiator (buggy - not always included in callback)
         if(tibWindow.location.search.search(re) !== -1) return false; // to prevent popup window from being automatically closed
@@ -169,11 +169,11 @@ var Tibit = (function(Tibit){
 
         return false; // function should never return, since window is gone
 
-    }
+    };
 
 
 
-    function localStorageAvailable() {
+    var localStorageAvailable = function() {
 
         try {
             x = '__storage_test__';
@@ -186,7 +186,7 @@ var Tibit = (function(Tibit){
             return false;
         }
 
-    }
+    };
 
     Tibit.Callback.initialize = initialize;
     return Tibit;
