@@ -39,6 +39,7 @@ var TIBIT = (function(tibit){
                 params[paramName] = e.getAttribute('data-bd-' + paramName);
             }
         }
+        //if(params.BTN === 'chevron'){ debugger; }
         return params;
     };
 
@@ -72,6 +73,51 @@ var TIBIT = (function(tibit){
         return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
     };
 
+    var mapParams = function(source, target){
+
+        // Given an object source, populate the named properties of an object target
+
+        if (typeof source !== "undefined") {
+            for ( var pName in target ){
+                if(source.hasOwnProperty(pName)){ // hasOwnProperty will return false for prototype properties
+                    target[pName] = source[pName];
+                    console.log(pName);
+                }
+            }
+        }
+    };
+
+    var copyParams = function(source, target){
+        for(var pName in source){
+            if(source.hasOwnProperty(pName)){
+                target[pName] = source[pName];
+            }
+        }
+    };
+
+    var init = function(initiatorParams, buttonParams){
+
+        mapParams(initiatorParams, tibit.initiators.params);
+        console.log(tibit.initiators.params);
+
+        mapParams(buttonParams, tibit.buttons.params);
+        console.log(tibit.buttons.params);
+
+
+        switch(document.readyState) {
+            case 'loading':
+                document.addEventListener('DOMContentLoaded', tibit.buttons.initButtons);
+                break;
+            case 'loaded': // for older Android
+            case 'interactive':
+            case 'complete':
+                if(document.getElementsByClassName('bd-tib-btn')){
+                    tibit.buttons.initButtons();
+                }
+        }
+
+    };
+
     // Takes a JS object as a parameter
 
     var params = {
@@ -99,6 +145,8 @@ var TIBIT = (function(tibit){
     };
 
     // Exposing our top level variables/methods/constants
+    tibit.init = init;
+    tibit.copyParams = copyParams;
     tibit.CONSTANTS = CONSTANTS;
     tibit.isTestnet = isTestnet;
     tibit.loadElementParams = loadElementParams;

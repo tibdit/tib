@@ -15,14 +15,10 @@ var TIBIT = (function(tibit){
 
     var styleButton = function(){ // Constructor function
 
-        this.params = tibit.buttons.params;
-
-        tibit.loadElementParams(this.params, this.domElement); // Overwrite params with any params specified as
-        // data-bd attributes
-        console.log(this.domElement);
 
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
-
+        console.log('style params: ');
+        console.log(this.params);
         loadButton(this.params, this.domElement);
 
     };
@@ -35,6 +31,7 @@ var TIBIT = (function(tibit){
     var loadButton= function(params, domElement){
 
         var buttonFile = params.BTN || "default";
+        console.log(params.BTN);
         var buttonLocation = params.BTS || "https://widget.tibit.com/buttons/";
 
         var tibbtn= new XMLHttpRequest();
@@ -47,7 +44,10 @@ var TIBIT = (function(tibit){
         var e = domElement;
         tibbtn.onreadystatechange= function(){
             if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
+                console.log(p.BTN);
+                console.log(e);
                 writeButton(tibbtn.responseXML, p, e);
+
             }
         };
     };
@@ -82,7 +82,7 @@ var TIBIT = (function(tibit){
         // Rewrite reference to counterElement to match imported button
         domElement.tibButton.counterElement= domElement.getElementsByClassName('bd-btn-counter')[0] || null;
 
-        domElement.tibButton.writeCounter(domElement.tibInitiator.getQty());
+        if(domElement.tibButton.counterElement) tibit.initiators.getQty(params);
 
     };
 
@@ -133,8 +133,7 @@ var TIBIT = (function(tibit){
             genericCssElement= headElement.appendChild(linkElement);
         }
 
-        if (! document.getElementById("tib-btn-" + params.BTN + "-css")) { // buton-style-specific CSS not already
-        // injected
+        if (! document.getElementById("tib-btn-" + params.BTN + "-css")) { // buton-style-specific CSS not already injected
             var styleElement = source.getElementById("tib-btn-" + params.BTN + "-css");   // extract button specifc CSS from source
             if (styleElement) {
                 headElement.insertBefore(styleElement, styleElement.nextSibling); // inject button specific CSS immediatly after
