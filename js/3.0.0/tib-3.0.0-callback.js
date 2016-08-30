@@ -8,11 +8,11 @@
  *
  * */
 
-var Tibit = (function(Tibit){
+var Tibit = (function(tibit){
 
 
 
-    Tibit.Callback = {};
+    var callbacks = {};
 
     // Initializing closure variables for later setting/usage
     var callbackIntervalID, tibWindow, token;
@@ -188,8 +188,14 @@ var Tibit = (function(Tibit){
 
     };
 
-    Tibit.Callback.initialize = initialize;
-    return Tibit;
+    callbacks.initialize = initialize;
+
+    tibit.callbacks = callbacks;
+
+
+    console.log('TIBIT: successfully loaded callback module');
+
+    return tibit;
 
 
 

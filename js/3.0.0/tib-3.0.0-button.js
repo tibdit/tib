@@ -45,6 +45,7 @@ var TIBIT= (function(tibit){
         tibit.loadElementParams( this.params, e);   // Only needed in style()?
         tibit.loadElementParams( tibInitiator.params, e);
 
+
         // TODO: add TibInitiator this.storageKey property
         e.classList.add( tibIinitator.storageKey );  
 
