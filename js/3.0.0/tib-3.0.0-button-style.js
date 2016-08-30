@@ -30,7 +30,7 @@ var Tibit = (function(Tibit){
 
         loadButton(this.params, this.domElement);
 
-    }
+    };
 
 
 

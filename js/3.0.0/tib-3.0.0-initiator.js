@@ -119,7 +119,7 @@ var Tibit = (function(Tibit){
         // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
         // potential to overload with platform specific code, but that will require DOM element (as argument?)
 
-        hash = TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
+        var hash = TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
         hash = murmurhash3_32_gc(hash, 0);   // possibly move to
         // https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
         return "TIB-SHA256-" + hash;
