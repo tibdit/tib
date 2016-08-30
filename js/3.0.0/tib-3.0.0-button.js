@@ -3,26 +3,27 @@
 /*************************************/
 /*
 *
-* Module containing the Tibit.Button constructor, which instantiates a Tibit.Initiator and optionally a
-* Tibit.ButtonStyle on a given DOM element, which the Button can then use to dispatch tibs on click, fetch and set
+* Module containing the tibit.Button constructor, which instantiates a tibit.Initiator and optionally a
+* tibit.ButtonStyle on a given DOM element, which the Button can then use to dispatch tibs on click, fetch and set
 * counters, and import/style a button. Also manages some classes/ID's attached to the DOM element.
 *
 * */
 
-var Tibit = (function(Tibit){
+var TIBIT = (function(tibit){
 
+    switch(document.readyState) {
+        case 'loading':
+            document.addEventListener('DOMContentLoaded', afterLoad);
+            break;
+        case 'loaded': // for older Android
+        case 'interactive':
+        case 'complete':
+            initButtons();
+    }
 
-
-    Tibit.Button = function( domElement) {
+    var TibButton= function( domElement) {
 
         // constructor for Button class, invoked by initButtons, 
-
-        this.writeCounter= function( QTY) {
-
-            if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) { // isNaN('') will return false
-                this.counterElement.textContent = parseInt(QTY, 10);
-            }
-        };
 
         this.params = {
             BTN : "",  // Will instantiate a ButtonStyle object if specified
@@ -33,33 +34,40 @@ var Tibit = (function(Tibit){
 
         this.domElement = domElement;
 
-        loadObjectParams(Tibit.params, this.params);
-        Tibit.loadElementParams(this.params, this.domElement);
+        loadObjectParams(tibit.params, this.params);
+        tibit.loadElementParams(this.params, this.domElement);
 
-        this.domElement.tibInitiator = new Tibit.Initiator(this.domElement);
+        this.domElement.tibInitiator = new tibit.Initiator(this.domElement);
 
         //window.addEventListener('storage', storageUpdate.bind(this)); // handles tibbed events and counter updates
         this.domElement.addEventListener("click", this.domElement.tibInitiator.dispatch.bind(this.domElement.tibInitiator));
         window.addEventListener('tibstate', storageUpdate.bind(this));
 
-        this.counterElement= null;
         this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
         if (this.counterElement) this.writeCounter(this.domElement.tibInitiator.getQty());
 
-        if (this.params.BTN) this.buttonStyle = new Tibit.ButtonStyle(this);
+        if (this.params.BTN) this.styleButton(); // buttonStyle = new tibit.ButtonStyle(this);
 
         // CSS/HTML Class Assignments
-        if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
-        this.domElement.classList.add( Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for easier reference later
+        if ( tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
+        this.domElement.classList.add( tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for easier reference later
 
         // Acknowledge tibbed state if persisted through localStorage
-        if ( localStorage.getItem(Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED') ) {
+        if ( localStorage.getItem(tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED') ) {
             acknowledgeTib(this.domElement);
         }
 
         if ( this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
             // TODO determine if button being overwritted by TibButtonStyle.writeButton affects this
             this.domElement.setAttribute('type','button'); // prevents default submit type/action if within <form>
+        }
+    };
+
+
+
+    var writeCounter= function( QTY) {
+        if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) { // isNaN('') will return false
+            this.counterElement.textContent = parseInt(QTY, 10);
         }
     };
 
@@ -86,12 +94,12 @@ var Tibit = (function(Tibit){
             e.newValue= localStorage[e.key];
         }
 
-        if ( e.newValue && e.key === Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
+        if ( e.newValue && e.key === tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
             // TODO: if a value is set from params, do we overwrite it after a Tib?  YES
             this.writeCounter( JSON.parse(e.newValue).QTY);
             }
 
-        if ( e.newValue && e.key === Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
+        if ( e.newValue && e.key === tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
             acknowledgeTib(this.domElement);
         }
     };
@@ -108,8 +116,15 @@ var Tibit = (function(Tibit){
     };
 
 
+    TibButton.prototype.writeCounter= writeCounter;
 
-    return Tibit;
+    tibit.buttons= {
+        TibButton: TibButton,
+        initButtons: initButtons
+    };
 
 
-})(Tibit || {});
+    return tibit;
+
+
+})(TIBIT || {});

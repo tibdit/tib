@@ -9,9 +9,9 @@
 *
 * */
 
-var Tibit = (function(Tibit){
+var TIBIT = (function(tibit){
 
-    Tibit.ButtonStyle = function(tibButton){ // Constructor function
+    styleButton = function(tibButton){ // Constructor function
 
         this.tibButton = tibButton;
         this.domElement = this.tibButton.domElement;
@@ -23,7 +23,7 @@ var Tibit = (function(Tibit){
             BTN: ""
         };
         this.params.BTN = this.tibButton.params.BTN; // Duplicate BTN param from parent tibButton
-        Tibit.loadElementParams(this.params, this.domElement); // Overwrite params with any params specified as
+        tibit.loadElementParams(this.params, this.domElement); // Overwrite params with any params specified as
         // data-bd attributes
 
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
@@ -31,6 +31,9 @@ var Tibit = (function(Tibit){
         loadButton(this.params, this.domElement);
 
     };
+
+
+    tibit.TibButton.prototype.style= styleButton;
 
 
 
@@ -155,6 +158,6 @@ var Tibit = (function(Tibit){
     //    return params;
     //};
 
-    return Tibit;
+    return tibit;
 
-})(Tibit || {});
+})(TIBIT || {});

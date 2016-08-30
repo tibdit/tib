@@ -10,15 +10,11 @@
 
 
 
-var Tibit = (function(Tibit){
+var TIBIT = (function(tibit){
 
     // Takes a JS object as a parameter
 
-    var init = function(siteParams){
-
-        // Initialising our params object as a property of our global Tibit object
-
-        Tibit.params = {
+    params = {
             // Initiator Params
             PAD : "",
             SUB : "",
@@ -33,25 +29,18 @@ var Tibit = (function(Tibit){
             BTH : ""
         };
 
-        for( var param in Tibit.params ){
+    sweepStorage();
+
+
+
+    var setDefaults = function(siteParams){
+
+        // Initialising our params object as a property of our global tibit object
+
+        for( var param in tibit.params ){
             if(siteParams[param]){
-                Tibit.params[param] = siteParams[param];
+                tibit.params[param] = siteParams[param];
             }
-        }
-
-        switch(document.readyState) {
-            case 'loading':
-                document.addEventListener('DOMContentLoaded', afterLoad);
-                break;
-            case 'loaded': // for older Android
-            case 'interactive':
-            case 'complete':
-                afterLoad();
-        }
-
-        function afterLoad() {
-            sweepStorage();
-            initButtons();
         }
     };
 
@@ -66,9 +55,9 @@ var Tibit = (function(Tibit){
         // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        var buttons = document.getElementsByClassName(Tibit.CONSTANTS.BUTTON_CLASS);
+        var buttons = document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
         for ( var i = 0, n = buttons.length; i < n; i++ ) {
-            buttons[i].tibButton = new Tibit.Button( buttons[i]);
+            buttons[i].tibButton = new tibit.Button( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
     };
@@ -96,7 +85,7 @@ var Tibit = (function(Tibit){
 
         for(var key in localStorage){
 
-            if ( key.substr( 0, Tibit.CONSTANTS.SUBREF_PREFIX.length) === Tibit.CONSTANTS.SUBREF_PREFIX ) {
+            if ( key.substr( 0, tibit.CONSTANTS.SUBREF_PREFIX.length) === tibit.CONSTANTS.SUBREF_PREFIX ) {
 
                 var item = JSON.parse( localStorage.getItem(key));
                 var expiry = new Date(item.EXP).getTime();
@@ -127,18 +116,19 @@ var Tibit = (function(Tibit){
         BUTTON_CLASS: 'bd-tib-btn'
     };
 
-    Tibit= {
+    tibit= {
         CONSTANTS: CONSTANTS,
         init: init,
         isTestnet: isTestnet,
-        loadElementParams: loadElementParams
+        loadElementParams: loadElementParams,
+        params: params
     };
 
-    return Tibit;
+    return tibit;
 
 
 
-})(Tibit || {});
+})(TIBIT || {});
 
 
 
