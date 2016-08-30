@@ -75,6 +75,9 @@ function sweepStorage() {
 }
 
 
+var counterEvent= document.createEvent('customEvent');
+
+
 
 
 /***********
@@ -105,6 +108,7 @@ function TibButton( siteParams, domElement) {
     this.loadElementParams(this.domElement);
 
     window.addEventListener('storage', this.storageUpdate.bind(this)); // handles tibbed events and counter updates
+    window.addEventListener('tibstate', this.storageUpdate.bind(this));
     this.domElement.addEventListener("click", this.initateTib.bind(this));
 
     this.counterElement= this.domElement.getElementsByClassName('bd-btn-counter')[0] || null;
@@ -206,6 +210,11 @@ TibButton.prototype.getQty= function(){
                     EXP : new Date(new Date().getTime() + (1000 * 60 * QTY_CACHE_DURATION)) // 20 minutes from now
                 };
                 localStorage.setItem(storageKey, JSON.stringify(subrefQTY));
+
+                var tibEvent= document.createEvent('customEvent');
+                tibEvent.initCustomEvent('tibstate', true, false, storageKey);
+                window.dispatchEvent( tibEvent);
+
                 // localStorage change event only fires if modified by a different window, so we must manually call
                 // writeCounter TODO: find localStorage event workaround
                 that.writeCounter(JSON.stringify(subrefQTY));
@@ -230,6 +239,11 @@ TibButton.prototype.storageUpdate= function(e) {
 
     // localStorage listener to update the buttons counter
     // used as the callback for TibInitiator, and when a tib is acknowledged
+
+    if ( e.type === 'tibstate' ) {
+        e.key= e.detail;
+        e.newValue= localStorage[e.key];
+    }
 
     if ( e.newValue && e.key === SUBREF_PREFIX + this.initiator.params.SUB + "-QTY" ) {
         // TODO: if a value is set from params, do we overwrite it after a tib?
