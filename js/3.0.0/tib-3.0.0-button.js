@@ -15,7 +15,7 @@ var Tibit = (function(Tibit){
 
     Tibit.Button = function( domElement) {
 
-
+        // constructor for Button class, invoked by initButtons, 
 
         this.writeCounter= function( QTY) {
 
@@ -23,8 +23,6 @@ var Tibit = (function(Tibit){
                 this.counterElement.textContent = parseInt(QTY, 10);
             }
         };
-
-
 
         this.params = {
             BTN : "",  // Will instantiate a ButtonStyle object if specified
@@ -52,19 +50,17 @@ var Tibit = (function(Tibit){
 
         // CSS/HTML Class Assignments
         if ( Tibit.isTestnet(this.domElement.tibInitiator.params.PAD) ) this.domElement.classList.add("testnet");
-        this.domElement.classList.add( Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for
-        // easier reference later
+        this.domElement.classList.add( Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB );  // Add subref class for easier reference later
 
         // Acknowledge tibbed state if persisted through localStorage
-        if(localStorage.getItem(Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED')){
+        if ( localStorage.getItem(Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + '-TIBBED') ) {
             acknowledgeTib(this.domElement);
         }
 
-        if (this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
+        if ( this.domElement.tagName === 'BUTTON' && !this.domElement.getAttribute('type') ) {
             // TODO determine if button being overwritted by TibButtonStyle.writeButton affects this
             this.domElement.setAttribute('type','button'); // prevents default submit type/action if within <form>
         }
-
     };
 
 
@@ -77,23 +73,30 @@ var Tibit = (function(Tibit){
         e.classList.add('tibbed');
     };
 
+
+
     var storageUpdate= function(e) {
-        // localStorage listener to update the buttons counter
+
+        // localStorage/tibstate listener to update the buttons counter
         // used as the callback for tibHandler.tibInitiator, and when a Tib is acknowledged
+        // for tibstate custom event, detail attribute contains the localStorage key
 
         if(e.type === 'tibstate'){
             e.key= e.detail;
             e.newValue= localStorage[e.key];
         }
 
-        if ( e.newValue && e.key === Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
-            // TODO: if a value is set from params, do we overwrite it after a Tib?
+        if ( e.newValue && e.key === Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-QTY" ) {
+            // TODO: if a value is set from params, do we overwrite it after a Tib?  YES
             this.writeCounter( JSON.parse(e.newValue).QTY);
             }
-        if ( e.newValue && e.key === Tibit.constants.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
+
+        if ( e.newValue && e.key === Tibit.CONSTANTS.SUBREF_PREFIX + this.domElement.tibInitiator.params.SUB + "-TIBBED" ) {
             acknowledgeTib(this.domElement);
         }
     };
+
+
 
     var loadObjectParams= function(source, params){
 
@@ -103,6 +106,8 @@ var Tibit = (function(Tibit){
             for ( var p in params) params[p] = source[p] || params[p];
         }
     };
+
+
 
     return Tibit;
 

@@ -13,9 +13,11 @@
 var Tibit = (function(Tibit){
 
     // Takes a JS object as a parameter
+
     var init = function(siteParams){
 
         // Initialising our params object as a property of our global Tibit object
+
         Tibit.params = {
             // Initiator Params
             PAD : "",
@@ -31,7 +33,7 @@ var Tibit = (function(Tibit){
             BTH : ""
         };
 
-        for( param in Tibit.params ){
+        for( var param in Tibit.params ){
             if(siteParams[param]){
                 Tibit.params[param] = siteParams[param];
             }
@@ -51,27 +53,30 @@ var Tibit = (function(Tibit){
             sweepStorage();
             initButtons();
         }
-    }
+    };
 
 
-    /**********
+
+    /********************
      PAGE LOAD FUNCTIONS
-    **********/
+    ********************/
 
     var initButtons = function() {
-    // adds and instantiates a TibButton object for all DOM elements with the 'bd-tib-btn' class
-    // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        var buttons = document.getElementsByClassName('bd-tib-btn');
+        // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
+        // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
+
+        var buttons = document.getElementsByClassName(Tibit.CONSTANTS.BUTTON_CLASS);
         for ( var i = 0, n = buttons.length; i < n; i++ ) {
             buttons[i].tibButton = new Tibit.Button( buttons[i]);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
-    }
+    };
 
 
 
     var loadElementParams = function(params, e){
+
         // For each property in params, populate with data-bd-X attribute from e if present
 
         for ( var paramName in params ) {
@@ -85,12 +90,13 @@ var Tibit = (function(Tibit){
 
 
     var sweepStorage = function() {
-    // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
-    // through each item and delete them if this time has passed.
+
+        // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
+        // through each item and delete them if this time has passed.
 
         for(var key in localStorage){
 
-            if ( key.substr( 0, Tibit.constants.SUBREF_PREFIX.length) === Tibit.constants.SUBREF_PREFIX ) {
+            if ( key.substr( 0, Tibit.CONSTANTS.SUBREF_PREFIX.length) === Tibit.CONSTANTS.SUBREF_PREFIX ) {
 
                 var item = JSON.parse( localStorage.getItem(key));
                 var expiry = new Date(item.EXP).getTime();
@@ -98,35 +104,43 @@ var Tibit = (function(Tibit){
                 if ( Date.now() >  expiry) {
                     localStorage.removeItem(key);
                 }
-
             }
-
         }
-
-    }
+    };
 
 
 
     var isTestnet = function(PAD){
 
         // true if PAD set and first character not 'm', 'n', or '2'
-        return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
 
+        return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
     };
 
 
 
-    Tibit.constants = {};
-    Tibit.constants.SUBREF_PREFIX= 'bd-subref-';
-    Tibit.constants.QTY_CACHE_DURATION= 20; // minutes
+    //  MODULE EXPORTS //
 
-    Tibit.init = init;
-    Tibit.isTestnet = isTestnet;
-    Tibit.loadElementParams = loadElementParams;
+    CONSTANTS = {
+        SUBREF_PREFIX: 'bd-subref-',
+        QTY_CACHE_DURATION: 20, // minutes
+        BUTTON_CLASS: 'bd-tib-btn'
+    };
+
+    Tibit= {
+        CONSTANTS: CONSTANTS,
+        init: init,
+        isTestnet: isTestnet,
+        loadElementParams: loadElementParams
+    };
 
     return Tibit;
 
+
+
 })(Tibit || {});
+
+
 
 /*
 ** MurmurHash3: Public Domain Austin Appleby http://sites.google.com/site/murmurhash/
