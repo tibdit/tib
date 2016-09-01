@@ -24,8 +24,6 @@ var TIBIT= (function(tibit){
         }
     };
 
-
-
     /********************
      PAGE LOAD FUNCTIONS
     ********************/
@@ -66,15 +64,6 @@ var TIBIT= (function(tibit){
 
 
 
-    var isTestnet= function(PAD){
-
-        // true if PAD set and first character not 'm', 'n', or '2'
-
-        return PAD && ( "mn2".search(PAD.substr(0,1)) !== -1 );
-    };
-
-
-
     var mapParams= function( source, target){
 
         // Given an object source, populate the named properties of an object target
@@ -101,24 +90,25 @@ var TIBIT= (function(tibit){
 
 
 
-    var init = function(initiatorParams, buttonParams){
+    var init = function(initiatorDefaultParams, buttonDefaultParams){
 
-        mapParams(initiatorParams, tibit.initiators.params);
-        console.log(tibit.initiators.params);
+        mapParams(initiatorDefaultParams, tibit.initiators.defaultParams);
 
-        mapParams(buttonParams, tibit.buttons.params);
-        console.log(tibit.buttons.params);
+        mapParams(buttonDefaultParams, tibit.buttons.defaultParams);
 
+        console.log('initialising');
 
         switch(document.readyState) {
             case 'loading':
-                document.addEventListener('DOMContentLoaded', tibit.buttons.initButtons);
+                console.log('found btns');
+                document.addEventListener('DOMContentLoaded', tibit.initTibButtons);
                 break;
             case 'loaded': // for older Android
             case 'interactive':
             case 'complete':
+                console.log('found btns');
                 if(document.getElementsByClassName('bd-tib-btn')){
-                    tibit.buttons.initButtons();
+                    tibit.initTibButtons();
                 }
         }
 
@@ -154,9 +144,7 @@ var TIBIT= (function(tibit){
     tibit.init = init;
     tibit.copyParams = copyParams;
     tibit.CONSTANTS = CONSTANTS;
-    tibit.isTestnet = isTestnet;
     tibit.loadElementParams = loadElementParams;
-    tibit.params = params;
 
     // Can't set tibit as an object literal, since we would overwrite the current tibit object (????)
 

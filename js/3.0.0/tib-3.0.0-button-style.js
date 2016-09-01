@@ -23,8 +23,7 @@ var TIBIT = (function(tibit){
 
     };
 
-    console.log(tibit.buttons);
-    tibit.buttons.TibButton.prototype.style= styleButton;
+    tibit.TibButton.prototype.style= styleButton;
 
 
 
@@ -82,7 +81,7 @@ var TIBIT = (function(tibit){
         // Rewrite reference to counterElement to match imported button
         domElement.tibButton.counterElement= domElement.getElementsByClassName('bd-btn-counter')[0] || null;
 
-        if(domElement.tibButton.counterElement) tibit.initiators.getQty(domElement.tibInitiator);
+        if(domElement.tibButton.counterElement) domElement.tibInitiator.updateQty();
 
     };
 
@@ -140,12 +139,6 @@ var TIBIT = (function(tibit){
             }
         }
     };
-
-
-    buttons.params.BTH = '';
-    buttons.params.BTC = '';
-    buttons.params.BTS = '';
-    buttons.params.BTN = 'default';
 
     tibit.buttons = buttons;
 

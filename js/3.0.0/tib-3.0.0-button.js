@@ -11,11 +11,16 @@
 
 var TIBIT= (function(tibit){
 
-    // Create our buttons object which will contain our buttons sub-namespace
+
+    // Declaring and/or initializing any module-level closure variables - these will be accessible from any function
+    // scope defined within the buttons module.
+    var buttons= {}; // Create our buttons namespace object container
+    var tibButtons= [];
+
+    // Aliasing top-level namespace variables for convenient reference within module
+    var CONSTANTS = tibit.CONSTANTS;
 
 
-    var buttons= {};
-    tibit.tibButtons= [];
 
     var initButtons= function() {
 
@@ -26,7 +31,9 @@ var TIBIT= (function(tibit){
         // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        var buttons= document.getElementsByClassName(tibit.CONSTANTS.BUTTON_CLASS);
+        console.log('initialising buttons');
+
+        var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
         for ( var i= 0, n= buttons.length; i < n; i++ ) {
             tibButton= new TibButton( buttons[i]);
             tibit.tibButtons.push( tibButton);
@@ -38,60 +45,23 @@ var TIBIT= (function(tibit){
 
     var TibButton= function( e) {
 
-        // constructor for TibButton class, invoked by initButtons, argument is DOM element (the button)
-
-        this.domElement= e;
-        e.tibButton= tibButton= this;
-
-        this.params = {};
-
-        this.tibbed= false;
-        this.testnet= false;
-
-        tibInitiator= e.tibInitiator= this.tibInitiator= new tibit.Initiator( e);
-
-        tibit.copyParams( buttons.params, this.params);
-        tibit.loadElementParams( this.params, e);   // Only needed in style()?
-        tibit.loadElementParams( tibInitiator.params, e);
-
-        // TODO: add TibInitiator this.storageKey property
-        e.classList.add( tibIinitator.storageKey );  
-
-        e.addEventListener("click", tibInitiator.dispatch.bind( tibInitiator));
-        
-        window.addEventListener( 'tibstate', storageUpdate.bind(this));   // intra-window update trigger 
-        window.addEventListener( 'storage', storageUpdate.bind(this));   // inter-window update trigger
-
-        setCounterElement( );
-
-        if ( e.classList.contains('bd-dynamic'))   this.style();   // load and format a dynamic button
-
-        if ( tibInitiator.isTestnet() )   setTestnet();   // set 'demo mode' class on button
-
-        if ( localStorage.getItem( tibIinitator.storageKey + '-TIBBED' ))   setTibbed();   // set button to tibbed state
-        
-        if ( e.tagName === 'BUTTON' && !e.getAttribute('type'))  e.setAttribute( 'type', 'button' );   // prevent default submit type/action if within <form>
-
-
-
-        
-    // }; enclosing sub-functions, so in theory this and e and tibInitiator are available?
-
 
 
         var setCounterElement= function( ) {
 
             // called on button construct and after style button imported
 
-            this.counterElement= e.getElementsByClassName( 'bd-btn-counter')[0] || null;
-            if ( this.counterElement )   tibInitiator.updateQty();   // get initiator to trigger event to update counter
+            counterElement= e.getElementsByClassName( 'bd-btn-counter')[0] || null;
+            if ( counterElement )   tibInitiator.updateQty();   // get initiator to trigger event to update counter]
+
+            return counterElement;
         };
 
 
 
         var writeCounter= function( QTY) {
-            if ( this.counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
-                this.counterElement.textContent= parseInt(QTY, 10);
+            if ( (counterElement || setCounterElement()) && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
+                counterElement.textContent= parseInt(QTY, 10);
             }
         };
 
@@ -139,17 +109,64 @@ var TIBIT= (function(tibit){
             }
         };
 
+
+        // Declaring our closure variables in one place
+        var tibButton, tibInitiator, tibbed, testnet, counterElement;
+
+        // Set up internal and external references to this tibButton object
+        tibButton = e.tibButton=  this;
+
+        // Initiatlising public variables with closure aliases for clarity ('testnet' less readable than 'testnet')
+        tibbed = this.tibbed = false;
+        testnet = this.testnet = false;
+        params = this.params = {};
+        this.domElement= e;
+
+        tibInitiator= e.tibInitiator= this.tibInitiator= new tibit.Initiator( e);
+
+        // Copying and populating TibButton.params from button defaultParams and data-bd-attributes
+        tibit.copyParams( buttons.defaultParams, this.params);
+        tibit.loadElementParams( this.params, e);   // Only needed in style()?
+
+        // Populating TibInitiator.params from data-bd-attributes (default params initialized within tibInitiator constructor)
+        tibit.loadElementParams( tibInitiator.params, e);
+
+        // TODO: add TibInitiator this.storageKey property
+        e.classList.add( tibInitiator.storageKey );
+
+        e.addEventListener("click", tibInitiator.dispatch.bind( tibInitiator)); // Assign generated initiator's dispatch method to click event
+
+        window.addEventListener( 'tibstate', storageUpdate.bind(this));   // intra-window update trigger
+        window.addEventListener( 'storage', storageUpdate.bind(this));   // inter-window update trigger
+
+        counterElement = this.counterElement = setCounterElement( ); // Initialised later in constructor, after tibInitiator is built
+
+        if ( e.classList.contains('bd-dynamic'))   this.style();   // load and format a dynamic button
+
+        if ( tibInitiator.isTestnet() )   setTestnet();   // set 'demo mode' class on button
+
+        if ( localStorage.getItem( tibInitiator.storageKey + '-TIBBED' ))   setTibbed();   // set button to tibbed state
+
+        if ( e.tagName === 'BUTTON' && !e.getAttribute('type'))  e.setAttribute( 'type', 'button' );   // prevent default submit type/action if within <form>
+
+
+
+
     }; // relocated from above to perhaps get access to e, this, tibInitiator...
 
 
+    buttons.defaultParams = {
+        BTN : '',
+        BTH : '',
+        BTC : '',
+        BTS : ''
+    };
 
 
-    var params= {};
-
-    // Expose public buttons methods/variables
+    // PUBLIC VARIABLES/METHODS AT TOP LEVEL NAMESPACE
+    tibit.tibButtons= tibButtons;
     tibit.TibButton= TibButton;
     tibit.initTibButtons= initButtons;
-    tibit.params= params;
 
     tibit.buttons= buttons;
 

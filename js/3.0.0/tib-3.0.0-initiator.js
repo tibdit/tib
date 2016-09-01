@@ -38,25 +38,97 @@ var TIBIT = (function(tibit){
             }
         };
 
-        this.qty= function(){
+        this.updateQty= function(){
 
-            var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + this.params.SUB + '-QTY';
+
+            console.log(storageKey);
 
             // Value from params takes precedence
             var subrefQTY = this.params.QTY;
 
             // No value from params set, attempt to fetch + parse QTY from localstorage
             if(!subrefQTY){
-                subrefQTY = localStorage.getItem(storageKey);
-                if(subrefQTY) subrefQTY = JSON.parse(localStorage.getItem(storageKey)).QTY;
+                subrefQTY = localStorage.getItem(storageKey + '-QTY');
+                if(subrefQTY) subrefQTY = JSON.parse(localStorage.getItem(storageKey + '-QTY')).QTY;
+            }
+
+            if(!subrefQTY){
+                fetchQty();
             }
 
             return subrefQTY;
 
         };
 
-        this.params = {};
-        tibit.copyParams(initiators.params, this.params);
+        this.isTestnet= function(PAD){
+
+            // true if PAD set and first character not 'm', 'n', or '2'
+
+            return this.params.PAD && ( "mn2".search(this.params.PAD.substr(0,1)) !== -1 );
+        };
+
+        var fetchQty = function(){
+
+            var qtyHttp= new XMLHttpRequest();
+            var initiatorUrl= "https://tib.me/getqty/" + querystring(params);
+            qtyHttp.open('GET', initiatorUrl, true);
+            qtyHttp.send();
+
+            qtyHttp.onreadystatechange= function(){
+                if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
+                    fetchQtyHandler(this);
+                }
+            };
+        };
+
+        var fetchQtyHandler = function(qtyHttp){
+
+                var obj = {
+                    QTY : JSON.parse(qtyHttp.response).QTY,
+                    EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
+                };
+
+                localStorage.setItem(storageKey + '-QTY', JSON.stringify(obj));
+
+                var tibEvent = document.createEvent('customEvent');
+                tibEvent.initCustomEvent('tibstate', true, false, storageKey + '-QTY');
+                window.dispatchEvent(tibEvent);
+
+
+        };
+
+        var querystring= function() {
+
+            // assembles Tib initiator parameters into URL querystring
+
+            var querystring = "?";
+            for ( var param in params ) {
+                if(params[param]){ // Skip to next param if value is an empty string
+                    querystring += param;
+                    querystring += "=";
+                    querystring += encodeURIComponent(params[param]);
+                    querystring += "&";
+                }
+            }
+            return querystring.substr(0,querystring.length);  // truncate trailing ampersand
+        };
+
+
+
+        var loadElementParams = function(params, e){
+
+            for ( var paramName in params ) {
+                if ( e.getAttribute('data-bd-' + paramName) ){
+                    params[paramName] = e.getAttribute('data-bd-' + paramName);
+                }
+            }
+
+            return params;
+        };
+
+
+        var params = this.params = {};
+        tibit.copyParams(initiators.defaultParams, this.params);
 
         if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
             this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
@@ -73,34 +145,9 @@ var TIBIT = (function(tibit){
             this.params.CBK = window.location.origin;
         }
 
-    };
+        var storageKey = this.storageKey = tibit.CONSTANTS.SUBREF_PREFIX + this.params.SUB;
 
 
-    var getQty = function(initiator){
-
-        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + initiator.params.SUB + '-QTY';
-
-        var qtyHttp= new XMLHttpRequest();
-        var initiatorUrl= "https://tib.me/getqty/" + querystring(initiator.params);
-        qtyHttp.open('GET', initiatorUrl, true);
-        qtyHttp.send();
-
-        qtyHttp.onreadystatechange= function(){
-            if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
-
-                var obj = {
-                    QTY : JSON.parse(qtyHttp.response).QTY,
-                    EXP : new Date(new Date().getTime() + (1000 * 60 * tibit.CONSTANTS.QTY_CACHE_DURATION)) // 20 minutes from now
-                };
-
-                localStorage.setItem(storageKey, JSON.stringify(obj));
-
-                var tibEvent = document.createEvent('customEvent');
-                tibEvent.initCustomEvent('tibstate', true, false, storageKey);
-                window.dispatchEvent(tibEvent);
-
-            }
-        };
     };
 
     var generateSub = function(TIB) {
@@ -114,36 +161,8 @@ var TIBIT = (function(tibit){
         return "TIB-SHA256-" + hash;
     };
 
-    var querystring= function(params) {
 
-        // assembles Tib initiator parameters into URL querystring
-
-        var querystring = "?";
-        for ( var param in params ) {
-            if(params[param]){ // Skip to next param if value is an empty string
-                querystring += param;
-                querystring += "=";
-                querystring += encodeURIComponent(params[param]);
-                querystring += "&";
-            }
-        }
-        return querystring.substr(0,querystring.length);  // truncate trailing ampersand
-    };
-
-
-
-    var loadElementParams = function(params, e){
-
-        for ( var paramName in params ) {
-            if ( e.getAttribute('data-bd-' + paramName) ){
-                params[paramName] = e.getAttribute('data-bd-' + paramName);
-            }
-        }
-
-        return params;
-    };
-
-    var params = {
+    var defaultParams = {
 
         PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
         SUB : "",  // Subreference - Identifies the specific item being tibbed for any counter
@@ -155,8 +174,7 @@ var TIBIT = (function(tibit){
 
 
     // Exposing our sub-namespace level variables/methods/constants
-    initiators.getQty = getQty;
-    initiators.params = params;
+    initiators.defaultParams = defaultParams;
 
     // Exposing our top-level namespace variables/methods/constants as part of our working tibit object
     tibit.initiators = initiators;
