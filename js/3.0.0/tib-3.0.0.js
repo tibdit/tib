@@ -92,23 +92,23 @@ var TIBIT= (function(tibit){
 
     var init = function(initiatorDefaultParams, buttonDefaultParams){
 
-        mapParams(initiatorDefaultParams, tibit.initiators.defaultParams);
+        mapParams(initiatorDefaultParams, tibit.initiatorDefaultParams);
 
-        mapParams(buttonDefaultParams, tibit.buttons.defaultParams);
+        mapParams(buttonDefaultParams, tibit.buttonDefaultParams);
 
         console.log('initialising');
 
         switch(document.readyState) {
             case 'loading':
                 console.log('found btns');
-                document.addEventListener('DOMContentLoaded', tibit.initTibButtons);
+                document.addEventListener('DOMContentLoaded', tibit.initTibElements);
                 break;
             case 'loaded': // for older Android
             case 'interactive':
             case 'complete':
                 console.log('found btns');
                 if(document.getElementsByClassName('bd-tib-btn')){
-                    tibit.initTibButtons();
+                    tibit.initTibElements();
                 }
         }
 

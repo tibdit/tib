@@ -11,7 +11,6 @@
 
 var TIBIT = (function(tibit){
 
-    var initiators = {};
 
     var Initiator = function( domElement){
 
@@ -169,7 +168,7 @@ var TIBIT = (function(tibit){
     };
 
 
-    var defaultParams = {
+    var initiatorDefaultParams = {
 
         PAD : "",  // Payment Address - Bitcoin address Tib value will be sent to
         SUB : "",  // Subreference - Identifies the specific item being tibbed for any counter
@@ -182,7 +181,7 @@ var TIBIT = (function(tibit){
 
 
     // Exposing our top-level namespace variables/methods/constants as part of our working tibit object
-    tibit.initiatorDefaultParams = defaultParams;
+    tibit.initiatorDefaultParams = initiatorDefaultParams;
     tibit.Initiator = Initiator;
 
     console.log('TIBIT: successfully loaded initiator module');

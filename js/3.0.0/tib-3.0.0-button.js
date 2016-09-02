@@ -1,163 +1,169 @@
 /*************************************/
-// TIB BUTTON MODULE
+// TIB BUTTON STYLE MODULE
 /*************************************/
 /*
 *
-* Module containing the tibit.Button constructor, which instantiates a tibit.Initiator and optionally a
-* tibit.ButtonStyle on a given DOM element, which the Button can then use to dispatch tibs on click, fetch and set
-* counters, and import/style a button. Also manages some classes/ID's attached to the DOM element.
+* Module concerned with styling and DOM representation of a Tib Button. This module will attempt to fetch a HTML/SVG
+* button and insert it into the DOM. It will also take height/colour parameters. If the inserted button has a
+* counter element, it will also initiate fetching and setting of tib QTY using initiator and button methods.
 *
 * */
 
-var TIBIT= (function(tibit){
+var TIBIT = (function(tibit){
+
+    var TibButton = function(e){ // Constructor function
 
 
-    // Declaring and/or initializing any module-level closure variables - these will be accessible from any function
-    // scope defined within the buttons module.
-    var buttons= {}; // Create our buttons namespace object container
-    var tibButtons= [];
+        var loadButton= function(){
 
-    // Aliasing top-level namespace variables for convenient reference within module
-    var CONSTANTS = tibit.CONSTANTS;
+            var buttonFile = params.BTN || "default";
+            console.log(params.BTN);
+            var buttonLocation = params.BTS || "https://widget.tibit.com/buttons/";
+
+            var tibbtn= new XMLHttpRequest();
+            tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".html", true);
+            tibbtn.responseType= "document";
+
+            // Initializing new variables with passed parameters to make available within onreadystatechange closure
+            var p = params;
+            var e = domElement;
+            var that = this;
+
+            tibbtn.onreadystatechange= function(){
+                if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
+                     writeButton.call(that, tibbtn.responseXML, p, e);
+                }
+            };
+
+
+            tibbtn.send();
 
 
 
-    var initButtons= function() {
+        };
 
-        // tibButtonDefaults={}  ??
 
-        // button defaults {} should be as argument to initButtons, and will available via closure.
 
-        // instantiates and attaches a TibButton object to all DOM elements with the 'bd-tib-btn' class
-        // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
+        var writeButton= function( source, params) {
+            // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
 
-        console.log('initialising buttons');
+            var sourceElement= source.getElementById("tib-btn-" + params.BTN);
+            if (! sourceElement) throw "bd: failed to find tib-btn-" + params.BTN + " in received XML";
 
-        var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
-        for ( var i= 0, n= buttons.length; i < n; i++ ) {
-            var tibButton= new TibButton( buttons[i]);
-            tibit.tibButtons.push( tibButton);
-            // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
-        }
+            var buttonElement= document.importNode(sourceElement, true);
+
+            if (domElement.children.length === 0) {
+                domElement.appendChild(buttonElement);  // append/insert if no placeholder
+            } else {
+                domElement.replaceChild(buttonElement, domElement.children[0]);  // replace placeholder if present
+            }
+
+            console.log(x);
+
+            domElement.children[0].removeAttribute("id");  // Removing imported SVG ID to avoid potential duplicates
+
+            injectCss( source, params);
+
+            setColour(params,domElement);
+            setHeight(params,domElement);
+
+            if(!domElement.classList.contains('bd-tib-btn')){
+                domElement.classList.add('bd-tib-btn');
+            }
+
+            // Rewrite reference to counterElement to match imported button
+            tibElement.setCounterElement();
+            if(tibElement.counterElement) tibElement.writeCounter(tibInitiator.updateQty());
+
+        };
+
+
+
+        var setColour= function(params, domElement){
+
+            var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
+            if ( backdrop && params.BTC ) {
+                backdrop.style.fill = params.BTC; // fill will only work for svg, needs expansion to include CSS
+            }
+        };
+
+
+
+        var setHeight = function(params, domElement){
+
+            if ( params.BTH ) {
+                domElement.style.height = params.BTH + "px";
+            }
+
+            // TODO: Re-implement this browser fix
+            var s= domElement.children[0];
+            //console.log('xx', s);
+
+            if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+                s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+                //console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
+            }
+        };
+
+
+
+        var injectCss = function( source, params){
+
+            // inject non-button-style dependant CSS
+            // should be moved to writebutton, with anti-dupication
+
+            var headElement= document.getElementsByTagName('head')[0];
+            var genericCssElement= document.getElementById('bd-css-tib-btn');
+
+            if (! genericCssElement) {
+                var linkElement= document.createElement('link');
+                linkElement.id = 'bd-css-tib-btn';
+                linkElement.rel= 'stylesheet';
+                linkElement.type = 'text/css';
+                linkElement.href = 'https://widget.tibit.com/assets/css/tib.css';
+                genericCssElement= headElement.appendChild(linkElement);
+            }
+
+            if (! document.getElementById("tib-btn-" + params.BTN + "-css")) { // buton-style-specific CSS not already injected
+                var styleElement = source.getElementById("tib-btn-" + params.BTN + "-css");   // extract button specifc CSS from source
+                if (styleElement) {
+                    headElement.insertBefore(styleElement, styleElement.nextSibling); // inject button specific CSS immediatly after
+                }
+            }
+
+
+        };
+
+        var tibElement = this.tibElement = e.tibElement;
+        var domElement = this.domElement = e;
+        var tibInitiator = this.tibInitiator = e.tibInitiator;
+        var params = this.params = {};
+
+        // Copying and populating TibButton.params from button defaultParams and data-bd-attributes
+        tibit.copyParams( buttonDefaultParams, this.params);
+        tibit.loadElementParams( this.params, e);   // Only needed in style()?
+
+        this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
+        console.log('style params: ');
+        console.log(this.params);
+        var x= 'what it is friends';
+        loadButton(this.params, this.domElement);
+
+
     };
 
+    var buttonDefaultParams = {
+        BTN : '',
+        BTH : '',
+        BTC : '',
+        BTS : ''
+    };
 
+    tibit.TibButton = TibButton;
+    tibit.buttonDefaultParams = buttonDefaultParams;
 
-    var TibButton= function( e) {
-
-
-
-        this.setCounterElement= function( ) {
-
-            // called on button construct and after style button imported
-
-            counterElement= e.getElementsByClassName( 'bd-btn-counter')[0] || null;
-            if ( counterElement )   tibInitiator.updateQty();   // get initiator to trigger event to update counter]
-
-            return counterElement;
-        };
-
-
-
-        this.writeCounter= function( QTY) {
-            if ( counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
-                counterElement.textContent= parseInt(QTY, 10);
-            }
-        };
-
-
-
-        var setTibbed= function() {
-
-            // set the button to tibbed state  
-            // perhaps can't use 'e' as also called from event handler
-
-            this.tibbed= true;
-            e.classList.add('tibbed');
-        };
-
-
-
-        var setTestnet= function() {
-
-            // set the button to tibbed state
-
-            this.testnet= true;
-            e.classList.add('testnet');
-        };
-
-
-
-        var storageUpdate= function(ev) {
-
-            // localStorage/tibstate listener to update the buttons counter
-            // used as the callback for tibHandler.tibInitiator, and when a Tib is acknowledged
-            // for tibstate custom event, detail attribute contains the localStorage key
-            // bound to DOM element, so this == e  ////  CHANGED this now == tibButton
-
-            if(ev.type === 'tibstate') {
-                ev.key= ev.detail;
-                ev.newValue= localStorage[ev.key];
-            }
-
-            if ( ev.newValue && ev.key === tibInitiator.storageKey + "-QTY" ) {
-                this.writeCounter( JSON.parse(ev.newValue).QTY);
-                }
-
-            if ( ev.newValue && ev.key === tibInitiator.storageKey + "-TIBBED" ) {
-                setTibbed( e);
-            }
-        };
-
-
-        // Declaring our closure variables in one place
-        var tibButton, tibInitiator, tibbed, testnet, counterElement;
-
-        // Set up internal and external references to this tibButton object
-        tibButton = e.tibButton=  this;
-
-        // Initiatlising public variables with closure aliases for clarity ('testnet' less readable than 'testnet')
-        tibbed = this.tibbed = false;
-        testnet = this.testnet = false;
-        this.domElement= e;
-        tibInitiator= e.tibInitiator= this.tibInitiator= new tibit.Initiator( e);
-
-        // TODO: add TibInitiator this.storageKey property
-        e.classList.add( tibInitiator.storageKey );
-
-        e.addEventListener("click", tibInitiator.dispatch.bind( tibInitiator)); // Assign generated initiator's dispatch method to click event
-
-        window.addEventListener( 'tibstate', storageUpdate.bind(this));   // intra-window update trigger
-        window.addEventListener( 'storage', storageUpdate.bind(this));   // inter-window update trigger
-
-        counterElement = this.counterElement = this.setCounterElement( ); // Initialised later in constructor, after tibInitiator is built
-        if(counterElement) this.writeCounter(tibInitiator.updateQty());
-
-        if ( e.classList.contains('bd-dynamic'))   this.tibButtonStyle = new tibit.TibButtonStyle(e);   // load and format a dynamic button
-
-        if ( tibInitiator.isTestnet() )   setTestnet();   // set 'demo mode' class on button
-
-        if ( localStorage.getItem( tibInitiator.storageKey + '-TIBBED' ))   setTibbed();   // set button to tibbed state
-
-        if ( e.tagName === 'BUTTON' && !e.getAttribute('type'))  e.setAttribute( 'type', 'button' );   // prevent default submit type/action if within <form>
-
-
-
-
-    }; // relocated from above to perhaps get access to e, this, tibInitiator...
-
-
-    // PUBLIC VARIABLES/METHODS AT TOP LEVEL NAMESPACE
-    tibit.tibButtons= tibButtons;
-    tibit.TibButton= TibButton;
-    tibit.initTibButtons= initButtons;
-
-    tibit.buttons= buttons;
-
-
-    console.log( 'TIBIT: successfully loaded button module');
+    console.log('TIBIT: successfully loaded button module');
 
     return tibit;
-
 
 })(TIBIT || {});
