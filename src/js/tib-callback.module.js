@@ -15,17 +15,8 @@ var TIBIT = (function(tibit){
     var callbackIntervalID, tibWindow, token;
 
     var DUR = 1; // TODO: pass from an initiator variable?
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
 
     var initializeCallback = function( window ){
-=======
-    var tibInitiator;
-
-
-    var initializeCallback = function(window, initiator){
-
-        tibInitiator = initiator;
->>>>>>> develop:js/src/tib-callback.module.js
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
         tibWindow.initialHref = tibWindow.location.href;
@@ -40,39 +31,25 @@ var TIBIT = (function(tibit){
 
 
     var persistAck = function(){
-    // Pulls the ISS (tib issue time) from retrieved token.obj, generates an EXP (tib expiry time) and saves both of
-    // these as JSON to a localStorage
+        // Pulls the ISS (tib issue time) from retrieved token.obj, generates an EXP (tib expiry time) and saves both of
+        // these as JSON to a localStorage
 
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
         tibit.CONSOLE_OUTPUT && console.log( 'Running persistAck for storage  ' );
 
         var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
 
         var duration = DUR * (isTestnet(token.obj.PAD) ? 300000 : 86400000 );
         tibit.CONSOLE_OUTPUT && console.log('Duration calculated as "'+ duration + '"');
-=======
-
-        var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
-
-        var duration = DUR * (tibInitiator.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
-        console.log(duration);
->>>>>>> develop:js/src/tib-callback.module.js
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
 
         var issueDate = new Date( token.obj.ISS );
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
         tibit.CONSOLE_OUTPUT && console.log('Retrieved issue date ' + issueDate);
         var expireDate = new Date( issueDate.getTime() + duration );
         tibit.CONSOLE_OUTPUT && console.log('Generated expire date '+ expireDate);
-=======
-        console.log(new Date(issueDate.getTime() + 300000));
-        var expireDate = new Date( issueDate.getTime() + duration );
-        console.log('Generated expire date'+ expireDate);
->>>>>>> develop:js/src/tib-callback.module.js
 
         var storageObj = { ISS: issueDate, // Issue Time
-                            EXP: expireDate}; // Expiry Time
+            EXP: expireDate}; // Expiry Time
         localStorage.setItem(storageKey, JSON.stringify(storageObj));
 
         // Fire custom 'tibstate' event for any post-tib functions to hook into
@@ -81,27 +58,15 @@ var TIBIT = (function(tibit){
         window.dispatchEvent(tibEvent);
 
     };
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
 
 
 
     var callbackHandler = function(){
-    // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
-    // persists the tib via localstorage and closes
+        // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
+        // persists the tib via localstorage and closes
 
         if(callbackDone()){ // Polls tibWindow for tib completion
 
-=======
-
-
-
-    var callbackHandler = function(){
-    // Handler for callback interval - checks the tibWindow every cycle and if conditions are met,
-    // persists the tib via localstorage and closes
-
-        if(callbackDone()){ // Polls tibWindow for tib completion
-
->>>>>>> develop:js/src/tib-callback.module.js
             token = extractTibToken(); // Save querystring token as json string AND js object to token variable
             closeWindow(tibWindow);
 
@@ -113,7 +78,6 @@ var TIBIT = (function(tibit){
 
     };
 
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
     var isTestnet = function( PAD ){
 
         // true if PAD set and first character not 'm', 'n', or '2'
@@ -121,13 +85,10 @@ var TIBIT = (function(tibit){
         return PAD && ( "mn2".search( PAD.substr(0,1)) !== -1 );
 
     };
-=======
-
->>>>>>> develop:js/src/tib-callback.module.js
 
     var callbackDone = function(){
-    // Assesses current tibWindow state to determine tib completion state - if all checks pass, clear the current
-    // poller interval and return true.
+        // Assesses current tibWindow state to determine tib completion state - if all checks pass, clear the current
+        // poller interval and return true.
 
         var domain;
 
@@ -158,7 +119,6 @@ var TIBIT = (function(tibit){
 
         clearInterval(callbackIntervalID);
         return true;
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
 
     };
 
@@ -166,14 +126,6 @@ var TIBIT = (function(tibit){
 
     var extractTibToken = function(){
 
-=======
-    };
-
-
-
-    var extractTibToken = function(){
-
->>>>>>> develop:js/src/tib-callback.module.js
         var tokenObj, signature;
         var queryString = tibWindow.location.search;
 
@@ -191,13 +143,8 @@ var TIBIT = (function(tibit){
 
     };
 
-<<<<<<< HEAD:js/3.0.0/tib-3.0.0-callback.js
 
 
-=======
-
-
->>>>>>> develop:js/src/tib-callback.module.js
     var validateTibToken = function(){
 
         token.timestamp = new Date(token.obj.SEN || token.obj.ISS);
