@@ -31,21 +31,23 @@ var TIBIT= (function(tibit){
         // instantiates and attaches a TibElement object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        console.log('initialising buttons');
+        tibit.CONSOLE_OUTPUT && console.log('Running initTibElements');
 
         var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
         for ( var i= 0, n= buttons.length; i < n; i++ ) {
-            var tibElements= new TibElement( buttons[i]);
-            tibit.tibElements.push( tibElements);
+            var tibElement= new TibElement( buttons[i]);
+            tibit.tibElements.push( tibElement);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
+
+        tibit.CONSOLE_OUTPUT && console.log('tibit.tibElements array populated: \n \t', tibit.tibElements);
     };
 
 
 
     var TibElement= function( e) {
 
-
+        tibit.CONSOLE_OUTPUT && console.log('Generating TibElement for domElement \n \t', e);
 
         this.setCounterElement= function( ) {
 
@@ -154,7 +156,7 @@ var TIBIT= (function(tibit){
     tibit.tibElements= tibElements;
 
 
-    console.log( 'TIBIT: successfully loaded element module');
+    tibit.CONSOLE_OUTPUT && console.log( 'successfully loaded element module');
 
     return tibit;
 

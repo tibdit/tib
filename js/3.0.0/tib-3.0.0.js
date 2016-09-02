@@ -12,7 +12,6 @@
 
 var TIBIT= (function(tibit){
 
-
     var setDefaults= function(siteParams){
 
         // Initialising our params object as a property of our global tibit object
@@ -56,6 +55,7 @@ var TIBIT= (function(tibit){
                 var expiry= new Date(item.EXP).getTime();
 
                 if ( Date.now() >  expiry) {
+                    tibit.CONSOLE_OUTPUT && console.log('Removing localstorage item ' + key);
                     localStorage.removeItem(key);
                 }
             }
@@ -72,10 +72,10 @@ var TIBIT= (function(tibit){
             for ( var pName in target ) {
                 if( source.hasOwnProperty(pName) ) { // hasOwnProperty will return false for prototype properties
                     target[pName] = source[pName];
-                    console.log(pName);
                 }
             }
         }
+        tibit.CONSOLE_OUTPUT && console.log('mapParams mapped following source to following target obj: \n \t' , source, '\n \t', target);
     };
 
 
@@ -133,12 +133,16 @@ var TIBIT= (function(tibit){
 
     //  MODULE EXPORTS //
 
+    tibit.CONSOLE_OUTPUT = tibit.CONSOLE_OUTPUT || false;
+
     var CONSTANTS= {
         SUBREF_PREFIX: 'bd-subref-',
         QTY_CACHE_DURATION: 20, // minutes
         BUTTON_CLASS: 'bd-tib-btn',
-        BUTTON_STYLE_CLASS: 'bd-dynamic'
+        BUTTON_STYLE_CLASS: 'bd-dynamic',
     };
+
+    tibit.CONSOLE_OUTPUT && console.log('TIBIT.constants saved: \n \t', CONSTANTS);
 
     // Exposing our top level variables/methods/constants
     tibit.init = init;
@@ -152,7 +156,7 @@ var TIBIT= (function(tibit){
 
     sweepStorage();
 
-    console.log('TIBIT: successfully loaded base module');
+    tibit.CONSOLE_OUTPUT && console.log('successfully loaded base module');
 
     // Return our working tibit object to be set to the global TIBIT object
 

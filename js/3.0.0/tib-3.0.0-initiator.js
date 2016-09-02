@@ -29,18 +29,19 @@ var TIBIT = (function(tibit){
             tibUrl.search = querystring(this.params);
             tibUrl.search= tibUrl.search.substr(0,tibUrl.search.length-1);  // remove trailing ampersand
 
-            tibWindow = window.open( tibUrl.href, tibWindowName, tibWindowOptions);
+            var tibWindow = window.open( tibUrl.href, tibWindowName, tibWindowOptions);
 
             // If using default (inline) CBK, we initialize the callback handlers on dispatch
-            if(this.params.CBK === window.location.origin){
-                tibit.callbacks.initialize(tibWindow);
+            if(this.params.CBK !== 'none' && this.params.CBK === window.location.origin){
+                tibit.CONSOLE_OUTPUT && console.log('No CBK specified - initializing inline callback poller');
+                tibit.initializeCallback(tibWindow, this);
             }
         };
 
         this.updateQty= function(callback){
 
 
-            console.log(storageKey);
+            tibit.CONSOLE_OUTPUT && console.log('Running updateQTY for storageKey "'+storageKey+'"');
 
             // Value from params takes precedence
             var subrefQTY = this.params.QTY;
@@ -49,6 +50,7 @@ var TIBIT = (function(tibit){
             if(!subrefQTY){
                 subrefQTY = localStorage.getItem(storageKey + '-QTY');
                 if(subrefQTY) subrefQTY = JSON.parse(localStorage.getItem(storageKey + '-QTY')).QTY;
+                tibit.CONSOLE_OUTPUT && console.log('updateQty retrieved QTY '+subrefQTY+' from localStorage');
             }
 
             if(!subrefQTY){
@@ -108,12 +110,14 @@ var TIBIT = (function(tibit){
             var querystring = "?";
             for ( var param in params ) {
                 if(params[param]){ // Skip to next param if value is an empty string
+                    if(param === 'CBK' && params[param] === 'none') break;
                     querystring += param;
                     querystring += "=";
                     querystring += encodeURIComponent(params[param]);
                     querystring += "&";
                 }
             }
+            tibit.CONSOLE_OUTPUT && console.log('Generated querystring "'+ querystring + '"');
             return querystring.substr(0,querystring.length);  // truncate trailing ampersand
         };
 
@@ -178,13 +182,11 @@ var TIBIT = (function(tibit){
     };
 
 
-
-
     // Exposing our top-level namespace variables/methods/constants as part of our working tibit object
     tibit.initiatorDefaultParams = initiatorDefaultParams;
     tibit.Initiator = Initiator;
 
-    console.log('TIBIT: successfully loaded initiator module');
+    tibit.CONSOLE_OUTPUT && console.log('successfully loaded initiator module');
 
     // Return our working tibit object to be set to the global TIBIT object
     return tibit;

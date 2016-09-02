@@ -13,11 +13,11 @@ var TIBIT = (function(tibit){
 
     var TibButton = function(e){ // Constructor function
 
+        tibit.CONSOLE_OUTPUT && console.log('Generating TibButton for domElement \n \t', e);
 
         var loadButton= function(){
 
             var buttonFile = params.BTN || "default";
-            console.log(params.BTN);
             var buttonLocation = params.BTS || "https://widget.tibit.com/buttons/";
 
             var tibbtn= new XMLHttpRequest();
@@ -27,11 +27,10 @@ var TIBIT = (function(tibit){
             // Initializing new variables with passed parameters to make available within onreadystatechange closure
             var p = params;
             var e = domElement;
-            var that = this;
 
             tibbtn.onreadystatechange= function(){
                 if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
-                     writeButton.call(that, tibbtn.responseXML, p, e);
+                     writeButton(tibbtn.responseXML);
                 }
             };
 
@@ -44,7 +43,7 @@ var TIBIT = (function(tibit){
 
 
 
-        var writeButton= function( source, params) {
+        var writeButton= function( source) {
             // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
 
             var sourceElement= source.getElementById("tib-btn-" + params.BTN);
@@ -58,14 +57,12 @@ var TIBIT = (function(tibit){
                 domElement.replaceChild(buttonElement, domElement.children[0]);  // replace placeholder if present
             }
 
-            console.log(x);
-
             domElement.children[0].removeAttribute("id");  // Removing imported SVG ID to avoid potential duplicates
 
             injectCss( source, params);
 
-            setColour(params,domElement);
-            setHeight(params,domElement);
+            setColour( params, domElement );
+            setHeight( params, domElement );
 
             if(!domElement.classList.contains('bd-tib-btn')){
                 domElement.classList.add('bd-tib-btn');
@@ -97,11 +94,9 @@ var TIBIT = (function(tibit){
 
             // TODO: Re-implement this browser fix
             var s= domElement.children[0];
-            //console.log('xx', s);
 
             if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
                 s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-                //console.log( s.getBBox().width, s.parentNode.clientHeight, s.getBBox().height, s.style.width);
             }
         };
 
@@ -144,11 +139,7 @@ var TIBIT = (function(tibit){
         tibit.loadElementParams( this.params, e);   // Only needed in style()?
 
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
-        console.log('style params: ');
-        console.log(this.params);
-        var x= 'what it is friends';
         loadButton(this.params, this.domElement);
-
 
     };
 
@@ -162,7 +153,7 @@ var TIBIT = (function(tibit){
     tibit.TibButton = TibButton;
     tibit.buttonDefaultParams = buttonDefaultParams;
 
-    console.log('TIBIT: successfully loaded button module');
+    tibit.CONSOLE_OUTPUT && console.log('TIBIT: successfully loaded button module');
 
     return tibit;
 

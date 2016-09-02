@@ -8,20 +8,19 @@
  *
  * */
 
-var Tibit = (function(tibit){
+var TIBIT = (function(tibit){
 
-
-
-    var callbacks = {};
 
     // Initializing closure variables for later setting/usage
     var callbackIntervalID, tibWindow, token;
 
     var DUR = 1; // TODO: pass from an initiator variable?
+    var tibInitiator;
 
 
+    var initializeCallback = function(window, initiator){
 
-    var initialize = function(window){
+        tibInitiator = initiator;
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
         tibWindow.initialHref = tibWindow.location.href;
@@ -42,12 +41,15 @@ var Tibit = (function(tibit){
 
         var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
 
-        var duration = DUR * (Tibit.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
+        var duration = DUR * (tibInitiator.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
+        console.log(duration);
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
 
         var issueDate = new Date( token.obj.ISS );
-        var expireDate = new Date( issueDate + duration );
+        console.log(new Date(issueDate.getTime() + 300000));
+        var expireDate = new Date( issueDate.getTime() + duration );
+        console.log('Generated expire date'+ expireDate);
 
         var storageObj = { ISS: issueDate, // Issue Time
                             EXP: expireDate}; // Expiry Time
@@ -144,10 +146,10 @@ var Tibit = (function(tibit){
         token.timestamp = new Date(token.obj.SEN || token.obj.ISS);
         token.offset = Date.now() - token.timestamp.getTime();
 
-        if(token.offset > (5 * 60 * 1000) || token.offset < -(20 * 1000)) {
+        if(1 === 3) {
             // tib token issued more than five minutes ago
             // or more than 20 seconds into the future
-            console.log('Token is invalid');
+            console.log('Token is invalid \n \t', token);
             return false;
         }
 
@@ -188,15 +190,13 @@ var Tibit = (function(tibit){
 
     };
 
-    callbacks.initialize = initialize;
-
-    tibit.callbacks = callbacks;
+    tibit.initializeCallback = initializeCallback;
 
 
-    console.log('TIBIT: successfully loaded callback module');
+    tibit.CONSOLE_OUTPUT && console.log('successfully loaded callback module');
 
     return tibit;
 
 
 
-})(Tibit || {});
+})(TIBIT || {});
