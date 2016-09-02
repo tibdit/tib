@@ -1,45 +1,45 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
-	tibCss();
+tibCss();
 
-	$script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
+$script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
-	var bd;
-	var obj = {};
+var bd;
+var obj = {};  
 
-	if (typeof arg === 'string') {
-		obj.PAD = arg;
-	} else if (typeof arg === 'object') {
-		obj= arg;
-	}
+if (typeof arg === 'string') {
+	obj.PAD = arg;
+} else if (typeof arg === 'object') {
+	obj= arg;
+}
 
-	bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
+bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN);
 
-	// initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
+    // initButtons( defaultBTN, buttonResourcesUrl, tibButtonsClass)
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', function() {
-			bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
-		});
-	} else {
-		bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
-	}
+    if (document.readyState === 'loading') {
+    	document.addEventListener('DOMContentLoaded', function() {
+    		bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
+    	});
+    } else {
+    	bd.initButtons( obj.BTN, obj.BTS , 'bd-tib-btn');
+    }
 
-	return bd;
+    return bd;
 
-	function tibCss() {
-		if (! document.getElementById('bd-css-tib-btn')) {
+    function tibCss() {
+    	if (! document.getElementById('bd-css-tib-btn')) { 
 
-			var headElement= document.getElementsByTagName('head')[0];
+    		var headElement= document.getElementsByTagName('head')[0]; 
 
-			var linkElement= document.createElement('link');
-			linkElement.id= 'bd-css-tib-btn';
-			linkElement.rel= 'stylesheet';
-			linkElement.type= 'text/css';
-			linkElement.href= 'https://widget.tibdit.com/assets/css/tib.css';
-			// linkElement.href= 'css/tib.css';
-			headElement.appendChild(linkElement);
-		}
-	}
+    		var linkElement= document.createElement('link'); 
+    		linkElement.id= 'bd-css-tib-btn';
+    		linkElement.rel= 'stylesheet';
+    		linkElement.type= 'text/css';
+    		linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
+    		// linkElement.href= 'css/tib.css';
+    		headElement.appendChild(linkElement); 
+    	}
+    }
 }
 
 /* TIB INITIATION FUNCTIONS */
@@ -51,26 +51,25 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 	DUR= DUR || 1;
 	ASN = ASN;
+	var testnet= false, pollForToken= false, mDUR= DUR * (3600000*24);
 	this.counters = {};
-	var testnet= false, pollForToken= false, mDUR= DUR * 3600000;
 
 	var prefix= '';  // NOT IN PRODUCTION
-
+	
 	var tibWindowName= "tibit";
 	var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
 
 	var cbkHandler, cbkPoller;
 
 	if (PAD) {
-		if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
-			// console.log(PAD);
+		if ( "mn2".search(PAD.substr(0,1)) != -1 ) {  
 			// testnet bitcoin address, DUR is minutes
 			DUR= Math.max( 3, DUR); // minimum 3 minutes
 			mDUR= DUR * 60000; // ( 1000ms/s ⨉ 60s/m ) 
 			testnet= true;
-		}
+		} 
 
-		else {
+		else { 
 			// not a testnet bitcoin address, DUR is days
 			DUR= Math.max( 1, DUR); // minimum 24 hours
 			mDUR= DUR * 86400000; // ( 1000ms/s ⨉ 60s/m x ⨉ 60 m/h ⨉ 24h/d ) 
@@ -84,14 +83,14 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// console.log(window.location.hostname);
 		CBK= window.location.protocol+"//"+window.location.host;
 		pollForToken= true;
-		cbkHandler = new tibCallback( true);
+		cbkHandler = new tibCallback( true);  
 		cbkPoller = 0;
 	}
 
 
 
 
-	this.tib= function( SUB, TIB) {
+	this.tib= function( SUB, TIB, ASN) {
 		// construct tib initiator and open tibit popup
 
 		var that= this;
@@ -105,13 +104,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				// window.open("https://tib.me/account_overview",tibWindowName,tibWindowOptions);
 				return false;
 			}
-			var tibInitiator; 
+
+			var tibInitiator;
+
 			if (ASN && TIB) {
 				tibInitiator = "?TIB=" + TIB +  "&ASN=" + ASN + "&DSP=TRUE" + (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '');
 			} else {
 				tibInitiator = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '')+ (CBK ? ("&CBK=" + CBK) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
-
+			
 			tibInitiator= "https://" + prefix + "tib.me/" + tibInitiator; // + "&noclose=true";
 			// console.log(tibInitiator);
 			// tibInitiator= "https://tib.me/" + tibInitiator; // + "&noclose=true";
@@ -119,8 +120,8 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			var tibWindow= window.open(tibInitiator,tibWindowName,tibWindowOptions);
 
 			if (pollForToken) {
-				cbkPoller= setInterval( function() {
-					tibWindowPoll( tibWindow, cbkHandler, SUB);
+				cbkPoller= setInterval( function() { 
+					tibWindowPoll( tibWindow, cbkHandler, SUB); 
 				}, 100);
 			}
 			return tibWindow;
@@ -139,9 +140,9 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 					clearInterval(cbkPoller);
 					return;
 				}
-				tibWindowUrl= tibWindow.location;
+				tibWindowUrl= tibWindow.location; 
 				domain= tibWindow.location.hostname;
-			}
+			}	
 			catch(e) {
 				if (e.code === e.SECURITY_ERR) {
 					// tib window is still on another domain - keep waiting
@@ -209,7 +210,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
-			var SUB, BTN, TIB;
+			var SUB, BTN, TIB, data_ASN;
 
 			SUB= e.getAttribute("data-bd-SUB");
 			SUB= SUB || "blank";
@@ -229,18 +230,20 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 			TIB= encodeURIComponent(TIB);
 
+			data_ASN = e.getAttribute("data-bd-ASN");
+			ASN = data_ASN || ASN;
+
 			if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ) {
-					e.classList.add("tibbed");  // add the tibbed class
+				e.classList.add("tibbed");  // add the tibbed class 
 			}
 			if (testnet) {
 				e.classList.add("testnet");
 			}
 
-			e.addEventListener("click", this.tib( SUB, TIB));
+			e.addEventListener("click", this.tib( SUB, TIB, ASN));
 			buttonNames.push( BTN);
 			pageSUBs.push(SUB);
 		}
-
 
 		// Install storage event handler
 		if (!pollForToken) {
@@ -270,10 +273,11 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// TODO counter caching in localStorage
 
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
-		var hasCounter= false;
-		var QTY;
 
 		var TIB;
+		var QTY;
+
+		var that= this;
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
@@ -281,8 +285,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 			TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
 			TIB= encodeURIComponent(TIB);
 		}
-
-		var that= this;
 
 		/* Set QTY from localstorage if present */
 		if(localStorage.getItem('bd-subref-' + SUB)) {
@@ -297,12 +299,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		else{
 
 			var tibqty= new XMLHttpRequest();
+
 			var tibQtyFetch;
+
 			if (ASN && TIB) {
 				tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? ("&SUB=" + SUB) : '');
 			} else {
 				tibQtyFetch = "?PAD=" + PAD + (TIB ? ("&TIB=" + TIB) : '') + (SUB ? ("&SUB=" + SUB) : '') + (ASN ? ("&ASN=" + ASN + "&DSP=TRUE") : '');
 			}
+
 			tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 			// tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
@@ -311,7 +316,6 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 			tibqty.onreadystatechange= function( ) {
 				if (tibqty.readyState == 4 && tibqty.status == 200) {
-
 					/* Grab existing localstorage entry for this SUB as a JS Object, or create a new
 					 * one to store this QTY */
 					if(localStorage.getItem('bd-subref-' + SUB)){
@@ -321,41 +325,37 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 						var newLocalStorageEntry = {};
 					}
 
+					/* Set the new QTY, convert back to JSON string */
 					newLocalStorageEntry.QTY = JSON.parse(tibqty.response).QTY;
 					newLocalStorageEntry = JSON.stringify(newLocalStorageEntry);
-					/* Set the new QTY, convert back to JSON string */
-					localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
-
-					delete that.counters[SUB];
 
 					/* Re-set the localStorage entry to our new JSON string */
+					localStorage.setItem('bd-subref-' + SUB, newLocalStorageEntry);
+					delete that.counters[SUB];
+
 					that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
 				}
 			};
 
 			that.counters[SUB] = tibqty;
-
 		}
-
-
-
 
 	};
 
 
 
 	this.writeCounter= function( SUB, QTY) {
-
+		
 		QTY= Number(QTY); // protect against injection
-
+		
 		var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
 
 		for (var i=0, n=buttons.length; i<n; i++) {
 			var e= buttons[i];
 			c= e.getElementsByClassName('bd-btn-counter')[0];
-			if (c && e.classList.contains('bd-load-set-QTY')) {
 			/* If element has a counter, and has the 'bd-load-set-QTY' class set to designate
 			 * that it's counter required writing, then write it */
+			if (c && e.classList.contains('bd-load-set-QTY')) {
 				c.textContent= QTY;
 				e.classList.remove('bd-load-set-QTY');
 			}
@@ -401,7 +401,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 				}
 			}
 			if(keysToRemove.length){
-				for(i= 0, n = keysToRemove.length; i < n; i++){
+				for(var i= 0, n = keysToRemove.length; i < n; i++){
 					localStorage.removeItem(keysToRemove[i]);
 				}
 			}
@@ -410,16 +410,15 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 
-	this.loadButton= function( BTN, BTS ){
+	this.loadButton= function( BTN, BTS){
 
 		// cache-friendly load button SVG and inline it inside the DOM <buttons>
 		// svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
 		BTN= BTN || "default";
-		BTS = BTS || "https://widget.tibdit.com/buttons/";
+		BTS = BTS || "//widget.tibdit.com/buttons/";
+		var that = this;
 
 		// TODO add a slash to end of URL when using custom BTS
-
-		var that = this;
 
 		var tibbtn= new XMLHttpRequest();
 		tibbtn.open("GET", BTS + "tib-btn-" + BTN + ".svg", true);
@@ -433,74 +432,76 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 		function writeButtons(){
 
-			// overwrites <object> embedded svg with inline SVG to allow external CSS styling
+    	// overwrites <object> embedded svg with inline SVG to allow external CSS styling
+    	
+    	var buttons= document.getElementsByClassName( "bd-tib-btn-" + BTN);
+    	
+    	var btnImport= tibbtn.responseXML.getElementById( "tib-btn-" + BTN);
+    	if (! btnImport) {
+    		throw( "bd: failed to load svg element tib-btn-" + BTN + " from " + tibbtn.responseURL );
+    	}
 
-			var buttons= document.getElementsByClassName( "bd-tib-btn-" + BTN);
+    	for (var i=0, n=buttons.length; i<n; i++) {
+    		var e= buttons[i];
+    		if (e.children.length === 0) {
+    			e.appendChild(document.importNode(btnImport,true));
+    		} else {
+				// target <button> element should have <object> as first or only child
+				e.replaceChild(document.importNode(btnImport,true),e.children[0]);
+			}
+			s = e.children[0];   // we don't want duplicate id's in the DOM
+			s.removeAttribute("id");
 
-			var btnImport= tibbtn.responseXML.getElementById( "tib-btn-" + BTN);
-			if (! btnImport) {
-				throw( "bd: failed to load svg element tib-btn-" + BTN + " from " + tibbtn.responseURL );
+			var SUB = e.getAttribute("data-bd-SUB");
+			e.classList.add('bd-load-set-QTY');
+			
+			if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+				s.style.width=(s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+			}
+			// prevent default submit type/action if placed within a form
+			if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
+			  e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
 			}
 
-			for (var i=0, n=buttons.length; i<n; i++) {
-				var e= buttons[i];
-				if (e.children.length === 0) {
-					e.appendChild(document.importNode(btnImport,true));
-				} else {
-					// target <button> element should have <object> as first or only child
-					e.replaceChild(document.importNode(btnImport,true),e.children[0]);
-				}
-				s = e.children[0];   // we don't want duplicate id's in the DOM
-				s.removeAttribute("id");
-
-				var SUB = e.getAttribute("data-bd-SUB");
-				e.classList.add('bd-load-set-QTY');
-
-				if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-					s.style.width=(s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-				}
-				// prevent default submit type/action if placed within a form
-				if (e.tagName == 'BUTTON' && !e.getAttribute('type') ) {
-					e.setAttribute('type','button'); // prevents default submit type/action if placed withing form
-				}
-
-				var QTY;
-				try{
-					/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
-					 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
-					 try/catch to prevent the script halting */
-					QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
-					QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
-				}
-				catch(err) {
-					/* We don't do anything in this catch block because we don't want to actually output every time we
-					 fail to parse JSON */
-				}
-
-				if(QTY && QTY % 1 === 0){
-					that.writeCounter(SUB, QTY);
-				}
-
-				var c= e.getElementsByClassName('bd-btn-counter')[0];
-				if(c && !that.counters[SUB]){
-					that.getCounter(SUB);
-				}
+			var QTY;
+			try{
+				/* Using JSON.parse on a string that isn't JSON throws an error. The string we're calling JSON.parse
+				 isn't necessarily JSON (in the case of transitioning from an earlier version of tib.js so we use
+				 try/catch to prevent the script halting */
+				QTY = JSON.parse(localStorage.getItem('bd-subref-' + SUB)); /* Convert JSON string to JS obj */
+				QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
 			}
+			catch(err) {
+				/* We don't do anything in this catch block because we don't want to actually output every time we
+				 fail to parse JSON */
+			}
+
+			if(QTY && QTY % 1 === 0){
+				that.writeCounter(SUB, QTY);
+			}
+
+			var c= e.getElementsByClassName('bd-btn-counter')[0];
+			if(c && !that.counters[SUB]){
+				that.getCounter(SUB);
+			}
+		}
+
+
 
 		}
 
 
-	};
+};
 
 
 
 
-	/* ACKNOWLEDGE TIB FUNCTIONS
-
-	 these functions add the 'tibbed' class to buttons with a coresponding entry in LocalStorage
-
-	 a backend alternative is required if tibs are persisted in the backend (ie: unique users in tibbee operated database)
-	 */
+/* ACKNOWLEDGE TIB FUNCTIONS 
+	
+	these functions add the 'tibbed' class to buttons with a coresponding entry in LocalStorage
+	
+	a backend alternative is required if tibs are persisted in the backend (ie: unique users in tibbee operated database)
+*/
 
 
 	this.ackElementsInClass= function( classToAck, QTY) {
@@ -537,7 +538,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		for (var i=0, n=buttons.length; i<n; i++) {    // iterate through elements with .tibButtonsClass
 			var e= buttons[i];
 			// for each button, is there a matching tib record in localStorage?
-			if ( localStorage["bd-subref-" + e.getAttribute("data-bd-SUB")] ) {
+			if ( localStorage["bd-subref-" + e.getAttribute("data-bd-SUB")] ) {  
 				e.classList.add("tibbed");  // add the tibbed class 
 			}
 		}
@@ -546,7 +547,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 
 
 	this.ackByStorage= function() {
-
+		
 		// iterates through localStorage, 
 		// acks class for localStorage entries with bd-subref- prefix
 
@@ -569,7 +570,7 @@ function tibHandler( PAD, DUR, CBK, ASN) {
 		// and ack that class
 
 		this.sweepOldTibs();
-
+		
 		var key="bd-subref-" + SUB;
 
 		if( localStorage[key] ) {
@@ -603,19 +604,19 @@ function tibCallback( inline) {
 			try {
 
 				$script.ready( 'urijs', function() {
-					token = that.extractUrlToken( url); // token expected in GET params
+    					token = that.extractUrlToken( url); // token expected in GET params
 
-					// set local storage item to record tibbed subref
-					// will not trigger an event for updating button if processToken called from same page (ie: inline)
-					// but we still need to store this for subsequent pages with tib buttons
-					that.persistAck( token.SUB, token.ISS);
+    					// set local storage item to record tibbed subref
+    					// will not trigger an event for updating button if processToken called from same page (ie: inline)
+    					// but we still need to store this for subsequent pages with tib buttons
+    					that.persistAck( token.SUB, token.ISS); 
 
-					if (! inline) {
-						//
-						that.closeWindow();
-					}
+    					if (! inline) {
+    						// 
+    						that.closeWindow();
+    					}
 
-				});
+    				});
 			}
 
 			catch (e) {
@@ -636,7 +637,7 @@ function tibCallback( inline) {
 
 		// for clarity, steps are individually broken down, reusing a single variable
 
-		var token= new URI(url);
+		var token= new URI(url); 
 
 		token= token.query(true); // retreive the querystring parameters into js object
 		token= token.tibtok; // pull out the value of the tibtok= querystring parameter
@@ -686,13 +687,13 @@ function tibCallback( inline) {
 		}
 
 		try {
-			var tibWindow= window.open('','_self');
+			var tibWindow= window.open('','_self'); 
 			tibWindow.close();
 		}
 		catch(ex) {
 			console.error( "bd: attempt to close callback window failed");
 		}
-
+		
 		return false;
 		// function should never return, since window is gone
 	};
@@ -707,7 +708,7 @@ function tibCallback( inline) {
 
 		try {
 			var storage = window[type],
-				x = '__storage_test__';
+			x = '__storage_test__';
 			storage.setItem(x, x);
 			storage.removeItem(x);
 			return true;
