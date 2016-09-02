@@ -12,40 +12,29 @@
 
 var TIBIT= (function(tibit){
 
-    var setDefaults= function(siteParams){
 
-        // Initialising our params object as a property of our global tibit object
-
-        for( var param in tibit.params ){
-            if(siteParams[param]){
-                tibit.params[param]= siteParams[param];
-            }
-        }
-    };
-
-    /********************
-     PAGE LOAD FUNCTIONS
-    ********************/
 
     var loadElementParams= function(params, e){
 
         // For each property in params, populate with data-bd-X attribute from e if present
 
         for ( var paramName in params ) {
+
             if ( e.getAttribute('data-bd-' + paramName) ){
                 params[paramName]= e.getAttribute('data-bd-' + paramName);
             }
+
         }
-        //if(params.BTN === 'chevron'){ debugger; }
+
         return params;
+
     };
 
 
 
     var sweepStorage= function() {
-
-        // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
-        // through each item and delete them if this time has passed.
+    // All 'TIBBED' and 'QTY' localStorage items have an EXP time generated and attached on creation - we cycle
+    // through each item and delete them if this time has passed.
 
         for(var key in localStorage){
 
@@ -58,58 +47,72 @@ var TIBIT= (function(tibit){
                     tibit.CONSOLE_OUTPUT && console.log('Removing localstorage item ' + key);
                     localStorage.removeItem(key);
                 }
+
             }
+
         }
+
     };
 
 
 
     var mapParams= function( source, target){
+    // Given a source object and target object, copy any properties from source to target that already exist on target
 
-        // Given an object source, populate the named properties of an object target
+        if ( typeof source !== "undefined" ) { // If source is not provided, do nothing
 
-        if ( typeof source !== "undefined" ) {
             for ( var pName in target ) {
                 if( source.hasOwnProperty(pName) ) { // hasOwnProperty will return false for prototype properties
                     target[pName] = source[pName];
                 }
             }
+
+            tibit.CONSOLE_OUTPUT && console.log('mapParams mapped following source to following target obj: \n \t' , source, '\n \t', target);
+
         }
-        tibit.CONSOLE_OUTPUT && console.log('mapParams mapped following source to following target obj: \n \t' , source, '\n \t', target);
+
     };
 
 
 
     var copyParams= function( source, target) {
+    // Given a target obj, copy properties to target obj (to avoid duplicate references to same obj)
+
         for ( var pName in source ) {
-            if ( source.hasOwnProperty(pName) ) {
+
+            if ( source.hasOwnProperty(pName) ) { // hasOwnProperty to filter prototype properties
                 target[pName] = source[pName];
             }
+
         }
+
     };
 
 
 
     var init = function(initiatorDefaultParams, buttonDefaultParams){
+    // Initialize default param objects for initiators and buttons, and setup tibit.initTibElements to run on document load
+
+        tibit.CONSOLE_OUTPUT && console.log('Running base tibit.init() function');
 
         mapParams(initiatorDefaultParams, tibit.initiatorDefaultParams);
-
         mapParams(buttonDefaultParams, tibit.buttonDefaultParams);
 
-        console.log('initialising');
-
         switch(document.readyState) {
+
             case 'loading':
-                console.log('found btns');
+                tibit.CONSOLE_OUTPUT && console.log('Document is still loading - setting event listener');
                 document.addEventListener('DOMContentLoaded', tibit.initTibElements);
                 break;
             case 'loaded': // for older Android
             case 'interactive':
             case 'complete':
-                console.log('found btns');
+                tibit.CONSOLE_OUTPUT && console.log('Document loaded - attempting to create tib elements');
+
                 if(document.getElementsByClassName('bd-tib-btn')){
                     tibit.initTibElements();
                 }
+
         }
 
     };

@@ -11,11 +11,16 @@
 
 var TIBIT = (function(tibit){
 
+
+
     var TibButton = function(e){ // Constructor function
 
         tibit.CONSOLE_OUTPUT && console.log('Generating TibButton for domElement \n \t', e);
 
+
+
         var loadButton= function(){
+        // Initiate button loading process by making a HTTP request to our BTS (button source,) with writeButton as a callback
 
             var buttonFile = params.BTN || "default";
             var buttonLocation = params.BTS || "https://widget.tibit.com/buttons/";
@@ -24,27 +29,22 @@ var TIBIT = (function(tibit){
             tibbtn.open("GET", buttonLocation + "tib-btn-" + buttonFile + ".html", true);
             tibbtn.responseType= "document";
 
-            // Initializing new variables with passed parameters to make available within onreadystatechange closure
-            var p = params;
-            var e = domElement;
-
             tibbtn.onreadystatechange= function(){
                 if (tibbtn.readyState === 4 && tibbtn.status === 200 && tibbtn.responseXML) {
                      writeButton(tibbtn.responseXML);
                 }
             };
 
-
             tibbtn.send();
-
-
 
         };
 
 
 
         var writeButton= function( source) {
-            // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
+        // Called from context of XMLHttpRequest.onreadystatechange handler - different 'this' context from ButtonStyle obj
+
+            tibit.CONSOLE_OUTPUT && console.log('Button XML retrieved successfully - attempting to write button');
 
             var sourceElement= source.getElementById("tib-btn-" + params.BTN);
             if (! sourceElement) throw "bd: failed to find tib-btn-" + params.BTN + " in received XML";
@@ -61,8 +61,8 @@ var TIBIT = (function(tibit){
 
             injectCss( source, params);
 
-            setColour( params, domElement );
-            setHeight( params, domElement );
+            setColour(  );
+            setHeight(  );
 
             if(!domElement.classList.contains('bd-tib-btn')){
                 domElement.classList.add('bd-tib-btn');
@@ -76,7 +76,10 @@ var TIBIT = (function(tibit){
 
 
 
-        var setColour= function(params, domElement){
+        var setColour= function( ){
+        // Attempt to set color of this buttons backdrop element ('.bd-btn-backdrop') based on params.BTC, if both present
+
+            tibit.CONSOLE_OUTPUT && console.log('Setting button colour to '+ params.BTC );
 
             var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
             if ( backdrop && params.BTC ) {
@@ -86,7 +89,10 @@ var TIBIT = (function(tibit){
 
 
 
-        var setHeight = function(params, domElement){
+        var setHeight = function( ){
+        // Attempt to set height of this buttons domElement based on a params.BTH property, if present.
+
+            tibit.CONSOLE_OUTPUT && console.log('Setting button height to '+ params.BTH );
 
             if ( params.BTH ) {
                 domElement.style.height = params.BTH + "px";
@@ -103,7 +109,6 @@ var TIBIT = (function(tibit){
 
 
         var injectCss = function( source, params){
-
             // inject non-button-style dependant CSS
             // should be moved to writebutton, with anti-dupication
 
@@ -143,7 +148,10 @@ var TIBIT = (function(tibit){
 
     };
 
+
+
     var buttonDefaultParams = {
+    // Initialize our buttonDefaultParams object with accepted button params, to later be overridden within tibit.init()
         BTN : '',
         BTH : '',
         BTC : '',
