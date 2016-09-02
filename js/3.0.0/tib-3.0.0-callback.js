@@ -15,12 +15,8 @@ var TIBIT = (function(tibit){
     var callbackIntervalID, tibWindow, token;
 
     var DUR = 1; // TODO: pass from an initiator variable?
-    var tibInitiator;
 
-
-    var initializeCallback = function(window, initiator){
-
-        tibInitiator = initiator;
+    var initializeCallback = function( window ){
 
         tibWindow = window; // Overwriting our tibWindow closure var on new callback initialisation
         tibWindow.initialHref = tibWindow.location.href;
@@ -38,18 +34,19 @@ var TIBIT = (function(tibit){
     // Pulls the ISS (tib issue time) from retrieved token.obj, generates an EXP (tib expiry time) and saves both of
     // these as JSON to a localStorage
 
+        tibit.CONSOLE_OUTPUT && console.log( 'Running persistAck for storage  ' );
 
         var storageKey = tibit.CONSTANTS.SUBREF_PREFIX + token.obj.SUB + "-TIBBED";
 
-        var duration = DUR * (tibInitiator.isTestnet(token.obj.PAD) ? 300000 : 86400000 );
-        console.log(duration);
+        var duration = DUR * (isTestnet(token.obj.PAD) ? 300000 : 86400000 );
+        tibit.CONSOLE_OUTPUT && console.log('Duration calculated as "'+ duration + '"');
         // 300000   = 1000 * 60 * 5        (5 mins)
         // 86400000 = 1000 * 60 * 60 * 24  (24 hours)
 
         var issueDate = new Date( token.obj.ISS );
-        console.log(new Date(issueDate.getTime() + 300000));
+        tibit.CONSOLE_OUTPUT && console.log('Retrieved issue date ' + issueDate);
         var expireDate = new Date( issueDate.getTime() + duration );
-        console.log('Generated expire date'+ expireDate);
+        tibit.CONSOLE_OUTPUT && console.log('Generated expire date '+ expireDate);
 
         var storageObj = { ISS: issueDate, // Issue Time
                             EXP: expireDate}; // Expiry Time
@@ -81,7 +78,13 @@ var TIBIT = (function(tibit){
 
     };
 
+    var isTestnet = function( PAD ){
 
+        // true if PAD set and first character not 'm', 'n', or '2'
+
+        return PAD && ( "mn2".search( PAD.substr(0,1)) !== -1 );
+
+    };
 
     var callbackDone = function(){
     // Assesses current tibWindow state to determine tib completion state - if all checks pass, clear the current
@@ -116,6 +119,7 @@ var TIBIT = (function(tibit){
 
         clearInterval(callbackIntervalID);
         return true;
+
     };
 
 
