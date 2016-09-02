@@ -1,27 +1,38 @@
 function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, BTN }
-    tibCss();
+
+
     $script('https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js', 'urijs');
 
     var bd;
     var obj = {};
+
     if (typeof arg === 'string') {
         obj.PAD = arg;
     } else if (typeof arg === 'object') {
         obj= arg;
     }
 
+    if(window.location.hostname.search("tibit.local") !== -1){ /* Get assets from tibit.local rather than tibit.com,
+     if running on tibit.local */
+        obj.ENP = 'tibit.local'
+    }
+    obj.ENP = obj.ENP || 'tibdit.com';
+    obj.VER = obj.VER || "2.4";
+
+    tibCss(obj.ENP);
+
     var scriptsToImport = ['urijs']; /* Initialising an array of scripts to be imported before initialising
      tibHandler */
 
     if(obj.PLT){ /* If a PLT is specified, import the corresponding extension JS file and add it to the list of
      scripts to import */
-        $script('https://widget.tibdit.com/assets/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '.js', 'extension');
+        $script('https://widget.' + obj.ENP + '/assets/platforms/' + obj.PLT + '/bd-tib-extn-' + obj.PLT + '-' + obj.VER + '.js', 'extension');
         scriptsToImport.push('extension');
     }
 
     $script.ready(scriptsToImport, function(){
 
-        bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT);
+        bd = new tibHandler( obj.PAD, obj.DUR, obj.CBK, obj.ASN, obj.PLT, obj.ENP);
 
         if(obj.PLT){ /* If a PLT is specified, we initialise a BDtibExtension object, passing our tibHandler to the
          constructor */
@@ -43,7 +54,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 
     });
 
-    function tibCss() {
+    function tibCss(ENP) {
         if (! document.getElementById('bd-css-tib-btn')) {
 
             var headElement= document.getElementsByTagName('head')[0];
@@ -52,7 +63,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
             linkElement.id= 'bd-css-tib-btn';
             linkElement.rel= 'stylesheet';
             linkElement.type= 'text/css';
-            linkElement.href= '//widget.tibdit.com/assets/css/tib.css';
+            linkElement.href= 'https://widget.' + ENP +'/assets/css/tib.css';
             // linkElement.href= 'css/tib.css';
             headElement.appendChild(linkElement);
         }
@@ -65,7 +76,11 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
 // var bd= new tibHandler(...)
 
 
-function tibHandler( PAD, DUR, CBK, ASN, PLT) {
+function tibHandler( PAD, DUR, CBK, ASN, PLT, ENP) {
+
+    this.params = {};
+    this.params.ENP = ENP;
+    this.counters = {};
     DUR= DUR || 1;
     ASN = ASN;
     /* TODO check if ASN = ASN needs to be set here */
@@ -77,8 +92,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
     var tibWindowOptions= "height=721,width=640,menubar=no,location=no,resizable=no,status=no";
 
     var cbkHandler, cbkPoller;
-
-    this.counters = {};
 
     if (PAD) {
         if ( "mn2".search(PAD.substr(0,1)) !== -1 ) {
@@ -232,8 +245,7 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
             var SUB, BTN, TIB, dataASN, BTS;
-            var lPAD = null;
-            var lASN = null;
+            var lASN = null, lPAD = null;
             SUB= e.getAttribute("data-bd-SUB");
             SUB= SUB || "blank";
             e.classList.add("bd-subref-" + SUB);
@@ -255,9 +267,9 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             dataASN = e.getAttribute("data-bd-ASN");
             lASN = dataASN || ASN;
 
-            lPAD = e.getAttribute('data-bd-PAD') || PAD;
+            lPAD = e.getAttribute("data-bd-PAD") || PAD;
 
-            if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ) {
+            if ( localStorage["bd-subref-" + SUB] && JSON.parse(localStorage.getItem('bd-subref-' + SUB)).ISS ){
                 e.classList.add("tibbed");  // add the tibbed class
             }
             if (testnet) {
@@ -275,7 +287,6 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
                 this.getCounter(SUB);
             }
         }
-
 
         // Install storage event handler
         if (!pollForToken) {
@@ -307,15 +318,17 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
         // TODO counter caching in localStorage
 
         var buttons= document.getElementsByClassName( "bd-subref-" + SUB);
+        var hasCounter= false;
         var TIB;
         var QTY;
+
         var that= this;
 
         for (var i=0, n=buttons.length; i<n; i++) {
             var e= buttons[i];
             TIB= e.getAttribute("data-bd-TIB");
             TIB= TIB || window.location.hostname + window.location.pathname + window.location.search;
-            TIB= encodeURIComponent(TIB);
+            TIB = encodeURIComponent(TIB);
         }
 
         /* Set QTY from localstorage if present */
@@ -324,33 +337,31 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
             QTY = QTY.QTY; /* Set QTY to the value we need from the JS obj */
         }
 
-        /* If QTY retrieved from localstorage, write counter using this QTY */
         if(QTY && QTY % 1 === 0){
             that.writeCounter(SUB, QTY);
         }
-        else {
-
+        else{
             /* TODO Delay this based on XMLRequest events rather than a flat delay */
-            var tibqty = new XMLHttpRequest();
+            var tibqty= new XMLHttpRequest();
 
             var tibQtyFetch;
 
             if (ASN && TIB) {
-                tibQtyFetch = "?TIB=" + TIB + "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
+                tibQtyFetch = "?TIB=" + TIB +  "&ASN=" + ASN + (SUB ? "&SUB=" + SUB : '');
             } else {
                 tibQtyFetch = "?PAD=" + PAD + (TIB ? "&TIB=" + TIB : '') + (SUB ? "&SUB=" + SUB : '') + (ASN ? "&ASN=" + ASN + "&DSP=TRUE" : '');
             }
 
 
-            tibQtyFetch = "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
+
+            tibQtyFetch= "https://" + prefix + "tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
             // tibQtyFetch= "https://tib.me/getqty/" + tibQtyFetch; // + "&noclose=true";
 
-            tibqty.open('GET', tibQtyFetch, true);
+            tibqty.open( 'GET', tibQtyFetch, true);
             tibqty.SUB = SUB;
-
             if(typeof ext === "undefined" || !ext.customCounterHandler){
-                /* If ext is undefined, or the ext constructed has no customCounterHandler attached, we want to use
-                 the default handler for onreadystatechange */
+            /* If ext is undefined, or the ext constructed has no customCounterHandler attached, we want to use
+             the default handler for onreadystatechange */
                 tibqty.onreadystatechange = function () {
                     if (tibqty.readyState === 4 && tibqty.status === 200) {
                         /* Grab existing localstorage entry for this SUB as a JS Object, or create a new
@@ -371,23 +382,23 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
                         delete that.counters[SUB];
 
-                        that.writeCounter( SUB, JSON.parse(tibqty.response).QTY);
+
+                        that.writeCounter(SUB, JSON.parse(tibqty.response).QTY);
                     }
                 }
             }
             else {
-                /* If we have a customCounterHandler specified in our ext object, we use this instead of the default
-                 handler */
+            /* If we have a customCounterHandler specified in our ext object, we use this instead of the default
+             handler */
                 ext.primaryTibQtyReqs[tibqty.SUB] = tibqty;
                 tibqty.onreadystatechange = function () {
                     return ext.customCounterHandler(tibqty, that);
                 };
             }
-
             tibqty.send();
             that.counters[SUB] = tibqty;
-        }
 
+        }
 
     };
 
@@ -460,12 +471,12 @@ function tibHandler( PAD, DUR, CBK, ASN, PLT) {
 
 
 
-    this.loadButton= function( BTN, BTS ){
+    this.loadButton= function( BTN, BTS){
 
         // cache-friendly load button SVG and inline it inside the DOM <buttons>
         // svg loaded from [buttonResourcesUrl]/bd-tib-btn-[buttonName].svg
         BTN= BTN || "default";
-        BTS = BTS || "//widget.tibdit.com/buttons/";
+        BTS = BTS || "https://widget." + this.params.ENP + "/buttons/";
         var that = this;
 
         // TODO add a slash to end of URL when using custom BTS
