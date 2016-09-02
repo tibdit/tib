@@ -35,7 +35,7 @@ var TIBIT= (function(tibit){
 
         var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
         for ( var i= 0, n= buttons.length; i < n; i++ ) {
-            tibButton= new TibButton( buttons[i]);
+            var tibButton= new TibButton( buttons[i]);
             tibit.tibButtons.push( tibButton);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
@@ -47,7 +47,7 @@ var TIBIT= (function(tibit){
 
 
 
-        var setCounterElement= function( ) {
+        this.setCounterElement= function( ) {
 
             // called on button construct and after style button imported
 
@@ -59,8 +59,8 @@ var TIBIT= (function(tibit){
 
 
 
-        var writeCounter= function( QTY) {
-            if ( (counterElement || setCounterElement()) && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
+        this.writeCounter= function( QTY) {
+            if ( counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
                 counterElement.textContent= parseInt(QTY, 10);
             }
         };
@@ -88,7 +88,7 @@ var TIBIT= (function(tibit){
 
 
 
-        var storageUpdate= function(ev, e) {
+        var storageUpdate= function(ev) {
 
             // localStorage/tibstate listener to update the buttons counter
             // used as the callback for tibHandler.tibInitiator, and when a Tib is acknowledged
@@ -101,7 +101,7 @@ var TIBIT= (function(tibit){
             }
 
             if ( ev.newValue && ev.key === tibInitiator.storageKey + "-QTY" ) {
-                writeCounter( JSON.parse(ev.newValue).QTY);
+                this.writeCounter( JSON.parse(ev.newValue).QTY);
                 }
 
             if ( ev.newValue && ev.key === tibInitiator.storageKey + "-TIBBED" ) {
@@ -119,17 +119,8 @@ var TIBIT= (function(tibit){
         // Initiatlising public variables with closure aliases for clarity ('testnet' less readable than 'testnet')
         tibbed = this.tibbed = false;
         testnet = this.testnet = false;
-        params = this.params = {};
         this.domElement= e;
-
         tibInitiator= e.tibInitiator= this.tibInitiator= new tibit.Initiator( e);
-
-        // Copying and populating TibButton.params from button defaultParams and data-bd-attributes
-        tibit.copyParams( buttons.defaultParams, this.params);
-        tibit.loadElementParams( this.params, e);   // Only needed in style()?
-
-        // Populating TibInitiator.params from data-bd-attributes (default params initialized within tibInitiator constructor)
-        tibit.loadElementParams( tibInitiator.params, e);
 
         // TODO: add TibInitiator this.storageKey property
         e.classList.add( tibInitiator.storageKey );
@@ -139,9 +130,10 @@ var TIBIT= (function(tibit){
         window.addEventListener( 'tibstate', storageUpdate.bind(this));   // intra-window update trigger
         window.addEventListener( 'storage', storageUpdate.bind(this));   // inter-window update trigger
 
-        counterElement = this.counterElement = setCounterElement( ); // Initialised later in constructor, after tibInitiator is built
+        counterElement = this.counterElement = this.setCounterElement( ); // Initialised later in constructor, after tibInitiator is built
+        if(counterElement) this.writeCounter(tibInitiator.updateQty());
 
-        if ( e.classList.contains('bd-dynamic'))   this.style();   // load and format a dynamic button
+        if ( e.classList.contains('bd-dynamic'))   this.tibButtonStyle = new tibit.TibButtonStyle(e);   // load and format a dynamic button
 
         if ( tibInitiator.isTestnet() )   setTestnet();   // set 'demo mode' class on button
 
@@ -153,14 +145,6 @@ var TIBIT= (function(tibit){
 
 
     }; // relocated from above to perhaps get access to e, this, tibInitiator...
-
-
-    buttons.defaultParams = {
-        BTN : '',
-        BTH : '',
-        BTC : '',
-        BTS : ''
-    };
 
 
     // PUBLIC VARIABLES/METHODS AT TOP LEVEL NAMESPACE

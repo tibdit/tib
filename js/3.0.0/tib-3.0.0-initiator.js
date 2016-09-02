@@ -38,7 +38,7 @@ var TIBIT = (function(tibit){
             }
         };
 
-        this.updateQty= function(){
+        this.updateQty= function(callback){
 
 
             console.log(storageKey);
@@ -54,7 +54,12 @@ var TIBIT = (function(tibit){
 
             if(!subrefQTY){
                 fetchQty();
+                subrefQTY = null;
             }
+
+            var tibEvent = document.createEvent('customEvent');
+            tibEvent.initCustomEvent('tibstate', true, false, storageKey + '-QTY');
+            window.dispatchEvent(tibEvent);
 
             return subrefQTY;
 
@@ -128,7 +133,9 @@ var TIBIT = (function(tibit){
 
 
         var params = this.params = {};
-        tibit.copyParams(initiators.defaultParams, this.params);
+        tibit.copyParams(initiatorDefaultParams, params);
+        // If we don't populate params with ElementParams within Initiator constructor, how does storageKey populate with correct SUB before fetching counter?
+        tibit.loadElementParams( params, domElement);
 
         if ( !this.params.TIB ) {          // If no TIB specified, default to the current page URL
             this.params.TIB = window.location.hostname + window.location.pathname + window.location.search; // + ??
@@ -173,11 +180,9 @@ var TIBIT = (function(tibit){
 
 
 
-    // Exposing our sub-namespace level variables/methods/constants
-    initiators.defaultParams = defaultParams;
 
     // Exposing our top-level namespace variables/methods/constants as part of our working tibit object
-    tibit.initiators = initiators;
+    tibit.initiatorDefaultParams = defaultParams;
     tibit.Initiator = Initiator;
 
     console.log('TIBIT: successfully loaded initiator module');
