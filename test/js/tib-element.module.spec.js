@@ -139,9 +139,7 @@ describe('TibElement Module', function(){
 
 
 
-        describe('Integration Tests', function(){
-
-
+        describe('Features', function(){
 
             it("should populate counter element with QTY queried from tib.me/getqty/", function(){
 

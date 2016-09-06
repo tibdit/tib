@@ -10,46 +10,12 @@ module.exports = function(grunt){
         },
 
         jasmine: {
+            src : 'dist/tib.min.js',
 
             options: {
+                specs : 'test/js/*spec.js',
                 vendor: 'node_modules/jasmine-ajax/lib/mock-ajax.js'
-            },
-
-            baseSpec: {
-                src : 'dist/tib.min.js',
-                options : {
-                    specs : 'test/js/tib-base.module.spec.js'
-                }
-            },
-
-            buttonSpec: {
-                src : 'dist/tib.min.js',
-                options : {
-                    specs : 'test/js/tib-button.module.spec.js'
-                }
-            },
-
-            callbackSpec: {
-                src : 'dist/tib.min.js',
-                options : {
-                    specs : 'test/js/tib-callback.module.spec.js'
-                }
-            },
-
-            elementSpec: {
-                src : 'dist/tib.min.js',
-                options : {
-                    specs : 'test/js/tib-element.module.spec.js'
-                }
-            },
-
-            initiatorSpec: {
-                src : 'dist/tib.min.js',
-                options : {
-                    specs : 'test/js/tib-initiator.module.spec.js'
-                }
             }
-
 
         }
     });

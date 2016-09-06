@@ -36,6 +36,8 @@ var TIBIT = (function(tibit){
                 tibit.CONSOLE_OUTPUT && console.log('No CBK specified - initializing inline callback poller');
                 tibit.initializeCallback(tibWindow, this);
             }
+
+            return tibWindow;
         };
 
         this.updateQty= function(callback){
