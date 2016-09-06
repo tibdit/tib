@@ -76,13 +76,16 @@ Development for tib.js requires [Node](https://nodejs.org/en/) and [NPM](https:/
 
 ```sh
 npm install
+```
 
 Then, in order to build:
 
 ```sh
 grunt build
+```
 
 And to run Jasmine tests:
 
 ```sh
 grunt test
+```
