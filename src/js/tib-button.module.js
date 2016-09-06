@@ -82,7 +82,7 @@ var TIBIT = (function(tibit){
             tibit.CONSOLE_OUTPUT && console.log('Setting button colour to '+ params.BTC );
 
             var backdrop = domElement.getElementsByClassName('bd-btn-backdrop')[0];  // the button face element used to set a custom colour
-            if ( backdrop && params.BTC ) {
+            if ( backdrop && params.BTC && params.BTC !== '' ) {
                 backdrop.style.fill = params.BTC; // fill will only work for svg, needs expansion to include CSS
             }
         };
@@ -94,7 +94,7 @@ var TIBIT = (function(tibit){
 
             tibit.CONSOLE_OUTPUT && console.log('Setting button height to '+ params.BTH );
 
-            if ( params.BTH ) {
+            if ( params.BTH && params.BTH !== '' ) {
                 domElement.style.height = params.BTH + "px";
             }
 
@@ -137,10 +137,8 @@ var TIBIT = (function(tibit){
         var tibElement = this.tibElement = e.tibElement;
         var domElement = this.domElement = e;
         var tibInitiator = this.tibInitiator = e.tibInitiator;
-        var params = this.params = {};
+        var params = this.params = tibit.cloneObj(buttonDefaultParams);
 
-        // Copying and populating TibButton.params from button defaultParams and data-bd-attributes
-        tibit.copyParams( buttonDefaultParams, this.params);
         tibit.loadElementParams( this.params, e);   // Only needed in style()?
 
         this.domElement.classList.add('bd-tib-btn-' + this.params.BTN);
@@ -151,11 +149,13 @@ var TIBIT = (function(tibit){
 
 
     var buttonDefaultParams = {
+
     // Initialize our buttonDefaultParams object with accepted button params, to later be overridden within tibit.init()
-        BTN : '',
+        BTN : 'default',
         BTH : '',
         BTC : '',
         BTS : ''
+
     };
 
     tibit.TibButton = TibButton;

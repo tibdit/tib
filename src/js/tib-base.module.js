@@ -16,6 +16,8 @@ var TIBIT= (function(tibit){
 
     var loadElementParams= function(params, e){
 
+        tibit.CONSOLE_OUTPUT && console.log('running loadElementParams for following params obj & following element: \n \t' , params, '\n \t' , e);
+
         // For each property in params, populate with data-bd-X attribute from e if present
 
         for ( var paramName in params ) {
@@ -25,6 +27,8 @@ var TIBIT= (function(tibit){
             }
 
         }
+
+        tibit.CONSOLE_OUTPUT && console.log('finished loadElementParams, outputting following params obj: \n \t' , params);
 
         return params;
 
@@ -75,15 +79,28 @@ var TIBIT= (function(tibit){
 
 
 
-    var copyParams= function( source, target) {
+    var cloneObj= function( source, target) {
     // Given a target obj, copy properties to target obj (to avoid duplicate references to same obj)
 
-        for ( var pName in source ) {
+        var clone = {};
 
-            if ( source.hasOwnProperty(pName) ) { // hasOwnProperty to filter prototype properties
-                target[pName] = source[pName];
+        if(typeof source === 'object'){
+
+            for ( var pName in source ) {
+
+                if ( source.hasOwnProperty(pName) ) { // hasOwnProperty to filter prototype properties
+                    clone[pName] = source[pName];
+                }
+
             }
 
+            tibit.CONSOLE_OUTPUT && console.log('cloneObj mapped following source to following output obj: \n \t' , source, '\n \t', clone);
+
+            return clone;
+
+        }
+        else{
+            return false;
         }
 
     };
@@ -149,7 +166,7 @@ var TIBIT= (function(tibit){
 
     // Exposing our top level variables/methods/constants
     tibit.init = init;
-    tibit.copyParams = copyParams;
+    tibit.cloneObj = cloneObj;
     tibit.CONSTANTS = CONSTANTS;
     tibit.loadElementParams = loadElementParams;
 

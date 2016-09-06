@@ -140,8 +140,8 @@ var TIBIT = (function(tibit){
         };
 
 
-        var params = this.params = {};
-        tibit.copyParams(initiatorDefaultParams, params);
+        var params = this.params = tibit.cloneObj(initiatorDefaultParams);
+
         // If we don't populate params with ElementParams within Initiator constructor, how does storageKey populate with correct SUB before fetching counter?
         tibit.loadElementParams( params, domElement);
 
