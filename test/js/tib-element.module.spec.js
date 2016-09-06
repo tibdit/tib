@@ -6,8 +6,10 @@ describe('TibElement Module', function(){
     // Declaring closure variables to be made available throughout our tests
     var domElement, tibElement, counterElement;
 
-    beforeEach(function(){
 
+
+    beforeEach(function(){
+        localStorage.clear(); // Clear localStorage to ensure we have no cached value
         jasmine.Ajax.install();
 
         domElement = document.createElement('div')
@@ -19,15 +21,23 @@ describe('TibElement Module', function(){
 
     });
 
+
+
     afterEach(function(){
 
         jasmine.Ajax.uninstall(); // Clear jasmine.Ajax after each test runs to prevent carryover
 
     });
 
+
+
     describe('TibElement Instance', function(){
 
+
+
         describe('Public Methods', function(){
+
+
 
             describe('TibElement.writeCounter', function() {
 
@@ -86,13 +96,54 @@ describe('TibElement Module', function(){
 
             });
 
+
+
+            describe('TibElement.getCounterElement', function(){
+
+
+
+                beforeEach(function(){
+
+                    domElement.appendChild(counterElement);
+                    counterElement.classList.add('original-counter-element'); // Add a class to counterElement to compare against
+                    tibElement = new TIBIT.TibElement(domElement); // Instantiate our tibElement
+
+                });
+
+
+
+                it("gets a new counter element when present", function(){
+                    var newCounterElement = document.createElement('div');
+                    newCounterElement.classList.add('bd-btn-counter');
+
+                    domElement.removeChild(counterElement);
+                    domElement.appendChild(newCounterElement); // Swap original counter element with new one
+
+                    expect(tibElement.getCounterElement().classList.contains('original-counter-element')).toBe(false);
+                });
+
+
+
+                it("returns null if no counter present", function(){
+                    domElement.removeChild(counterElement);
+                    expect(tibElement.getCounterElement()).toBe(null);
+                });
+
+
+
+            });
+
+
+
         });
+
+
 
         describe('Integration Tests', function(){
 
-            it("should populate counter element with QTY queried from tib.me/getqty/", function(){
 
-                localStorage.clear(); // Clear localStorage to ensure we have no cached value
+
+            it("should populate counter element with QTY queried from tib.me/getqty/", function(){
 
                 domElement.appendChild(counterElement);
 
@@ -108,6 +159,8 @@ describe('TibElement Module', function(){
                 expect(counterElement.innerHTML).toBe('20'); // Check counterElement is populated with correct value
 
             });
+
+
 
         });
 

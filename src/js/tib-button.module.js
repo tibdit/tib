@@ -69,7 +69,7 @@ var TIBIT = (function(tibit){
             }
 
             // Rewrite reference to counterElement to match imported button
-            tibElement.setCounterElement();
+            tibElement.counterElement = tibElement.getCounterElement();
             if(tibElement.counterElement) tibElement.writeCounter(tibInitiator.updateQty());
 
         };

@@ -49,10 +49,9 @@ var TIBIT= (function(tibit){
 
         tibit.CONSOLE_OUTPUT && console.log('Generating TibElement for domElement \n \t', e);
 
-        this.setCounterElement= function( ) {
+        this.getCounterElement= function( ) {
 
             // called on button construct and after style button imported
-
             counterElement= e.getElementsByClassName( 'bd-btn-counter')[0] || null;
             if ( counterElement )   tibInitiator.updateQty();   // get initiator to trigger event to update counter]
 
@@ -132,7 +131,7 @@ var TIBIT= (function(tibit){
         window.addEventListener( 'tibstate', storageUpdate.bind(this));   // intra-window update trigger
         window.addEventListener( 'storage', storageUpdate.bind(this));   // inter-window update trigger
 
-        counterElement = this.counterElement = this.setCounterElement( ); // Initialised later in constructor, after tibInitiator is built
+        counterElement = this.counterElement = this.getCounterElement( ); // Initialised later in constructor, after tibInitiator is built
         if(counterElement) this.writeCounter(tibInitiator.updateQty());
 
         if ( e.classList.contains('bd-dynamic'))   e.tibButton = new tibit.TibButton(e);   // load and format a dynamic button
