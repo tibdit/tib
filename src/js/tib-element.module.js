@@ -62,7 +62,7 @@ var TIBIT= (function(tibit){
 
 
         this.writeCounter= function( QTY) {
-            if ( counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null) {    // isNaN('') will return false
+            if ( counterElement && !isNaN(QTY) && QTY !== '' && QTY !== null && QTY >= 0) {    // isNaN('') will return false
                 counterElement.textContent= parseInt(QTY, 10);
             }
         };

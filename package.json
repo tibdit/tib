@@ -3,6 +3,8 @@
   "version": "3.0.0",
   "devDependencies": {
     "grunt": "~0.4.4",
-    "grunt-contrib-uglify": "latest"
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-jasmine": "~1.0.3",
+    "jasmine-ajax": "~3.2.0"
   }
 }

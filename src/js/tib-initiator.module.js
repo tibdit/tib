@@ -54,13 +54,15 @@ var TIBIT = (function(tibit){
             }
 
             if(!subrefQTY){
+                tibit.CONSOLE_OUTPUT && console.log('subrefQTY not set (' + subrefQTY + ') - attempting to fetch');
                 fetchQty();
                 subrefQTY = null;
             }
-
-            var tibEvent = document.createEvent('customEvent');
-            tibEvent.initCustomEvent('tibstate', true, false, storageKey + '-QTY');
-            window.dispatchEvent(tibEvent);
+            else{
+                var tibEvent = document.createEvent('CustomEvent');
+                tibEvent.initCustomEvent('tibstate', true, false, storageKey + '-QTY');
+                window.dispatchEvent(tibEvent);
+            }
 
             return subrefQTY;
 
@@ -80,6 +82,7 @@ var TIBIT = (function(tibit){
             qtyHttp.open('GET', initiatorUrl, true);
             qtyHttp.send();
 
+
             qtyHttp.onreadystatechange= function(){
                 if ( qtyHttp.readyState === 4 && qtyHttp.status === 200 ) {
                     fetchQtyHandler(this);
@@ -96,7 +99,7 @@ var TIBIT = (function(tibit){
 
                 localStorage.setItem(storageKey + '-QTY', JSON.stringify(obj));
 
-                var tibEvent = document.createEvent('customEvent');
+                var tibEvent = document.createEvent('CustomEvent');
                 tibEvent.initCustomEvent('tibstate', true, false, storageKey + '-QTY');
                 window.dispatchEvent(tibEvent);
 
