@@ -69,3 +69,20 @@ Each tib token has a unique ```tibsig``` param, which you can verify by followin
 4. Get the public key from [our website](https://widget.tibdit.com/pub.key).
 
 5. Verify the signature, using the public key and the digest: ```$ openssl pkeyutl -verify -in digest -sigfile sig -pubin -inkey pub.key```	
+
+### Development
+
+Development for tib.js requires [Node](https://nodejs.org/en/) and [NPM](https://github.com/npm/npm) to be installed. With these installed, clone the tibbee-integration repository, and install all packages on the command line:
+
+```sh
+npm install
+
+Then, in order to build:
+
+```sh
+grunt build
+
+And to run Jasmine tests:
+
+```sh
+grunt test
