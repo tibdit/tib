@@ -16,7 +16,7 @@ describe('Initiator Module', function(){
         // Uncomment to turn on logging in tib.js
         //TIBIT.CONSOLE_OUTPUT = true;
 
-        domElement = document.createElement('div')
+        domElement = document.createElement('div');
 
         counterElement = document.createElement('div');
         counterElement.classList.add('bd-btn-counter'); // Create mock counter domElement
@@ -32,7 +32,7 @@ describe('Initiator Module', function(){
         jasmine.Ajax.uninstall(); // Clear jasmine.Ajax after each test runs to prevent carryover
 
     });
-    
+
 
 
 
