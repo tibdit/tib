@@ -101,9 +101,9 @@ var TIBIT = (function(tibit){
             // TODO: Re-implement this browser fix
             var s= domElement.children[0];
 
-            if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
-                s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
-            }
+            //if (s.style.width === "") { // width of SVG element needs to be set for MSIE/EDGE
+            //    s.style.width= (s.getBBox().width*(s.parentNode.clientHeight / s.getBBox().height )).toString()+"px";
+            //}
         };
 
 

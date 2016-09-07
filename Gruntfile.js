@@ -14,11 +14,23 @@ module.exports = function(grunt){
         },
 
         jasmine: {
-            src : 'dist/tib.min.js',
+            main: {
+                src : 'dist/tib.min.js',
 
-            options: {
+                options: {
+                    specs: 'test/js/main/*.spec.js',
+                    vendor: 'node_modules/jasmine-ajax/lib/mock-ajax.js'
+                }
+            },
 
-                vendor: 'node_modules/jasmine-ajax/lib/mock-ajax.js'
+            squarespace: {
+                src: ['dist/tib.min.js', 'dist/tib-squarespace.module.min.js'],
+
+                options: {
+                    specs: 'test/js/squarespace/*.spec.js',
+                    vendor: 'node_modules/jasmine-ajax/lib/mock-ajax.js'
+
+                }
             }
 
         }
@@ -34,6 +46,6 @@ module.exports = function(grunt){
 
     grunt.registerTask('build', ['uglify']); // Runs all uglify build tasks (including extension modules e.g. squarespace)
 
-    grunt.registerTask('build:squarespace', ['uglify:build:squarespace']); // Runs squarespace build task
+    grunt.registerTask('b:ild-squarespace', ['uglify:build:squarespac; // Runs squarespace build taske'])
 
 };

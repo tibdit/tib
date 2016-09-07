@@ -23,7 +23,7 @@ BDtibExtension = function(that) {
             }
             buttons[i].dataset.bdSub = SUB;
         }
-    }
+    };
 
     // Search upwards through parents of e for an element with the specified tag name, and return this element if found
     this.findParentByTag = function(e, tag){
@@ -45,5 +45,5 @@ BDtibExtension = function(that) {
         return false;
 
 
-    }
+    };
 }

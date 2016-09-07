@@ -12,7 +12,7 @@ describe('TibElement Module', function(){
         localStorage.clear(); // Clear localStorage to ensure we have no cached value
         jasmine.Ajax.install();
 
-        domElement = document.createElement('div')
+        domElement = document.createElement('div');
 
         counterElement = document.createElement('div');
         counterElement.classList.add('bd-btn-counter'); // Create mock counter domElement

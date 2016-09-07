@@ -35,7 +35,7 @@ var TIBIT= (function(tibit){
 
         var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
         for ( var i= 0, n= buttons.length; i < n; i++ ) {
-            var tibElement= new TibElement( buttons[i]);
+            var tibElement= new tibit.TibElement( buttons[i]);
             tibit.tibElements.push( tibElement);
             // Construct tibHandler.Initiator for button, feeding in site default params + local params from element data-bd-*
         }
