@@ -31,7 +31,7 @@ var TIBIT= (function(tibit){
         // instantiates and attaches a TibElement object to all DOM elements with the 'bd-tib-btn' class
         // settings are defaulted to matching items in the siteParams object, and data-bd-* attributes in the DOM element
 
-        tibit.CONSOLE_OUTPUT && console.log('Running initTibElements');
+        tibit.CONSOLE_OUTPUT && console.log('Running initTibElements ');
 
         var buttons= document.getElementsByClassName(CONSTANTS.BUTTON_CLASS);
         for ( var i= 0, n= buttons.length; i < n; i++ ) {
