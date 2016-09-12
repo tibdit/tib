@@ -12,11 +12,7 @@ function tibInit( arg) {  // can be string (PAD) or JS object { PAD, DUR, CBK, B
         obj= arg;
     }
 
-    if(window.location.hostname.search("tibit.local") !== -1){ /* Get assets from tibit.local rather than tibit.com,
-     if running on tibit.local */
-        obj.ENP = 'tibit.local'
-    }
-    obj.ENP = obj.ENP || 'tibdit.com';
+    obj.ENP = obj.ENP || 'tibit.com';
     obj.VER = obj.VER || "2.4";
 
     tibCss(obj.ENP);
