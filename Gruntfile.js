@@ -46,6 +46,6 @@ module.exports = function(grunt){
 
     grunt.registerTask('build', ['uglify']); // Runs all uglify build tasks (including extension modules e.g. squarespace)
 
-    grunt.registerTask('b:ild-squarespace', ['uglify:build:squarespac; // Runs squarespace build taske'])
+    grunt.registerTask('build-squarespace', ['uglify:squarespace']); // Runs squarespace build task
 
 };
