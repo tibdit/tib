@@ -40,6 +40,8 @@ var TIBIT = (function(tibit){
             return tibWindow;
         };
 
+        this.generateSub= tibit.generateSub;
+
         this.updateQty= function(callback){
 
 
@@ -139,7 +141,7 @@ var TIBIT = (function(tibit){
             return params;
         };
 
-
+        this.domElement = domElement;
         var params = this.params = tibit.cloneObj(initiatorDefaultParams);
 
         // If we don't populate params with ElementParams within Initiator constructor, how does storageKey populate with correct SUB before fetching counter?
@@ -150,7 +152,7 @@ var TIBIT = (function(tibit){
         }
 
         if ( !this.params.SUB ) {          // If no SUB is provided, use a hash of the TIB url
-            this.params.SUB=  generateSub(this.params.TIB);
+            this.params.SUB=  this.generateSub();
         }
 
         // If not CBK is specified, we just set to window.location.origin - this will never be seen as our callback
@@ -165,17 +167,18 @@ var TIBIT = (function(tibit){
 
     };
 
-    var generateSub = function(TIB) {
+    var generateSub = function() {
 
         // generate SHA256 hash, truncate to 10 chars, and use this for the SUB.
         // potential to overload with platform specific code, but that will require DOM element (as argument?)
 
-        var hash = TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
+        var hash = this.params.TIB.replace(/^(https?:)?(\/\/)?(www.)?/g, '');  // remove generic url prefixes
         hash = murmurhash3_32_gc(hash, 0);   // possibly move to
         // https://github.com/garycourt/murmurhash-js/blob/master/murmurhash3_gc.js
         return "TIB-SHA256-" + hash;
     };
 
+    tibit.generateSub = tibit.generateSub || generateSub; // If tibit.generateSub not already defined, use default
 
     var initiatorDefaultParams = {
 
