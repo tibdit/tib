@@ -114,6 +114,7 @@ var TIBIT= (function(tibit){
 
         mapParams(initiatorDefaultParams, tibit.initiatorDefaultParams);
         mapParams(buttonDefaultParams, tibit.buttonDefaultParams);
+        console.log(document.readyState);
 
         switch(document.readyState) {
 
